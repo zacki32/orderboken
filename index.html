@@ -30,6 +30,8 @@ header{background:var(--red);color:#fff;padding:calc(18px + env(safe-area-inset-
 .hbtns{display:flex;gap:8px;flex:none}
 h1{font:800 clamp(28px,6vw,40px)/1.05 Archivo,"Noto Sans Arabic",sans-serif;margin:0}
 .sub{opacity:.85;font-size:14px;margin:4px 0 0}
+.lang option{color:#1d1414;background:#fff}
+select.lang{appearance:none;-webkit-appearance:none;padding:0 14px;text-align:center}
 .lang{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:999px;min-height:44px;padding:0 16px;font:600 15px Inter,"Noto Sans Arabic";cursor:pointer}
 main{max-width:1240px;margin:auto;padding:0 max(5vw,16px) 48px}
 .feed{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:-12px;box-shadow:0 8px 24px rgba(60,10,20,.08)}
@@ -78,6 +80,13 @@ li:last-child{border-bottom:0}
 .settings h3:first-child{margin-top:0}
 .settings input[type=password]{width:100%}
 .ok{color:var(--ok);font-weight:600}
+.calc{margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:0 12px;background:var(--bg)}
+.calc summary{min-height:44px;display:flex;align-items:center;font-weight:600;cursor:pointer}
+.calc textarea{min-height:76px;margin-bottom:8px}
+.calc .cl{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);font-variant-numeric:tabular-nums}
+.calc .ctot{display:flex;justify-content:space-between;gap:10px;padding:10px 0 12px;font:800 20px Archivo,"Noto Sans Arabic",sans-serif;color:var(--red)}
+.csum{color:var(--ink);white-space:nowrap}
+.crow{flex-wrap:wrap}
 .crow{display:flex;gap:6px;align-items:center;padding:0 0 6px;font-size:13px;color:var(--mute)}
 .crow .fld{width:76px;min-height:36px}
 .srow .have{text-align:end}
@@ -101,7 +110,7 @@ li:last-child{border-bottom:0}
 </head>
 <body>
 <header><div class="top"><div><h1 data-t="title">Orderboken</h1><p class="sub" data-t="sub">Skriv eller prata in beställningar – på svenska eller arabiska.</p></div>
-<div class="hbtns"><button class="lang" id="langBtn">عربي</button><button class="lang" id="setBtn" aria-label="Inställningar">⚙</button></div></div></header>
+<div class="hbtns"><select class="lang" id="langSel" aria-label="Language / Språk"><option value="sv">Svenska</option><option value="en">English</option><option value="pl">Polski</option><option value="da">Dansk</option><option value="ar">العربية</option></select><button class="lang" id="setBtn" aria-label="Inställningar">⚙</button></div></div></header>
 <main>
 <section class="settings" id="settings" hidden></section>
 <section class="feed" id="feed">
@@ -110,6 +119,8 @@ li:last-child{border-bottom:0}
 <textarea id="inp" dir="auto"></textarea>
 <div class="row"><button class="pri" id="addBtn" data-t="add">Läs in beställning</button></div>
 <p class="hint" id="hint"></p>
+<details class="calc" id="calc"><summary data-t="calcTitle">🧮 Räkna kartonger</summary>
+<p class="hint" data-t="calcHelp"></p><textarea id="calcIn" dir="auto" rows="3"></textarea><div id="calcOut" aria-live="polite"></div></details>
 <div class="status" id="status" role="status"></div>
 <div id="draft"></div>
 </section>
@@ -147,7 +158,7 @@ phIn:"Leverantör: 200 kg kyckling, 150 kg kött",checkIn:"🚚 Inleverans – s
 supplier:"Leverantör",unknownSup:"Okänd leverantör",emptyIn:"Inga inleveranser än. Välj 🚚 Inleverans ovan och skriv vad som kom.",
 emptyStock:"Lagret är tomt. Registrera en inleverans först (🚚 ovan).",stockInfo:"I lager = allt som kommit in minus det du markerat som levererat till kunder.",
 stIn:"In",stOut:"Ut",stOpen:"Beställt",stLeft:"Kvar efter order",stShort:"Saknas",stHave:"i lager",
-adjust:"Räkna om",adjustQ:"Hur mycket {p} ({u}) finns i lager just nu?",adjName:"Lagerjustering",copyStock:"Dela lagerlista",krt:"krt",cartons:"Antal kartonger",perCarton:"Kilo per kartong",kgPer:"kg/krt",whichProd:"Vilken vara?",unknownProd:"okänd vara",stockTitle:"Lager",received:"inkommit",suppliers:"leverantörer"},
+adjust:"Räkna om",adjustQ:"Hur mycket {p} ({u}) finns i lager just nu?",adjName:"Lagerjustering",copyStock:"Dela lagerlista",krt:"krt",cartons:"Antal kartonger",perCarton:"Kilo per kartong",kgPer:"kg/krt",whichProd:"Vilken vara?",unknownProd:"okänd vara",stockTitle:"Lager",received:"inkommit",suppliers:"leverantörer","unknownCust": "Okänd", "phOrder": "Ahmed: 5 kg kött, 5 kg kyckling, 2 lådor tomater", "u_st": "st", "u_låda": "låda", "u_liter": "liter", "u_paket": "paket", "sub": "Skriv eller prata in beställningar – på svenska, arabiska, engelska, polska eller danska.", "calcTitle": "🧮 Räkna kartonger", "calcPh": "10 kartonger 7,2\n5 krt 10", "calcHelp": "Skriv antal kartonger och kilo per kartong, en rad per sort. Summan räknas direkt.", "calcTotal": "Totalt"},
 ar:{title:"دفتر الطلبات",sub:"اكتب أو قل الطلبات – بالعربية أو السويدية.",add:"اقرأ الطلب",mic:"🎙 اضغط وتكلّم",micOn:"⏹ انتهيت – اضغط عند الانتهاء",
 hint:'مثال: "أحمد يريد ٥ كيلو لحم و٥ كيلو دجاج" أو "Ahmed: 5 kg kött, 5 kg kyckling". زبون واحد في كل سطر. لا يظهر زر الميكروفون؟ اضغط في المربع واستخدم ميكروفون لوحة المفاتيح.',
 tCust:"الزبائن",tTot:"المجموع للتجهيز",tAsk:"اسأل المساعد",tDone:"تم التسليم",reading:"جارٍ قراءة الطلب…",save:"حفظ",discard:"إلغاء",
@@ -167,15 +178,19 @@ phIn:"المورّد: ٢٠٠ كيلو دجاج، ١٥٠ كيلو لحم",checkIn
 supplier:"المورّد",unknownSup:"مورّد غير معروف",emptyIn:"لا توجد شحنات واردة بعد. اختر 🚚 شحنة واردة في الأعلى واكتب ما وصل.",
 emptyStock:"المخزون فارغ. سجّل شحنة واردة أولاً (🚚 في الأعلى).",stockInfo:"في المخزون = كل ما وصل ناقص ما سلّمته للزبائن.",
 stIn:"وارد",stOut:"صادر",stOpen:"مطلوب",stLeft:"الباقي بعد الطلبات",stShort:"ناقص",stHave:"في المخزون",
-adjust:"إعادة العدّ",adjustQ:"كم يوجد من {p} ({u}) في المخزون الآن؟",adjName:"تعديل المخزون",copyStock:"مشاركة قائمة المخزون",krt:"كرتونة",cartons:"عدد الكراتين",perCarton:"كيلو لكل كرتونة",kgPer:"كغ/كرتونة",whichProd:"أي منتج؟",unknownProd:"منتج غير معروف",stockTitle:"المخزون",received:"وارد",suppliers:"موردين"}};
+adjust:"إعادة العدّ",adjustQ:"كم يوجد من {p} ({u}) في المخزون الآن؟",adjName:"تعديل المخزون",copyStock:"مشاركة قائمة المخزون",krt:"كرتونة",cartons:"عدد الكراتين",perCarton:"كيلو لكل كرتونة",kgPer:"كغ/كرتونة",whichProd:"أي منتج؟",unknownProd:"منتج غير معروف",stockTitle:"المخزون",received:"وارد",suppliers:"موردين","unknownCust": "غير معروف", "phOrder": "أحمد: ٥ كيلو لحم، ٥ كيلو دجاج", "u_st": "حبة", "u_låda": "صندوق", "u_liter": "لتر", "u_paket": "كيس", "sub": "اكتب أو قل الطلبات – بالعربية أو السويدية أو الإنجليزية أو البولندية أو الدنماركية.", "calcTitle": "🧮 حاسبة الكراتين", "calcPh": "١٠ كراتين ٧٫٢\n٥ كرتونة ١٠", "calcHelp": "اكتب عدد الكراتين والكيلو لكل كرتونة، سطر لكل نوع. يُحسب المجموع فوراً.", "calcTotal": "المجموع"},
+en:{"title": "Order Book", "sub": "Type or speak orders – in Swedish, Arabic, English, Polish or Danish.", "add": "Read order", "mic": "🎙 Tap and speak", "micOn": "⏹ Done – tap when you have finished speaking", "hint": "Example: \"Ahmed wants 5 kg meat and 5 kg chicken\" or \"Ahmed: 70 cartons chicken 7.2\". One customer per line. No mic button? Tap the box and use the microphone on the keyboard.", "tCust": "Customers", "tTot": "Total to pick", "tAsk": "Ask the assistant", "tDone": "Delivered", "reading": "Reading the order…", "save": "Save", "discard": "Discard", "check": "Is this right? Change anything that came out wrong.", "saved": "Saved ✓", "empty": "No open orders yet. Write one above.", "emptyDone": "Nothing delivered yet.", "search": "Search customer or product…", "delivered": "Delivered", "undo": "Undo", "remove": "Remove", "orders": "orders", "copy": "Copy list", "copied": "Copied ✓", "askPh": "E.g. How much chicken do I need in total? Who hasn't had their order?", "askBtn": "Ask", "thinking": "Thinking…", "fail": "Couldn't read the text. Try: Ahmed: 5 kg meat, 3 kg chicken", "noKey": "The assistant needs your own Claude API key. Add it under ⚙. The \"Total to pick\" tab always works without a key.", "aiErr": "AI reading failed – I used the simple reader.", "sure": "Sure? Tap again", "rename": "Rename", "renameQ": "New name for the customer (the same name as another customer merges them):", "addItem": "+ Product", "customer": "Customer", "product": "Product", "sTitle": "Settings", "sKey": "Your own Claude API key (optional)", "sKeyInfo": "With a key, reading gets smarter and the assistant can answer questions. The key is stored only on this phone. Each reading costs a small amount on your Anthropic account. Everything else works without a key.", "sKeySave": "Save key", "sKeyDel": "Remove key", "sKeyOn": "Key saved ✓", "sKeyOff": "No key – the simple reader is used.", "sBackup": "Backup", "sBackupInfo": "Everything is stored in the phone's browser. Save a copy now and then so nothing is lost if browser data is cleared.", "sExport": "Save copy", "sImport": "Load copy", "sImported": "Loaded ✓", "sClose": "Close", "sCount": "orders saved", "sCountIn": "deliveries", "mOrder": "📦 Customer order", "mIn": "🚚 Delivery in", "tStock": "Stock", "tIn": "Deliveries in", "hintIn": "Write who delivered and what came, e.g. \"Lindbergs: 70 cartons chicken 7.2, 150 kg meat\". 70 cartons 7.2 = 70 cartons of 7.2 kg = 504 kg. Stock is updated automatically.", "phIn": "Supplier: 70 cartons chicken 7.2, 150 kg meat", "checkIn": "🚚 Delivery in – is this right?", "savedIn": "Delivery saved – stock updated ✓", "supplier": "Supplier", "unknownSup": "Unknown supplier", "emptyIn": "No deliveries yet. Choose 🚚 Delivery in above and write what came.", "emptyStock": "Stock is empty. Register a delivery first (🚚 above).", "stockInfo": "In stock = everything that came in minus what you marked as delivered to customers.", "stIn": "In", "stOut": "Out", "stOpen": "Ordered", "stLeft": "Left after orders", "stShort": "Short", "stHave": "in stock", "adjust": "Recount", "adjustQ": "How much {p} ({u}) is in stock right now?", "adjName": "Stock adjustment", "copyStock": "Share stock list", "krt": "ctn", "cartons": "Number of cartons", "perCarton": "Kilos per carton", "kgPer": "kg/ctn", "whichProd": "Which product?", "unknownProd": "unknown product", "stockTitle": "Stock", "received": "received", "suppliers": "suppliers", "unknownCust": "Unknown", "phOrder": "Ahmed: 5 kg meat, 5 kg chicken, 2 boxes tomatoes", "u_st": "pcs", "u_låda": "box", "u_liter": "l", "u_paket": "pack", "calcTitle": "🧮 Carton calculator", "calcPh": "10 cartons 7.2\n5 ctn 10", "calcHelp": "Write the number of cartons and kilos per carton, one line per kind. The sum is calculated as you type.", "calcTotal": "Total"},
+pl:{"title": "Książka zamówień", "sub": "Wpisz lub powiedz zamówienia – po szwedzku, arabsku, angielsku, polsku lub duńsku.", "add": "Wczytaj zamówienie", "mic": "🎙 Naciśnij i mów", "micOn": "⏹ Gotowe – naciśnij, gdy skończysz mówić", "hint": "Przykład: \"Ahmed chce 5 kg mięsa i 5 kg kurczaka\" lub \"Ahmed: 70 kartonów kurczaka 7,2\". Jeden klient w linii. Nie widzisz przycisku mikrofonu? Dotknij pola i użyj mikrofonu na klawiaturze.", "tCust": "Klienci", "tTot": "Razem do skompletowania", "tAsk": "Zapytaj asystenta", "tDone": "Dostarczone", "reading": "Czytam zamówienie…", "save": "Zapisz", "discard": "Odrzuć", "check": "Czy to się zgadza? Popraw, jeśli coś jest źle.", "saved": "Zapisano ✓", "empty": "Brak otwartych zamówień. Wpisz jedno powyżej.", "emptyDone": "Nic jeszcze nie dostarczono.", "search": "Szukaj klienta lub produktu…", "delivered": "Dostarczone", "undo": "Cofnij", "remove": "Usuń", "orders": "zamówień", "copy": "Kopiuj listę", "copied": "Skopiowano ✓", "askPh": "Np. Ile kurczaka potrzebuję łącznie? Kto nie dostał zamówienia?", "askBtn": "Zapytaj", "thinking": "Myślę…", "fail": "Nie udało się odczytać tekstu. Spróbuj: Ahmed: 5 kg mięsa, 3 kg kurczaka", "noKey": "Asystent potrzebuje własnego klucza Claude API. Dodaj go w ⚙. Zakładka \"Razem do skompletowania\" działa zawsze bez klucza.", "aiErr": "Odczyt AI nie powiódł się – użyłem prostego czytnika.", "sure": "Na pewno? Naciśnij ponownie", "rename": "Zmień nazwę", "renameQ": "Nowa nazwa klienta (ta sama nazwa co inny klient połączy ich):", "addItem": "+ Produkt", "customer": "Klient", "product": "Produkt", "sTitle": "Ustawienia", "sKey": "Własny klucz Claude API (opcjonalnie)", "sKeyInfo": "Z kluczem odczyt jest mądrzejszy, a asystent może odpowiadać na pytania. Klucz jest zapisany tylko na tym telefonie. Każdy odczyt kosztuje niewielką kwotę na Twoim koncie Anthropic. Bez klucza wszystko inne działa.", "sKeySave": "Zapisz klucz", "sKeyDel": "Usuń klucz", "sKeyOn": "Klucz zapisany ✓", "sKeyOff": "Brak klucza – używany jest prosty czytnik.", "sBackup": "Kopia zapasowa", "sBackupInfo": "Wszystko jest zapisane w przeglądarce telefonu. Czasem zapisz kopię, aby nic nie zginęło, jeśli dane przeglądarki zostaną usunięte.", "sExport": "Zapisz kopię", "sImport": "Wczytaj kopię", "sImported": "Wczytano ✓", "sClose": "Zamknij", "sCount": "zapisanych zamówień", "sCountIn": "dostaw", "mOrder": "📦 Zamówienie klienta", "mIn": "🚚 Dostawa do mnie", "tStock": "Magazyn", "tIn": "Dostawy", "hintIn": "Wpisz, kto dostarczył i co przyszło, np. \"Lindbergs: 70 kartonów kurczaka 7,2, 150 kg mięsa\". 70 kartonów 7,2 = 70 kartonów po 7,2 kg = 504 kg. Magazyn liczy się automatycznie.", "phIn": "Dostawca: 70 kartonów kurczaka 7,2, 150 kg mięsa", "checkIn": "🚚 Dostawa – czy to się zgadza?", "savedIn": "Dostawa zapisana – magazyn zaktualizowany ✓", "supplier": "Dostawca", "unknownSup": "Nieznany dostawca", "emptyIn": "Brak dostaw. Wybierz 🚚 Dostawa powyżej i wpisz, co przyszło.", "emptyStock": "Magazyn jest pusty. Najpierw zarejestruj dostawę (🚚 powyżej).", "stockInfo": "W magazynie = wszystko, co przyszło, minus to, co oznaczyłeś jako dostarczone klientom.", "stIn": "Przyjęto", "stOut": "Wydano", "stOpen": "Zamówiono", "stLeft": "Zostanie po zamówieniach", "stShort": "Brakuje", "stHave": "w magazynie", "adjust": "Przelicz", "adjustQ": "Ile {p} ({u}) jest teraz w magazynie?", "adjName": "Korekta magazynu", "copyStock": "Udostępnij stan magazynu", "krt": "kart.", "cartons": "Liczba kartonów", "perCarton": "Kilogramy na karton", "kgPer": "kg/kart.", "whichProd": "Jaki produkt?", "unknownProd": "nieznany produkt", "stockTitle": "Magazyn", "received": "przyjęto", "suppliers": "dostawców", "unknownCust": "Nieznany", "phOrder": "Ahmed: 5 kg mięsa, 5 kg kurczaka, 2 skrzynki pomidorów", "u_st": "szt.", "u_låda": "skrzynka", "u_liter": "l", "u_paket": "opak.", "calcTitle": "🧮 Kalkulator kartonów", "calcPh": "10 kartonów 7,2\n5 kart. 10", "calcHelp": "Wpisz liczbę kartonów i kilogramy na karton, jedna linia na rodzaj. Suma liczy się od razu.", "calcTotal": "Razem"},
+da:{"title": "Ordrebogen", "sub": "Skriv eller indtal ordrer – på svensk, arabisk, engelsk, polsk eller dansk.", "add": "Læs ordre", "mic": "🎙 Tryk og tal", "micOn": "⏹ Færdig – tryk når du har talt færdig", "hint": "Eksempel: \"Ahmed vil have 5 kg kød og 5 kg kylling\" eller \"Ahmed: 70 kartoner kylling 7,2\". Én kunde pr. linje. Ingen mikrofonknap? Tryk i feltet og brug mikrofonen på tastaturet.", "tCust": "Kunder", "tTot": "I alt at plukke", "tAsk": "Spørg assistenten", "tDone": "Leveret", "reading": "Læser ordren…", "save": "Gem", "discard": "Kassér", "check": "Passer det? Ret det, hvis noget blev forkert.", "saved": "Gemt ✓", "empty": "Ingen åbne ordrer endnu. Skriv en ovenfor.", "emptyDone": "Intet leveret endnu.", "search": "Søg kunde eller vare…", "delivered": "Leveret", "undo": "Fortryd", "remove": "Slet", "orders": "ordrer", "copy": "Kopiér liste", "copied": "Kopieret ✓", "askPh": "F.eks. Hvor meget kylling skal jeg bruge i alt? Hvem har ikke fået sin ordre?", "askBtn": "Spørg", "thinking": "Tænker…", "fail": "Kunne ikke læse teksten. Prøv: Ahmed: 5 kg kød, 3 kg kylling", "noKey": "Assistenten skal bruge din egen Claude API-nøgle. Tilføj den under ⚙. Fanen \"I alt at plukke\" virker altid uden nøgle.", "aiErr": "AI-læsningen mislykkedes – jeg brugte den simple læser.", "sure": "Sikker? Tryk igen", "rename": "Omdøb", "renameQ": "Nyt navn til kunden (samme navn som en anden kunde slår dem sammen):", "addItem": "+ Vare", "customer": "Kunde", "product": "Vare", "sTitle": "Indstillinger", "sKey": "Egen Claude API-nøgle (valgfri)", "sKeyInfo": "Med en nøgle bliver læsningen klogere, og assistenten kan svare på spørgsmål. Nøglen gemmes kun på denne telefon. Hver læsning koster et lille beløb på din Anthropic-konto. Uden nøgle virker alt andet stadig.", "sKeySave": "Gem nøgle", "sKeyDel": "Slet nøgle", "sKeyOn": "Nøgle gemt ✓", "sKeyOff": "Ingen nøgle – den simple læser bruges.", "sBackup": "Sikkerhedskopi", "sBackupInfo": "Alt gemmes i telefonens browser. Gem en kopi en gang imellem, så intet går tabt, hvis browserdata bliver slettet.", "sExport": "Gem kopi", "sImport": "Indlæs kopi", "sImported": "Indlæst ✓", "sClose": "Luk", "sCount": "ordrer gemt", "sCountIn": "indleveringer", "mOrder": "📦 Kundeordre", "mIn": "🚚 Indlevering", "tStock": "Lager", "tIn": "Indleveringer", "hintIn": "Skriv hvem der leverede og hvad der kom, f.eks. \"Lindbergs: 70 kartoner kylling 7,2, 150 kg kød\". 70 kartoner 7,2 = 70 kartoner à 7,2 kg = 504 kg. Lageret opdateres automatisk.", "phIn": "Leverandør: 70 kartoner kylling 7,2, 150 kg kød", "checkIn": "🚚 Indlevering – passer det?", "savedIn": "Indlevering gemt – lager opdateret ✓", "supplier": "Leverandør", "unknownSup": "Ukendt leverandør", "emptyIn": "Ingen indleveringer endnu. Vælg 🚚 Indlevering ovenfor og skriv hvad der kom.", "emptyStock": "Lageret er tomt. Registrér først en indlevering (🚚 ovenfor).", "stockInfo": "På lager = alt der er kommet ind minus det, du har markeret som leveret til kunder.", "stIn": "Ind", "stOut": "Ud", "stOpen": "Bestilt", "stLeft": "Tilbage efter ordrer", "stShort": "Mangler", "stHave": "på lager", "adjust": "Optæl", "adjustQ": "Hvor meget {p} ({u}) er der på lager lige nu?", "adjName": "Lagerregulering", "copyStock": "Del lagerliste", "krt": "krt", "cartons": "Antal kartoner", "perCarton": "Kilo pr. karton", "kgPer": "kg/krt", "whichProd": "Hvilken vare?", "unknownProd": "ukendt vare", "stockTitle": "Lager", "received": "modtaget", "suppliers": "leverandører", "unknownCust": "Ukendt", "phOrder": "Ahmed: 5 kg kød, 5 kg kylling, 2 kasser tomater", "u_st": "stk", "u_låda": "kasse", "u_liter": "l", "u_paket": "pakke", "calcTitle": "🧮 Kartonberegner", "calcPh": "10 kartoner 7,2\n5 krt 10", "calcHelp": "Skriv antal kartoner og kilo pr. karton, én linje pr. slags. Summen beregnes med det samme.", "calcTotal": "I alt"}};
 
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
-let lang=ls.get("ob_lang","sv");
+let lang=ls.get("ob_lang","sv");if(!["sv","en","pl","da","ar"].includes(lang))lang="sv";
+const LOC=()=>({sv:"sv-SE",en:"en-GB",pl:"pl-PL",da:"da-DK",ar:"ar"})[lang];
 const t=k=>T[lang][k]??T.sv[k];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const fmt=n=>(Math.round(n*100)/100).toLocaleString(lang==="ar"?"ar":"sv-SE");
-const APP_VERSION="4 · kartonger";
+const fmt=n=>(Math.round(n*100)/100).toLocaleString(LOC());
+const APP_VERSION="5 · språk";
 const UNITS=["kg","kartong","st","låda","liter","paket"];
 
 let orders=[],received=[],view="cust",draft=null,q="",armed=null,mode="order";
@@ -215,14 +230,27 @@ const PRODUCTS=[ // [swedish, arabic, default unit, aliases...]
 ["bröd","خبز","st","bröd","خبز","عيش"],
 ["mjölk","حليب","liter","mjölk","حليب"],
 ["yoghurt","لبن","st","yoghurt","لبن","لبنة"]];
+const EXTRA_ALIASES={"lammkött": ["lamb meat", "lamb", "mutton", "jagnięcina", "jagnięciny", "baranina", "baraniny", "lammekød", "lam"], "köttfärs": ["minced meat", "ground meat", "ground beef", "mince", "mięso mielone", "mięsa mielonego", "mielone", "mielonego", "hakket kød", "hakkekød", "fars"], "nötkött": ["beef", "wołowina", "wołowiny", "oksekød"], "kycklingfilé": ["chicken breast", "chicken breasts", "chicken fillet", "chicken fillets", "filet z kurczaka", "pierś z kurczaka", "piersi z kurczaka", "kyllingebryst", "kyllingefilet"], "kycklinglår": ["chicken thighs", "chicken thigh", "chicken legs", "udka z kurczaka", "udka", "udko", "kyllingelår"], "kyckling": ["chicken", "chickens", "kurczak", "kurczaka", "kurczaki", "kurczaków", "kurczę", "kylling", "kyllinger"], "kött": ["meat", "mięso", "mięsa", "kød"], "tomater": ["tomatoes", "tomato", "pomidory", "pomidorów", "pomidor"], "gurka": ["cucumbers", "cucumber", "ogórki", "ogórków", "ogórek", "agurker", "agurk"], "lök": ["onions", "onion", "cebula", "cebuli", "løg"], "vitlök": ["garlic", "czosnek", "czosnku", "hvidløg"], "potatis": ["potatoes", "potato", "ziemniaki", "ziemniaków", "kartofler", "kartofel"], "paprika": ["bell peppers", "peppers", "pepper", "papryka", "papryki", "peberfrugter", "peberfrugt"], "persilja": ["parsley", "pietruszka", "pietruszki", "persille"], "citron": ["lemons", "lemon", "cytryny", "cytryna", "citroner"], "ris": ["rice", "ryż", "ryżu"], "olivolja": ["olive oil", "oliwa", "oliwy", "olivenolie"], "olja": ["oil", "olej", "oleju", "olie"], "ägg": ["eggs", "egg", "jajka", "jaja", "jajko", "jajek", "æg"], "bröd": ["bread", "chleb", "chleba", "brød"], "mjölk": ["milk", "mleko", "mleka", "mælk"], "yoghurt": ["yogurt", "yoghurts", "jogurt", "jogurtu"]};
+PRODUCTS.forEach(p=>p.push(...(EXTRA_ALIASES[p[0]]||[])));
+const NAMES={"kött": {"en": "meat", "pl": "mięso", "da": "kød"}, "kyckling": {"en": "chicken", "pl": "kurczak", "da": "kylling"}, "lammkött": {"en": "lamb", "pl": "jagnięcina", "da": "lammekød"}, "köttfärs": {"en": "minced meat", "pl": "mięso mielone", "da": "hakket kød"}, "nötkött": {"en": "beef", "pl": "wołowina", "da": "oksekød"}, "kycklingfilé": {"en": "chicken breast", "pl": "filet z kurczaka", "da": "kyllingebryst"}, "kycklinglår": {"en": "chicken thighs", "pl": "udka z kurczaka", "da": "kyllingelår"}, "tomater": {"en": "tomatoes", "pl": "pomidory", "da": "tomater"}, "gurka": {"en": "cucumber", "pl": "ogórki", "da": "agurk"}, "lök": {"en": "onions", "pl": "cebula", "da": "løg"}, "vitlök": {"en": "garlic", "pl": "czosnek", "da": "hvidløg"}, "potatis": {"en": "potatoes", "pl": "ziemniaki", "da": "kartofler"}, "paprika": {"en": "peppers", "pl": "papryka", "da": "peberfrugt"}, "persilja": {"en": "parsley", "pl": "pietruszka", "da": "persille"}, "citron": {"en": "lemons", "pl": "cytryny", "da": "citroner"}, "ris": {"en": "rice", "pl": "ryż", "da": "ris"}, "olivolja": {"en": "olive oil", "pl": "oliwa", "da": "olivenolie"}, "olja": {"en": "oil", "pl": "olej", "da": "olie"}, "ägg": {"en": "eggs", "pl": "jajka", "da": "æg"}, "bröd": {"en": "bread", "pl": "chleb", "da": "brød"}, "mjölk": {"en": "milk", "pl": "mleko", "da": "mælk"}, "yoghurt": {"en": "yogurt", "pl": "jogurt", "da": "yoghurt"}};
 const ALIASES=PRODUCTS.flatMap(p=>p.slice(3).map(a=>[a,p])).sort((a,b)=>b[0].length-a[0].length);
 const UNITMAP=[["kg",["kilogram","kilon","kilo","kg","كيلوغرام","كيلوات","كيلوين","كيلو","كغ","كجم"]],["g",["gram","gr","g","غرام","جرام"]],
 ["st",["stycken","styck","stk","st","حبات","حبة","قطع","قطعة"]],["kartong",["kartonger","kartongen","kartong","kartonge","krt","kart","kolli","كراتين","كرتونات","كرتونة","كرتون"]],["låda",["lådor","lådan","låda","låd","صناديق","صندوق","علب","علبة"]],
 ["liter",["liter","litre","l","ليتر","لتر"]],["paket",["paket","förpackningar","förp","باكيتات","باكيت","أكياس","اكياس","كيس"]]];
+const UNIT_EXTRA={kg:["kilograms","kilogramy","kilogramów","kgs","kilos"],g:["grams","gramów","gramy"],st:["pieces","piece","pcs","sztuk","sztuki","sztuka","szt","stykker","styk"],
+kartong:["kartoner","kartonów","kartony","karton","cartons","carton","cases","case","ctns","ctn"],låda:["boxes","box","crates","crate","skrzynki","skrzynek","skrzynka","kasser","kasse"],
+liter:["litres","liters","litre","litr","litry","litrów"],paket:["packets","packet","packs","pack","paczki","paczek","paczka","opakowania","opakowanie","pakker","pakke"]};
+UNITMAP.forEach(([u,as])=>as.push(...(UNIT_EXTRA[u]||[])));
 const UNITALIAS=UNITMAP.flatMap(([u,as])=>as.map(a=>[a,u])).sort((a,b)=>b[0].length-a[0].length);
 const NUMWORDS=[["ett halvt",.5],["en halv",.5],["halvt",.5],["halv",.5],["en",1],["ett",1],["två",2],["tre",3],["fyra",4],["fem",5],["sex",6],["sju",7],["åtta",8],["nio",9],["tio",10],["tolv",12],["femton",15],["tjugo",20],
 ["نص",.5],["نصف",.5],["ربع",.25],["واحد",1],["اثنين",2],["اتنين",2],["ثلاث",3],["ثلاثة",3],["تلاتة",3],["تلات",3],["أربع",4],["اربع",4],["أربعة",4],["اربعة",4],["خمس",5],["خمسة",5],["ست",6],["ستة",6],["سبع",7],["سبعة",7],["ثمان",8],["ثمانية",8],["تمن",8],["تسع",9],["تسعة",9],["عشر",10],["عشرة",10]].sort((a,b)=>b[0].length-a[0].length);
+NUMWORDS.push(["one",1],["two",2],["three",3],["four",4],["five",5],["six",6],["seven",7],["eight",8],["nine",9],["ten",10],["half a",.5],["a half",.5],["half",.5],
+["jeden",1],["jedna",1],["dwa",2],["dwie",2],["trzy",3],["cztery",4],["pięć",5],["sześć",6],["siedem",7],["osiem",8],["dziewięć",9],["dziesięć",10],["pół",.5],
+["et",1],["fire",4],["seks",6],["syv",7],["otte",8],["ti",10]);
+NUMWORDS.sort((a,b)=>b[0].length-a[0].length);
 const FILLER=new Set(["vill","ha","ska","skall","beställer","beställning","beställt","till","för","från","tar","köper","och","wants","want","يريد","تريد","يبغى","بدو","بده","بدها","بدي","عايز","عاوز","طلب","طلبية","الى","إلى","من","ل"]);
+["wants","needs","ordered","orders","order","would","like","for","from","takes","gets","chce","chcą","zamawia","zamówienie","dla","od","potrzebuje","bierze",
+ "vil","have","skal","bestiller","bestilling","til","fra","tager","gerne","købe"].forEach(w=>FILLER.add(w));
 const END="(?=[\\s,.!?؟]|$)";
 const startRe=(list)=>new RegExp("^("+list.map(([a])=>a.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|")+")"+END,"i");
 const NUM_RE=startRe(NUMWORDS),UNIT_RE=startRe(UNITALIAS);
@@ -235,7 +263,7 @@ function findProduct(s){
     if(/[a-zåäö]/.test(al)&&al.length>=4&&words.some(w=>w.startsWith(al)))return p;}
   return null;
 }
-const normalize=s=>String(s).replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/٫/g,".").replace(/(\d+)\s+(?:komma|فاصلة|فاصل)\s+(\d+)/gi,"$1.$2").replace(/(\d),(\d)/g,"$1.$2").replace(/[،؛]/g,",").replace(/ـ/g,"");
+const normalize=s=>String(s).replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/٫/g,".").replace(/(\d+)\s+(?:komma|point|comma|przecinek|فاصلة|فاصل)\s+(\d+)/gi,"$1.$2").replace(/(\d),(\d)/g,"$1.$2").replace(/[،؛]/g,",").replace(/ـ/g,"");
 const toNum=s=>Number(String(s).replace(",","."));
 function productAtStart(s){
   const words=s.toLowerCase().trim().split(/[\s,]+/).map(stripAl),joined=words.join(" ");
@@ -252,7 +280,7 @@ function cartonize(it,per){
   return{...it,qty:n,unit:"kartong",cartons:n};
 }
 function parseItem(raw){
-  let s=raw.trim().replace(/^(och|samt|plus)\s+/i,"").replace(/[.!?؟]+$/,"").replace(/\s+(och|samt|plus|و)$/i,"").trim();
+  let s=raw.trim().replace(/^(och|samt|plus|and|oraz|og|i)\s+/i,"").replace(/[.!?؟]+$/,"").replace(/\s+(och|samt|plus|and|oraz|og|i|و)$/i,"").trim();
   if(/^و/.test(s)&&startsItem(s.slice(1).trim()))s=s.slice(1).trim();
   if(!s)return null;
   let qty=null,unit=null,m,per=null;
@@ -272,7 +300,7 @@ function parseItem(raw){
   const it=p?{product:p[0],product_ar:p[1],qty,unit,_q:hadQty}:{product:s.toLowerCase(),product_ar:"",qty,unit,_q:hadQty};
   return unit==="kartong"?cartonize(it,per):it;
 }
-const CARTON_RE=/(\d+(?:\.\d+)?)\s*(?:kartonger|kartongen|kartonge|kartong|krt|kart|kolli|كراتين|كرتونات|كرتونة|كرتون)\s*([^\d,;@\n]*?)\s*(?:à|á|a|@|per|om|x|×|kg\/st|كل واحدة|كل واحد|كل|بوزن|وزن)?\s*(\d+(?:\.\d+)?)(?:\s*(?:kg|kilo|kilon|كيلو))?(?=\s*(?:$|[,;.]|och\s|samt\s|و|\n))/gi;
+const CARTON_RE=/(\d+(?:\.\d+)?)\s*(?:kartonger|kartongen|kartonge|kartoner|kartonów|kartony|kartong|karton|cartons|carton|cases|case|ctns|ctn|kart\.|krt|kart|kolli|كراتين|كرتونات|كرتونة|كرتون)\s*([^\d,;@\n]*?)\s*(?:à|á|a|@|per|om|at|po|x|×|kg\/st|كل واحدة|كل واحد|كل|بوزن|وزن)?\s*(\d+(?:\.\d+)?)(?:\s*(?:kg|kilo|kilon|kilos|كيلو))?(?:\s*(?:each|każdy|hver))?(?=\s*(?:$|[,;.]|och\s|samt\s|and\s|oraz\s|og\s|i\s|و|\n))/gi;
 function parseLine(line){
   line=line.trim();if(!line)return null;
   let name="",rest="",m;
@@ -288,7 +316,7 @@ function parseLine(line){
            .replace(/\s+و\s*(?=\d|كيلو|نص|نصف|ربع|علب|صندوق|كرتون|حب)/g,",")
            .replace(/\s+و(?=\S)/g,(x,off,str)=>startsItem(str.slice(off+x.length))?",":x);
   const items=[];
-  for(const it of rest.split(/\s*,\s*|\s+och\s+|\s+samt\s+|\s+plus\s+|;|\s+و\s+/i).map(parseItem).filter(Boolean)){
+  for(const it of rest.split(/\s*,\s*|\s+och\s+|\s+samt\s+|\s+plus\s+|\s+and\s+|\s+&\s+|\s+oraz\s+|\s+og\s+|\s+i\s+|;|\s+و\s+/i).map(parseItem).filter(Boolean)){
     const prev=items[items.length-1];
     if(it._qtyOnly){
       if(prev&&prev.unit==="kartong"&&!prev.perCarton&&(!it.unit||it.unit==="kg"))items[items.length-1]=cartonize(prev,it.qty); // "70 kartonger, 7.2"
@@ -318,11 +346,11 @@ function lastPerCarton(product){let best=null;for(const r of received)for(const 
 const knownCustomers=()=>[...new Set(orders.map(o=>o.customer))];
 const knownSuppliers=()=>[...new Set(received.map(r=>r.supplier))];
 async function parseAI(text,kind){
-  const out=await claude((kind==="in"?`These notes record deliveries RECEIVED by a meat wholesaler from its suppliers. Put the SUPPLIER name in the "customer" field. Known suppliers: ${JSON.stringify(knownSuppliers())}; use an existing spelling if it matches. If no supplier is named, use "${t("unknownSup")}".\n`:"")+`You read order notes for a small food business in Malmö. Notes are in Swedish, Arabic, or a mix (Arabic may be in Arabic script or written with Latin letters; numbers may be Arabic-Indic digits like ٥).
+  const out=await claude((kind==="in"?`These notes record deliveries RECEIVED by a meat wholesaler from its suppliers. Put the SUPPLIER name in the "customer" field. Known suppliers: ${JSON.stringify(knownSuppliers())}; use an existing spelling if it matches. If no supplier is named, use "${t("unknownSup")}".\n`:"")+`You read order notes for a small food business in Malmö. Notes may be in Swedish, Arabic, English, Polish, Danish, or a mix (Arabic may be in Arabic script or written with Latin letters; numbers may be Arabic-Indic digits like ٥).
 Extract every customer order. Return ONLY JSON, no other text:
 {"orders":[{"customer":"name","items":[{"product":"Swedish product name, lowercase, singular, e.g. kött, kyckling, lammkött, köttfärs, tomater","product_ar":"Arabic name","qty":number,"unit":"kg|st|låda|liter|paket"}],"note":"anything else, e.g. delivery day, or empty"}]}
 Cartons: "70 kartonger 7,2" / "70 kartonger kyckling à 7,2 kg" / "٧٠ كرتونة ٧٫٢" means 70 cartons of 7.2 kg each -> unit "kg", qty 504, plus "cartons":70,"perCarton":7.2. Cartons without a weight -> unit "kartong", qty = number of cartons, "cartons" = same number. A decimal comma (7,2) is a decimal point.
-Rules: convert grams to kg (500 g -> 0.5 kg). "kilo"/"كيلو"/"kg" -> kg. "نص كيلو" = 0.5 kg. If no number is given, qty 1. Write product in Swedish so totals add up across languages (لحم=kött, دجاج=kyckling, لحم غنم=lammkött, لحم مفروم=köttfärs).
+Rules: convert grams to kg (500 g -> 0.5 kg). "kilo"/"كيلو"/"kg" -> kg. "نص كيلو" = 0.5 kg. If no number is given, qty 1. Write product in Swedish so totals add up across languages (لحم/meat/mięso/kød=kött, دجاج/chicken/kurczak/kylling=kyckling, لحم غنم/lamb=lammkött, لحم مفروم/minced meat=köttfärs).
 Known customers already in the book: ${JSON.stringify(knownCustomers())}. If a name refers to one of them (also across scripts, e.g. أحمد = Ahmed), use the existing spelling exactly. Otherwise keep the name as written. If no customer name is given, use "Okänd".
 Note text:
 """${text}"""`,4000);
@@ -344,14 +372,14 @@ $("#addBtn").onclick=async()=>{
     if(getKey()){try{parsed=await parseAI(text,mode);st.textContent=""}catch(e){parsed=parseOffline(text);st.textContent=t("aiErr")+" ("+e.message+")"}}
     else{parsed=parseOffline(text);st.textContent=""}
     if(!parsed.length){st.textContent=t("fail");return}
-    if(mode==="in")parsed.forEach(o=>{if(o.customer==="Okänd")o.customer=t("unknownSup")});
+    parsed.forEach(o=>{if(o.customer==="Okänd")o.customer=mode==="in"?t("unknownSup"):t("unknownCust")});
     parsed.forEach(o=>o.items=o.items.map(it=>it.unit==="kartong"&&it.product&&lastPerCarton(it.product)?cartonize(it,lastPerCarton(it.product)):it));
     draft={raw:text,orders:parsed,kind:mode};renderDraft();
   }finally{$("#addBtn").disabled=false}
 };
 function renderDraft(){
   const el=$("#draft");if(!draft){el.innerHTML="";return}
-  const opt=u=>UNITS.map(x=>`<option${x===u?" selected":""}>${x}</option>`).join("");
+  const opt=u=>UNITS.map(x=>`<option value="${x}"${x===u?" selected":""}>${esc(unitTxt(x))}</option>`).join("");
   const isIn=draft.kind==="in";
   el.innerHTML=`<div class="draft${isIn?" in":""}"><h3>${isIn?t("checkIn"):t("check")}</h3>${draft.orders.map((o,oi)=>`<div class="dord">
     <input class="fld nm" dir="auto" data-f="${oi}:customer" value="${esc(o.customer)}" aria-label="${isIn?t("supplier"):t("customer")}">
@@ -359,7 +387,7 @@ function renderDraft(){
       <input class="fld" type="number" step="any" inputmode="decimal" data-f="${oi}:${ii}:qty" value="${it.qty}">
       <select class="fld" data-f="${oi}:${ii}:unit">${opt(it.unit)}</select>
       <button class="small del" data-rm="${oi}:${ii}" aria-label="${t("remove")}">✕</button></div>
-      ${it.cartons!=null||it.unit==="kartong"?`<div class="crow"><span>📦</span><input class="fld" type="number" step="any" inputmode="decimal" data-c="${oi}:${ii}:cartons" value="${it.cartons??it.qty}" aria-label="${t("cartons")}"><span>${t("krt")} ×</span><input class="fld" type="number" step="any" inputmode="decimal" data-c="${oi}:${ii}:perCarton" value="${it.perCarton??""}" placeholder="?" aria-label="${t("perCarton")}"><span>${t("kgPer")}</span></div>`:""}`).join("")}
+      ${it.cartons!=null||it.unit==="kartong"?`<div class="crow"><span>📦</span><input class="fld" type="number" step="any" inputmode="decimal" data-c="${oi}:${ii}:cartons" value="${it.cartons??it.qty}" aria-label="${t("cartons")}"><span>${t("krt")} ×</span><input class="fld" type="number" step="any" inputmode="decimal" data-c="${oi}:${ii}:perCarton" value="${it.perCarton??""}" placeholder="?" aria-label="${t("perCarton")}"><span>${t("kgPer")}</span><strong class="csum" data-sum="${oi}:${ii}">${it.perCarton>0?"= "+fmt(it.qty)+" kg":""}</strong></div>`:""}`).join("")}
     <div class="row" style="margin-top:6px"><button class="small" data-addi="${oi}">${t("addItem")}</button>${o.note?`<span class="meta" dir="auto">${esc(o.note)}</span>`:""}</div></div>`).join("")}
     <div class="row"><button class="pri" id="saveBtn">${t("save")}</button><button id="discBtn">${t("discard")}</button></div></div>`;
   el.querySelectorAll("[data-f]").forEach(f=>f.oninput=f.onchange=()=>{const p=f.dataset.f.split(":");const o=draft.orders[+p[0]];
@@ -368,6 +396,7 @@ function renderDraft(){
     const v=Number(f.value);if(k==="cartons")it.cartons=v>0?v:0;else it.perCarton=v>0?v:undefined;
     const qf=el.querySelector(`[data-f="${oi}:${ii}:qty"]`),uf=el.querySelector(`[data-f="${oi}:${ii}:unit"]`);
     if(it.perCarton>0){it.qty=Math.round(it.cartons*it.perCarton*1000)/1000;it.unit="kg"}else{it.qty=it.cartons;it.unit="kartong"}
+    const sm=el.querySelector(`[data-sum="${oi}:${ii}"]`);if(sm)sm.textContent=it.perCarton>0?"= "+fmt(it.qty)+" kg":"";
     qf.value=it.qty;uf.value=it.unit});
   el.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{const[oi,ii]=b.dataset.rm.split(":").map(Number);draft.orders[oi].items.splice(ii,1);draft.orders=draft.orders.filter(o=>o.items.length);if(!draft.orders.length)draft=null;renderDraft()});
   el.querySelectorAll("[data-addi]").forEach(b=>b.onclick=()=>{draft.orders[+b.dataset.addi].items.push({product:"",product_ar:"",qty:1,unit:"kg"});renderDraft()});
@@ -386,9 +415,9 @@ function renderDraft(){
 
 /* ---------- views ---------- */
 document.querySelectorAll("[role=tab]").forEach(b=>b.onclick=()=>{view=b.dataset.v;document.querySelectorAll("[role=tab]").forEach(x=>x.setAttribute("aria-selected",x===b));render()});
-const match=o=>!q||(o.customer+" "+o.items.map(i=>i.product+" "+i.product_ar).join(" ")+" "+o.note).toLowerCase().includes(q.toLowerCase());
+const match=o=>!q||(o.customer+" "+o.items.map(i=>i.product+" "+pn(i.product)+" "+i.product_ar).join(" ")+" "+o.note).toLowerCase().includes(q.toLowerCase());
 const sumItems=list=>{const m=new Map();for(const o of list)for(const it of o.items){const k=it.product+"|"+it.unit;const c=m.get(k)||{product:it.product,product_ar:it.product_ar,unit:it.unit,qty:0,cartons:0};c.qty+=it.qty;c.cartons+=Number(it.cartons)||0;if(it.perCarton)c.perCarton=c.perCarton&&c.perCarton!==it.perCarton?0:it.perCarton;if(!c.product_ar&&it.product_ar)c.product_ar=it.product_ar;m.set(k,c)}return[...m.values()].sort((a,b)=>a.product.localeCompare(b.product,"sv"))};
-const when=ts=>new Date(ts).toLocaleString(lang==="ar"?"ar":"sv-SE",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+const when=ts=>new Date(ts).toLocaleString(LOC(),{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
 function stockRows(){
   const m=new Map();
   const add=(it,f)=>{const k=it.product+"|"+it.unit;const c=m.get(k)||{product:it.product,product_ar:it.product_ar,unit:it.unit,in:0,out:0,open:0};c[f]+=Number(it.qty)||0;if(!c.product_ar&&it.product_ar)c.product_ar=it.product_ar;m.set(k,c)};
@@ -398,9 +427,11 @@ function stockRows(){
 }
 const stockMap=()=>new Map(stockRows().map(r=>[r.product+"|"+r.unit,r]));
 const shareText=(txt,btn)=>{(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>btn.textContent=t("copied")).catch(()=>{if(navigator.share)navigator.share({text:txt}).catch(()=>{})})};
+const pn=prod=>(NAMES[prod]&&NAMES[prod][lang])||prod;
+const sec=i=>lang==="ar"?(pn(i.product)!==i.product_ar?i.product:""):(i.product_ar||"");
 const krtTxt=i=>i.cartons&&i.unit==="kg"?`<br><span class="meta">📦 ${fmt(i.cartons)} ${t("krt")}${i.perCarton?` × ${fmt(i.perCarton)} kg`:""}</span>`:"";
-const unitTxt=u=>u==="kartong"?t("krt"):u;
-const itemLi=i=>`<li><span dir="auto">${esc(i.product)} <span class="ar">${esc(i.product_ar)}</span>${krtTxt(i)}</span><span class="q">${fmt(i.qty)} ${esc(unitTxt(i.unit))}</span></li>`;
+const unitTxt=u=>u==="kartong"?t("krt"):u==="kg"?"kg":(T[lang]["u_"+u]||T.sv["u_"+u]||u);
+const itemLi=i=>`<li><span dir="auto">${esc(pn(i.product))} <span class="ar">${esc(sec(i))}</span>${krtTxt(i)}</span><span class="q">${fmt(i.qty)} ${esc(unitTxt(i.unit))}</span></li>`;
 
 function render(){
   const v=$("#view");
@@ -413,10 +444,10 @@ function render(){
     const s=sumItems(list);
     const sm=stockMap();
     const totLi=i=>{const r=sm.get(i.product+"|"+i.unit);const hasStock=r&&r.in!==0;
-      return `<li><span dir="auto">${esc(i.product)} <span class="ar">${esc(i.product_ar)}</span>${hasStock?`<br><span class="meta">${fmt(r.have)} ${esc(i.unit)} ${t("stHave")}</span>${r.left<0?` <span class="short">${t("stShort")} ${fmt(-r.left)} ${esc(i.unit)}</span>`:""}`:""}</span><span class="q">${fmt(i.qty)} ${esc(i.unit)}</span></li>`};
+      return `<li><span dir="auto">${esc(pn(i.product))} <span class="ar">${esc(sec(i))}</span>${hasStock?`<br><span class="meta">${fmt(r.have)} ${esc(unitTxt(i.unit))} ${t("stHave")}</span>${r.left<0?` <span class="short">${t("stShort")} ${fmt(-r.left)} ${esc(unitTxt(i.unit))}</span>`:""}`:""}</span><span class="q">${fmt(i.qty)} ${esc(unitTxt(i.unit))}</span></li>`};
     v.innerHTML=searchBox+(s.length?`<div class="slip tot"><ul>${s.map(totLi).join("")}</ul>
       <div class="row"><button id="copyBtn">${t("copy")}</button><span class="meta">${new Set(list.map(o=>o.customer)).size} ${t("tCust").toLowerCase()} · ${list.length} ${t("orders")}</span></div></div>`:`<div class="empty">${t("empty")}</div>`);
-    const cb=$("#copyBtn");if(cb)cb.onclick=()=>shareText(s.map(i=>`${i.product}${i.product_ar?" ("+i.product_ar+")":""}: ${fmt(i.qty)} ${i.unit}`).join("\n"),cb);
+    const cb=$("#copyBtn");if(cb)cb.onclick=()=>shareText(s.map(i=>`${pn(i.product)}${sec(i)?" ("+sec(i)+")":""}: ${fmt(i.qty)} ${unitTxt(i.unit)}`).join("\n"),cb);
   }else{
     const by=new Map();for(const o of list){if(!by.has(o.customer))by.set(o.customer,[]);by.get(o.customer).push(o)}
     v.innerHTML=searchBox+(by.size?`<div class="grid">${[...by].map(([c,os])=>`<article class="slip"><header><div><h2 dir="auto">${esc(c)}</h2>
@@ -437,20 +468,20 @@ function renderStockViews(v){
   const searchBox=`<input class="search" id="q" dir="auto" placeholder="${t("search")}" value="${esc(q)}">`;
   const ql=q.toLowerCase();
   if(view==="stock"){
-    const rows=stockRows().filter(r=>r.in!==0||r.out!==0).filter(r=>!q||(r.product+" "+r.product_ar).toLowerCase().includes(ql));
+    const rows=stockRows().filter(r=>r.in!==0||r.out!==0).filter(r=>!q||(r.product+" "+pn(r.product)+" "+r.product_ar).toLowerCase().includes(ql));
     const short=rows.filter(r=>r.left<0).length;
     v.innerHTML=searchBox+(rows.length?`<div class="slip tot"><p class="hint" style="margin-top:0">${t("stockInfo")}</p>${rows.map(r=>`<div class="srow">
-      <div class="top1"><span dir="auto"><strong>${esc(r.product)}</strong> <span class="ar">${esc(r.product_ar)}</span></span><span class="have${r.have<0?" neg":""}">${fmt(r.have)} ${esc(unitTxt(r.unit))}${r.per?`<br><span class="meta" style="font:13px Inter,'Noto Sans Arabic'">≈ ${fmt(r.have/r.per)} ${t("krt")} (${fmt(r.per)} kg)</span>`:""}</span></div>
+      <div class="top1"><span dir="auto"><strong>${esc(pn(r.product))}</strong> <span class="ar">${esc(sec(r))}</span></span><span class="have${r.have<0?" neg":""}">${fmt(r.have)} ${esc(unitTxt(r.unit))}${r.per?`<br><span class="meta" style="font:13px Inter,'Noto Sans Arabic'">≈ ${fmt(r.have/r.per)} ${t("krt")} (${fmt(r.per)} kg)</span>`:""}</span></div>
       <div class="nums"><span>${t("stIn")} <b>${fmt(r.in)}</b></span><span>${t("stOut")} <b>${fmt(r.out)}</b></span><span>${t("stOpen")} <b>${fmt(r.open)}</b></span>
-        <span>${t("stLeft")} <b class="${r.left<0?"neg":""}">${fmt(r.left)}</b></span>${r.left<0?`<span class="short">${t("stShort")} ${fmt(-r.left)} ${esc(r.unit)}</span>`:""}
+        <span>${t("stLeft")} <b class="${r.left<0?"neg":""}">${fmt(r.left)}</b></span>${r.left<0?`<span class="short">${t("stShort")} ${fmt(-r.left)} ${esc(unitTxt(r.unit))}</span>`:""}
         <button class="small" style="margin-inline-start:auto" data-adj="${esc(r.product)}|${esc(r.unit)}">${t("adjust")}</button></div></div>`).join("")}
       <div class="row"><button id="copyBtn">${t("copyStock")}</button>${short?`<span class="short">${short} × ${t("stShort")}</span>`:""}</div></div>`
       :`<div class="empty">${t("emptyStock")}</div>`);
     v.querySelectorAll("[data-adj]").forEach(b=>b.onclick=()=>{const[prod,unit]=b.dataset.adj.split("|");const r=stockRows().find(x=>x.product===prod&&x.unit===unit);if(!r)return;
-      const ans=prompt(t("adjustQ").replace("{p}",prod).replace("{u}",unit),String(Math.round(r.have*100)/100));if(ans===null)return;
+      const ans=prompt(t("adjustQ").replace("{p}",pn(prod)).replace("{u}",unitTxt(unit)),String(Math.round(r.have*100)/100));if(ans===null)return;
       const n=Number(String(normalize(ans)).replace(",","."));if(!isFinite(n))return;const diff=Math.round((n-r.have)*1000)/1000;if(!diff)return;
       const now=Date.now();putIn({id:"a"+now,supplier:t("adjName"),adjust:true,items:[{product:prod,product_ar:r.product_ar||"",qty:diff,unit}],note:"",raw:`${prod}: ${fmt(r.have)} → ${fmt(n)} ${unit}`,created:now})});
-    const cb=$("#copyBtn");if(cb)cb.onclick=()=>shareText(t("stockTitle")+" "+new Date().toLocaleDateString(lang==="ar"?"ar":"sv-SE")+"\n"+rows.map(r=>`${r.product}${r.product_ar?" ("+r.product_ar+")":""}: ${fmt(r.have)} ${r.unit}`).join("\n"),cb);
+    const cb=$("#copyBtn");if(cb)cb.onclick=()=>shareText(t("stockTitle")+" "+new Date().toLocaleDateString(LOC())+"\n"+rows.map(r=>`${pn(r.product)}${sec(r)?" ("+sec(r)+")":""}: ${fmt(r.have)} ${unitTxt(r.unit)}`).join("\n"),cb);
   }else{
     const list=received.filter(r=>!q||(r.supplier+" "+r.items.map(i=>i.product+" "+i.product_ar).join(" ")+" "+r.note).toLowerCase().includes(ql)).sort((a,b)=>b.created-a.created);
     const tot=sumItems(list.filter(r=>!r.adjust));
@@ -474,7 +505,7 @@ function renderAsk(v){
     const data=orders.map(o=>({customer:o.customer,items:o.items.map(i=>`${i.qty} ${i.unit} ${i.product}`),note:o.note,delivered:o.done,date:new Date(o.created).toISOString().slice(0,16)}));
     const inData=received.map(r=>({supplier:r.supplier,adjustment:!!r.adjust,items:r.items.map(i=>`${i.qty} ${i.unit} ${i.product}`),date:new Date(r.created).toISOString().slice(0,16)}));
     const stock=stockRows().map(r=>({product:r.product,unit:r.unit,received:r.in,delivered_to_customers:r.out,in_stock:r.have,open_orders:r.open,left_after_open_orders:r.left}));
-    try{lastAnswer=await claude(`You are the order and stock assistant for a meat wholesaler: big deliveries come IN from suppliers, and goods go OUT to customers. Answer the question using ONLY the data below. Reply in the same language as the question (Swedish or Arabic). Be short and exact; add up quantities carefully and show totals with units. Plain text, no markdown. Today is ${new Date().toISOString().slice(0,10)}.
+    try{lastAnswer=await claude(`You are the order and stock assistant for a meat wholesaler: big deliveries come IN from suppliers, and goods go OUT to customers. Answer the question using ONLY the data below. Reply in the same language as the question (Swedish, Arabic, English, Polish or Danish). Be short and exact; add up quantities carefully and show totals with units. Plain text, no markdown. Today is ${new Date().toISOString().slice(0,10)}.
 CUSTOMER ORDERS: ${JSON.stringify(data)}
 DELIVERIES RECEIVED FROM SUPPLIERS: ${JSON.stringify(inData)}
 CURRENT STOCK (computed): ${JSON.stringify(stock)}
@@ -492,7 +523,7 @@ function setupMic(){
   const b=$("#micBtn");b.hidden=false;
   b.onclick=()=>{
     if(listening){rec&&rec.stop();return}
-    rec=new SR();rec.lang=lang==="ar"?"ar-SA":"sv-SE";rec.continuous=true;rec.interimResults=true;
+    rec=new SR();rec.lang=({sv:"sv-SE",en:"en-GB",pl:"pl-PL",da:"da-DK",ar:"ar-SA"})[lang];rec.continuous=true;rec.interimResults=true;
     base=$("#inp").value.trim();finalText="";
     rec.onresult=e=>{let interim="";for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)finalText+=r[0].transcript+" ";else interim+=r[0].transcript}
       $("#inp").value=[base,(finalText+interim).trim()].filter(Boolean).join("\n")};
@@ -529,20 +560,38 @@ $("#setBtn").onclick=()=>{const s=$("#settings");s.hidden=!s.hidden;if(!s.hidden
 function applyLang(){
   document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";
   document.querySelectorAll("[data-t]").forEach(el=>el.textContent=t(el.dataset.t));
-  $("#langBtn").textContent=lang==="ar"?"Svenska":"عربي";
+  $("#langSel").value=lang;
   applyMode();
   if(!listening)$("#micBtn").textContent=t("mic");
+  $("#calcIn").placeholder=t("calcPh");renderCalc();
   render();renderDraft();if(!$("#settings").hidden)renderSettings();
 }
+function calcLine(line){
+  const x=normalize(line).trim();if(!x)return null;
+  const nums=[...x.matchAll(/\d+(?:\.\d+)?/g)].map(m=>Number(m[0]));
+  if(nums.length<2)return{text:line.trim(),bad:true};
+  const n=nums[0],w=nums[1];
+  const words=x.replace(/\d+(?:\.\d+)?/g," ").replace(UNIT_RE," ").trim();
+  const pr=findProduct(words.split(/\s+/).filter(v=>!UNITALIAS.some(([a])=>a.toLowerCase()===v.toLowerCase())).join(" "));
+  return{n,w,kg:Math.round(n*w*1000)/1000,prod:pr?pn(pr[0]):""};
+}
+function renderCalc(){
+  const rows=$("#calcIn").value.split(/\n+/).map(calcLine).filter(Boolean);const ok=rows.filter(r=>!r.bad);
+  const totKg=ok.reduce((a,r)=>a+r.kg,0),totN=ok.reduce((a,r)=>a+r.n,0);
+  $("#calcOut").innerHTML=rows.map(r=>r.bad?`<div class="cl"><span dir="auto">${esc(r.text)}</span><span class="meta">?</span></div>`
+    :`<div class="cl"><span dir="auto">${r.prod?esc(r.prod)+" · ":""}${fmt(r.n)} ${t("krt")} × ${fmt(r.w)} kg</span><strong>= ${fmt(r.kg)} kg</strong></div>`).join("")
+    +(ok.length?`<div class="ctot"><span>${t("calcTotal")}${ok.length>1?` · ${fmt(totN)} ${t("krt")}`:""}</span><span>${fmt(totKg)} kg</span></div>`:"");
+}
+$("#calcIn").oninput=renderCalc;
 function applyMode(){
   document.querySelectorAll(".mode button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.k===mode));
   $("#feed").classList.toggle("in",mode==="in");
   $("#hint").textContent=mode==="in"?t("hintIn"):t("hint");
-  $("#inp").placeholder=mode==="in"?t("phIn"):(lang==="ar"?"أحمد: ٥ كيلو لحم، ٥ كيلو دجاج":"Ahmed: 5 kg kött, 5 kg kyckling, 2 lådor tomater");
+  $("#inp").placeholder=mode==="in"?t("phIn"):t("phOrder");
   $("#addBtn").textContent=mode==="in"?"🚚 "+t("add"):t("add");
 }
 document.querySelectorAll(".mode button").forEach(b=>b.onclick=()=>{mode=b.dataset.k;if(draft&&draft.kind!==mode){draft=null;renderDraft()}applyMode()});
-$("#langBtn").onclick=()=>{lang=lang==="sv"?"ar":"sv";ls.set("ob_lang",lang);applyLang()};
+$("#langSel").onchange=e=>{lang=e.target.value;ls.set("ob_lang",lang);applyLang()};
 
 window.__ob={parseOffline,stockRows};
 load();setupMic();applyLang();
