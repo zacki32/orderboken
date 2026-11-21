@@ -25,17 +25,17 @@
 textarea,input,select{font-family:inherit}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,"Noto Sans Arabic",system-ui,sans-serif;overflow-x:clip}
 [dir=rtl] body,[dir=rtl] input,[dir=rtl] textarea{font-family:"Noto Sans Arabic",Inter,system-ui,sans-serif}
-header{background:var(--red);color:#fff;padding:calc(18px + env(safe-area-inset-top)) max(5vw,16px) 22px}
+header{background:var(--red);color:#fff;padding:calc(12px + env(safe-area-inset-top)) max(5vw,16px) 22px}
 .top{display:flex;justify-content:space-between;align-items:center;gap:12px;max-width:1240px;margin:auto}
 .hbtns{display:flex;gap:8px;flex:none}
-h1{font:800 clamp(28px,6vw,40px)/1.05 Archivo,"Noto Sans Arabic",sans-serif;margin:0}
+h1{font:800 clamp(24px,5vw,34px)/1.05 Archivo,"Noto Sans Arabic",sans-serif;margin:0}
 .sub{opacity:.85;font-size:14px;margin:4px 0 0}
 .lang option{color:#1d1414;background:#fff}
 select.lang{appearance:none;-webkit-appearance:none;padding:0 14px;text-align:center}
 .lang{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:999px;min-height:44px;padding:0 16px;font:600 15px Inter,"Noto Sans Arabic";cursor:pointer}
-main{max-width:1240px;margin:auto;padding:0 max(5vw,16px) 48px}
+main{max-width:1240px;margin:auto;padding:0 max(5vw,16px) calc(100px + env(safe-area-inset-bottom))}
 .feed{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:-12px;box-shadow:0 8px 24px rgba(60,10,20,.08)}
-textarea{width:100%;min-height:92px;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:17px;background:var(--bg);color:var(--ink);resize:vertical}
+textarea{width:100%;min-height:64px;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:17px;background:var(--bg);color:var(--ink);resize:vertical}
 textarea:focus,input:focus,select:focus,button:focus-visible{outline:3px solid color-mix(in srgb,var(--red) 45%,transparent);outline-offset:1px}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
 button{min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:0 16px;font:600 15px Inter,"Noto Sans Arabic",sans-serif;cursor:pointer}
@@ -107,36 +107,40 @@ li:last-child{border-bottom:0}
 .srow .nums b{color:var(--ink);font-variant-numeric:tabular-nums}
 .neg,.srow .nums b.neg{color:var(--red)}
 .short{background:var(--redbg);color:var(--red);border-radius:999px;padding:1px 8px;font-weight:700;font-size:12px}
+.acts{display:flex;gap:10px}
+.acts .big{flex:1 1 0;min-height:84px;font-size:20px;margin-bottom:10px}
+.acts .big[hidden]{display:none}
+#view{margin-top:18px}
+.bottom{position:fixed;left:0;right:0;bottom:0;z-index:5;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--paper);border-top:1px solid var(--line);padding:6px 10px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(0,0,0,.06)}
+.bottom button{border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:58px;font-size:13px;color:var(--mute);border-radius:14px;padding:0 4px}
+.bottom .ico{font-size:24px;line-height:1}
+.bottom button[aria-selected=true]{color:var(--ink);background:var(--redbg)}
+.donebtn{width:100%;margin-top:14px;color:var(--mute)}
+.settings select.fld{width:100%;min-height:44px}
+.settings a{color:var(--red)}
 @media (prefers-reduced-motion:no-preference){.slip{animation:in .25s ease-out}@keyframes in{from{opacity:0;transform:translateY(6px)}}}
 </style>
 </head>
 <body>
-<header><div class="top"><div><h1 data-t="title">Orderboken</h1><p class="sub" data-t="sub">Skriv eller prata in beställningar – på svenska eller arabiska.</p></div>
-<div class="hbtns"><select class="lang" id="langSel" aria-label="Language / Språk"><option value="sv">Svenska</option><option value="en">English</option><option value="pl">Polski</option><option value="da">Dansk</option><option value="ar">العربية</option></select><button class="lang" id="setBtn" aria-label="Inställningar">⚙</button></div></div></header>
+<header><div class="top"><h1 data-t="title">Orderboken</h1><button class="lang" id="setBtn" aria-label="⚙">⚙</button></div></header>
 <main>
 <section class="settings" id="settings" hidden></section>
 <section class="feed" id="feed">
-<div class="mode"><button data-k="order" aria-pressed="true" data-t="mOrder">📦 Kundorder</button><button data-k="in" aria-pressed="false" data-t="mIn">🚚 Inleverans</button></div>
-<button class="big" id="micBtn" hidden data-t="mic">🎙 Tryck och prata</button>
-<textarea id="inp" dir="auto"></textarea>
-<div class="row"><button class="pri" id="addBtn" data-t="add">Läs in beställning</button><button id="photoBtn">📷</button><input type="file" id="photoIn" accept="image/*" capture="environment" hidden></div>
-<p class="hint" id="hint"></p>
-<details class="calc" id="calc"><summary data-t="calcTitle">🧮 Räkna kartonger</summary>
-<p class="hint" data-t="calcHelp"></p><textarea id="calcIn" dir="auto" rows="3"></textarea><div id="calcOut" aria-live="polite"></div></details>
+<div class="acts"><button class="big" id="photoBtn">📷</button><button class="big" id="micBtn" hidden>🎙</button></div>
+<input type="file" id="photoIn" accept="image/*" capture="environment" hidden>
+<textarea id="inp" dir="auto" rows="2"></textarea>
+<div class="row"><button class="pri" id="addBtn">OK</button></div>
 <div class="status" id="status" role="status"></div>
 <div id="draft"></div>
+<details class="calc" id="calc"><summary data-t="calcTitle">🧮</summary><textarea id="calcIn" dir="auto" rows="3"></textarea><div id="calcOut" aria-live="polite"></div></details>
 </section>
-
-<nav class="tabs" role="tablist">
-<button role="tab" data-v="cust" aria-selected="true" data-t="tCust">Kunder</button>
-<button role="tab" data-v="tot" aria-selected="false" data-t="tTot">Totalt att plocka</button>
-<button role="tab" data-v="stock" aria-selected="false" data-t="tStock">Lager</button>
-<button role="tab" data-v="in" aria-selected="false" data-t="tIn">Inleveranser</button>
-<button role="tab" data-v="ask" aria-selected="false" data-t="tAsk">Fråga agenten</button>
-<button role="tab" data-v="done" aria-selected="false" data-t="tDone">Levererat</button>
-</nav>
 <div id="view"></div>
 </main>
+<nav class="bottom" role="tablist">
+<button role="tab" data-v="in"><span class="ico">🚚</span><span data-t="tIn">Inleveranser</span></button>
+<button role="tab" data-v="cust"><span class="ico">📦</span><span data-t="tCust">Kunder</span></button>
+<button role="tab" data-v="stock"><span class="ico">📊</span><span data-t="tStock">Lager</span></button>
+</nav>
 
 <script>
 {
@@ -195,6 +199,11 @@ Object.assign(T.en,{"photoFail": "Couldn't open the photo. Try again.", "photoNo
 Object.assign(T.pl,{"photoFail": "Nie udało się otworzyć zdjęcia. Spróbuj ponownie.", "photoNoLines": "Odczytałem zdjęcie, ale nie znalazłem wierszy z towarem. Tekst jest teraz w polu powyżej – popraw go (np. \"Kurczak 10 kart. 72 kg\") i naciśnij Wczytaj zamówienie.", "photoNoText": "Nie znaleziono tekstu na zdjęciu. Zrób zdjęcie bliżej, aby tekst wypełniał kadr.", "photoNoNet": "Nie udało się załadować rozpoznawania tekstu – sprawdź połączenie z internetem i spróbuj ponownie."});
 Object.assign(T.da,{"photoFail": "Kunne ikke åbne billedet. Prøv igen.", "photoNoLines": "Jeg læste billedet, men fandt ingen varelinjer. Teksten står nu i feltet ovenfor – ret den (f.eks. \"Kylling 10 krt 72 kg\") og tryk Læs ordre.", "photoNoText": "Fandt ingen tekst i billedet. Tag billedet tættere på, så teksten fylder billedet.", "photoNoNet": "Tekstgenkendelsen kunne ikke indlæses – tjek internetforbindelsen og prøv igen."});
 Object.assign(T.ar,{"photoFail": "تعذّر فتح الصورة. حاول مرة أخرى.", "photoNoLines": "قرأت الصورة لكن لم أجد أسطر منتجات. النص الآن في المربع أعلاه – صحّحه (مثلاً \"دجاج ١٠ كرتونة ٧٢ كيلو\") ثم اضغط اقرأ الطلب.", "photoNoText": "لم أجد نصاً في الصورة. التقط الصورة من مسافة أقرب حتى يملأ النص الصورة.", "photoNoNet": "تعذّر تحميل التعرّف على النص – تحقق من الاتصال بالإنترنت وحاول مرة أخرى."});
+Object.assign(T.sv,{"read": "Läs in", "micShort": "🎙 Prata", "showDone": "Visa levererade", "hideDone": "Dölj levererade", "lang": "Språk", "keyHow": "Så skaffar du en nyckel: gå till <a href=\"https://platform.claude.com\" target=\"_blank\" rel=\"noopener\">platform.claude.com</a> och skapa ett konto. Fyll på krediter under Billing (t.ex. 5 $). Välj API Keys → Create Key, kopiera nyckeln (börjar med sk-ant-) och klistra in den här."});
+Object.assign(T.en,{"read": "Read", "micShort": "🎙 Speak", "showDone": "Show delivered", "hideDone": "Hide delivered", "lang": "Language", "keyHow": "How to get a key: go to <a href=\"https://platform.claude.com\" target=\"_blank\" rel=\"noopener\">platform.claude.com</a> and create an account. Add credits under Billing (e.g. $5). Choose API Keys → Create Key, copy the key (starts with sk-ant-) and paste it here."});
+Object.assign(T.pl,{"read": "Wczytaj", "micShort": "🎙 Mów", "showDone": "Pokaż dostarczone", "hideDone": "Ukryj dostarczone", "lang": "Język", "keyHow": "Jak zdobyć klucz: wejdź na <a href=\"https://platform.claude.com\" target=\"_blank\" rel=\"noopener\">platform.claude.com</a> i załóż konto. Doładuj środki w Billing (np. 5 $). Wybierz API Keys → Create Key, skopiuj klucz (zaczyna się od sk-ant-) i wklej go tutaj."});
+Object.assign(T.da,{"read": "Læs ind", "micShort": "🎙 Tal", "showDone": "Vis leverede", "hideDone": "Skjul leverede", "lang": "Sprog", "keyHow": "Sådan får du en nøgle: gå til <a href=\"https://platform.claude.com\" target=\"_blank\" rel=\"noopener\">platform.claude.com</a> og opret en konto. Køb kreditter under Billing (f.eks. 5 $). Vælg API Keys → Create Key, kopiér nøglen (starter med sk-ant-) og indsæt den her."});
+Object.assign(T.ar,{"read": "اقرأ", "micShort": "🎙 تكلّم", "showDone": "عرض المُسلَّم", "hideDone": "إخفاء المُسلَّم", "lang": "اللغة", "keyHow": "كيف تحصل على مفتاح: اذهب إلى <a href=\"https://platform.claude.com\" target=\"_blank\" rel=\"noopener\">platform.claude.com</a> وأنشئ حساباً. أضف رصيداً من Billing (مثلاً ٥ دولار). اختر API Keys ثم Create Key، انسخ المفتاح (يبدأ بـ sk-ant-) والصقه هنا."});
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let lang=ls.get("ob_lang","sv");if(!["sv","en","pl","da","ar"].includes(lang))lang="sv";
 const LOC=()=>({sv:"sv-SE",en:"en-GB",pl:"pl-PL",da:"da-DK",ar:"ar"})[lang];
@@ -202,10 +211,12 @@ const t=k=>T[lang][k]??T.sv[k];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>(Math.round(n*100)/100).toLocaleString(LOC());
-const APP_VERSION="7 · foto 2";
+const APP_VERSION="8 · enkel";
 const UNITS=["kg","kartong","st","låda","liter","paket"];
 
-let orders=[],received=[],view="cust",draft=null,q="",armed=null,mode="order";
+let orders=[],received=[],view=ls.get("ob_view","cust"),draft=null,q="",armed=null,mode="order",showDone=false;
+if(!["in","cust","stock"].includes(view))view="cust";
+mode=view==="in"?"in":"order";
 
 /* ---------- storage: this phone only ---------- */
 const LS="ob_orders";
@@ -531,7 +542,7 @@ function renderDraft(){
 }
 
 /* ---------- views ---------- */
-document.querySelectorAll("[role=tab]").forEach(b=>b.onclick=()=>{view=b.dataset.v;document.querySelectorAll("[role=tab]").forEach(x=>x.setAttribute("aria-selected",x===b));render()});
+document.querySelectorAll("[role=tab]").forEach(b=>b.onclick=()=>{view=b.dataset.v;ls.set("ob_view",view);q="";mode=view==="in"?"in":"order";if(draft&&draft.kind!==mode){draft=null;renderDraft()}$("#status").textContent="";applyMode();render();window.scrollTo(0,0)});
 const match=o=>!q||(o.customer+" "+o.items.map(i=>i.product+" "+pn(i.product)+" "+i.product_ar).join(" ")+" "+o.note).toLowerCase().includes(q.toLowerCase());
 const sumItems=list=>{const m=new Map();for(const o of list)for(const it of o.items){const k=it.product+"|"+it.unit;const c=m.get(k)||{product:it.product,product_ar:it.product_ar,unit:it.unit,qty:0,cartons:0};c.qty+=it.qty;c.cartons+=Number(it.cartons)||0;if(it.perCarton)c.perCarton=c.perCarton&&c.perCarton!==it.perCarton?0:it.perCarton;if(!c.product_ar&&it.product_ar)c.product_ar=it.product_ar;m.set(k,c)}return[...m.values()].sort((a,b)=>a.product.localeCompare(b.product,"sv"))};
 const when=ts=>new Date(ts).toLocaleString(LOC(),{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
@@ -552,48 +563,38 @@ const itemLi=i=>`<li><span dir="auto">${esc(pn(i.product))} <span class="ar">${e
 
 function render(){
   const v=$("#view");
-  if(view==="ask"){renderAsk(v);return}
   if(view==="stock"||view==="in"){renderStockViews(v);return}
-  const showDone=view==="done";
-  const list=orders.filter(o=>!!o.done===showDone).filter(match).sort((a,b)=>b.created-a.created);
-  const searchBox=`<input class="search" id="q" dir="auto" placeholder="${t("search")}" value="${esc(q)}">`;
-  if(view==="tot"){
-    const s=sumItems(list);
-    const sm=stockMap();
-    const totLi=i=>{const r=sm.get(i.product+"|"+i.unit);const hasStock=r&&r.in!==0;
-      return `<li><span dir="auto">${esc(pn(i.product))} <span class="ar">${esc(sec(i))}</span>${hasStock?`<br><span class="meta">${fmt(r.have)} ${esc(unitTxt(i.unit))} ${t("stHave")}</span>${r.left<0?` <span class="short">${t("stShort")} ${fmt(-r.left)} ${esc(unitTxt(i.unit))}</span>`:""}`:""}</span><span class="q">${fmt(i.qty)} ${esc(unitTxt(i.unit))}</span></li>`};
-    v.innerHTML=searchBox+(s.length?`<div class="slip tot"><ul>${s.map(totLi).join("")}</ul>
-      <div class="row"><button id="copyBtn">${t("copy")}</button><span class="meta">${new Set(list.map(o=>o.customer)).size} ${t("tCust").toLowerCase()} · ${list.length} ${t("orders")}</span></div></div>`:`<div class="empty">${t("empty")}</div>`);
-    const cb=$("#copyBtn");if(cb)cb.onclick=()=>shareText(s.map(i=>`${pn(i.product)}${sec(i)?" ("+sec(i)+")":""}: ${fmt(i.qty)} ${unitTxt(i.unit)}`).join("\n"),cb);
-  }else{
-    const by=new Map();for(const o of list){if(!by.has(o.customer))by.set(o.customer,[]);by.get(o.customer).push(o)}
-    v.innerHTML=searchBox+(by.size?`<div class="grid">${[...by].map(([c,os])=>`<article class="slip"><header><div><h2 dir="auto">${esc(c)}</h2>
-      <div class="meta">${os.length} ${t("orders")}</div></div><button class="small" data-ren="${esc(c)}" aria-label="${t("rename")}">✏️</button></header>
+  const byNew=(a,b)=>b.created-a.created;
+  const open=orders.filter(o=>!o.done).filter(match).sort(byNew),done=orders.filter(o=>o.done).filter(match).sort(byNew);
+  const searchBox=orders.length>6?`<input class="search" id="q" dir="auto" placeholder="${t("search")}" value="${esc(q)}">`:"";
+  const slips=list=>{const by=new Map();for(const o of list){if(!by.has(o.customer))by.set(o.customer,[]);by.get(o.customer).push(o)}
+    return `<div class="grid">${[...by].map(([c,os])=>`<article class="slip"><header><h2 dir="auto">${esc(c)}</h2><button class="small" data-ren="${esc(c)}" aria-label="${t("rename")}">✏️</button></header>
       <ul>${sumItems(os).map(itemLi).join("")}</ul>
-      <div>${os.map(o=>`<div class="order${o.done?" done":""}"><div class="meta">${when(o.created)}${o.note?` · <span dir="auto">${esc(o.note)}</span>`:""}</div>
-        <div class="raw" dir="auto">"${esc(o.raw.length>90?o.raw.slice(0,90)+"…":o.raw)}"</div>
-        <div class="row"><button class="small" data-done="${o.id}">${o.done?t("undo"):"✓ "+t("delivered")}</button><button class="small del" data-del="${o.id}">${armed===o.id?t("sure"):t("remove")}</button></div></div>`).join("")}</div></article>`).join("")}</div>`
-      :`<div class="empty">${showDone?t("emptyDone"):t("empty")}</div>`);
-    v.querySelectorAll("[data-done]").forEach(b=>b.onclick=()=>{const o=orders.find(x=>x.id===b.dataset.done);if(o)put({...o,done:!o.done})});
-    v.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const id=b.dataset.del;if(armed===id){armed=null;drop(id)}else{armed=id;render();setTimeout(()=>{if(armed===id){armed=null;render()}},4000)}});
-    v.querySelectorAll("[data-ren]").forEach(b=>b.onclick=()=>{const old=b.dataset.ren;const nn=(prompt(t("renameQ"),old)||"").trim();if(!nn||nn===old)return;
-      orders=orders.map(o=>o.customer===old?{...o,customer:nn}:o);persist();render()});
-  }
+      ${os.map(o=>`<div class="order${o.done?" done":""}">${os.length>1||o.note?`<div class="meta">${when(o.created)}${o.note?` · <span dir="auto">${esc(o.note)}</span>`:""}</div>`:""}
+        <div class="row" style="margin-top:4px"><button class="small" data-done="${o.id}">${o.done?t("undo"):"✓ "+t("delivered")}</button><button class="small del" data-del="${o.id}">${armed===o.id?t("sure"):t("remove")}</button></div></div>`).join("")}</article>`).join("")}</div>`};
+  v.innerHTML=searchBox+(open.length?slips(open):`<div class="empty">${t("empty")}</div>`)
+    +(done.length?`<button class="donebtn" id="doneTog">${showDone?t("hideDone"):t("showDone")} (${done.length})</button>${showDone?`<div style="margin-top:14px">${slips(done)}</div>`:""}`:"");
+  const dt=$("#doneTog");if(dt)dt.onclick=()=>{showDone=!showDone;render()};
+  v.querySelectorAll("[data-done]").forEach(b=>b.onclick=()=>{const o=orders.find(x=>x.id===b.dataset.done);if(o)put({...o,done:!o.done})});
+  v.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const id=b.dataset.del;if(armed===id){armed=null;drop(id)}else{armed=id;render();setTimeout(()=>{if(armed===id){armed=null;render()}},4000)}});
+  v.querySelectorAll("[data-ren]").forEach(b=>b.onclick=()=>{const old=b.dataset.ren;const nn=(prompt(t("renameQ"),old)||"").trim();if(!nn||nn===old)return;
+    orders=orders.map(o=>o.customer===old?{...o,customer:nn}:o);persist();render()});
   const qi=$("#q");if(qi)qi.oninput=e=>{q=e.target.value;const pos=e.target.selectionStart;render();const n=$("#q");n.focus();n.setSelectionRange(pos,pos)};
 }
 function renderStockViews(v){
-  const searchBox=`<input class="search" id="q" dir="auto" placeholder="${t("search")}" value="${esc(q)}">`;
+  const many=(view==="stock"?stockRows().length:received.length)>6;
+  const searchBox=many?`<input class="search" id="q" dir="auto" placeholder="${t("search")}" value="${esc(q)}">`:"";
   const ql=q.toLowerCase();
   if(view==="stock"){
     const rows=stockRows().filter(r=>r.in!==0||r.out!==0).filter(r=>!q||(r.product+" "+pn(r.product)+" "+r.product_ar).toLowerCase().includes(ql));
     const short=rows.filter(r=>r.left<0).length;
-    v.innerHTML=searchBox+(rows.length?`<div class="slip tot"><p class="hint" style="margin-top:0">${t("stockInfo")}</p>${rows.map(r=>`<div class="srow">
+    v.innerHTML=searchBox+(rows.length?`<div class="slip tot">${rows.map(r=>`<div class="srow">
       <div class="top1"><span dir="auto"><strong>${esc(pn(r.product))}</strong> <span class="ar">${esc(sec(r))}</span></span><span class="have${r.have<0?" neg":""}">${fmt(r.have)} ${esc(unitTxt(r.unit))}${r.per?`<br><span class="meta" style="font:13px Inter,'Noto Sans Arabic'">≈ ${fmt(r.have/r.per)} ${t("krt")} (${fmt(r.per)} kg)</span>`:""}</span></div>
-      <div class="nums"><span>${t("stIn")} <b>${fmt(r.in)}</b></span><span>${t("stOut")} <b>${fmt(r.out)}</b></span><span>${t("stOpen")} <b>${fmt(r.open)}</b></span>
-        <span>${t("stLeft")} <b class="${r.left<0?"neg":""}">${fmt(r.left)}</b></span>${r.left<0?`<span class="short">${t("stShort")} ${fmt(-r.left)} ${esc(unitTxt(r.unit))}</span>`:""}
+      <div class="nums">${r.open?`<span>${t("stOpen")} <b>${fmt(r.open)}</b></span><span>${t("stLeft")} <b class="${r.left<0?"neg":""}">${fmt(r.left)}</b></span>`:""}${r.left<0?`<span class="short">${t("stShort")} ${fmt(-r.left)} ${esc(unitTxt(r.unit))}</span>`:""}
         <button class="small" style="margin-inline-start:auto" data-adj="${esc(r.product)}|${esc(r.unit)}">${t("adjust")}</button></div></div>`).join("")}
       <div class="row"><button id="copyBtn">${t("copyStock")}</button>${short?`<span class="short">${short} × ${t("stShort")}</span>`:""}</div></div>`
-      :`<div class="empty">${t("emptyStock")}</div>`);
+      :`<div class="empty">${t("emptyStock")}</div>`)+(getKey()?`<div id="askBox" style="margin-top:18px"></div>`:"");
+    if(getKey())renderAsk($("#askBox"));
     v.querySelectorAll("[data-adj]").forEach(b=>b.onclick=()=>{const[prod,unit]=b.dataset.adj.split("|");const r=stockRows().find(x=>x.product===prod&&x.unit===unit);if(!r)return;
       const ans=prompt(t("adjustQ").replace("{p}",pn(prod)).replace("{u}",unitTxt(unit)),String(Math.round(r.have*100)/100));if(ans===null)return;
       const n=Number(String(normalize(ans)).replace(",","."));if(!isFinite(n))return;const diff=Math.round((n-r.have)*1000)/1000;if(!diff)return;
@@ -601,10 +602,8 @@ function renderStockViews(v){
     const cb=$("#copyBtn");if(cb)cb.onclick=()=>shareText(t("stockTitle")+" "+new Date().toLocaleDateString(LOC())+"\n"+rows.map(r=>`${pn(r.product)}${sec(r)?" ("+sec(r)+")":""}: ${fmt(r.have)} ${unitTxt(r.unit)}`).join("\n"),cb);
   }else{
     const list=received.filter(r=>!q||(r.supplier+" "+r.items.map(i=>i.product+" "+i.product_ar).join(" ")+" "+r.note).toLowerCase().includes(ql)).sort((a,b)=>b.created-a.created);
-    const tot=sumItems(list.filter(r=>!r.adjust));
-    v.innerHTML=searchBox+(list.length?`${tot.length?`<div class="slip inl tot" style="margin-bottom:14px"><div class="meta">${t("received")} · ${list.filter(r=>!r.adjust).length} ${t("tIn").toLowerCase()} · ${new Set(list.filter(r=>!r.adjust).map(r=>r.supplier)).size} ${t("suppliers")}</div><ul>${tot.map(itemLi).join("")}</ul></div>`:""}
-      <div class="grid">${list.map(r=>`<article class="slip inl"><h2 dir="auto">${r.adjust?"⚖️ ":"🚚 "}${esc(r.supplier)}</h2><div class="meta">${when(r.created)}${r.note?` · <span dir="auto">${esc(r.note)}</span>`:""}</div>
-      <ul>${r.items.map(itemLi).join("")}</ul><div class="raw" dir="auto" style="font-size:13px;color:var(--mute);font-style:italic">"${esc(r.raw.length>90?r.raw.slice(0,90)+"…":r.raw)}"</div>
+    v.innerHTML=searchBox+(list.length?`<div class="grid">${list.map(r=>`<article class="slip inl"><h2 dir="auto">${r.adjust?"⚖️ ":"🚚 "}${esc(r.supplier)}</h2><div class="meta">${when(r.created)}${r.note?` · <span dir="auto">${esc(r.note)}</span>`:""}</div>
+      <ul>${r.items.map(itemLi).join("")}</ul>
       <div class="row"><button class="small del" data-deli="${r.id}">${armed===r.id?t("sure"):t("remove")}</button></div></article>`).join("")}</div>`
       :`<div class="empty">${t("emptyIn")}</div>`);
     v.querySelectorAll("[data-deli]").forEach(b=>b.onclick=()=>{const id=b.dataset.deli;if(armed===id){armed=null;dropIn(id)}else{armed=id;render();setTimeout(()=>{if(armed===id){armed=null;render()}},4000)}});
@@ -645,7 +644,7 @@ function setupMic(){
     rec.onresult=e=>{let interim="";for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)finalText+=r[0].transcript+" ";else interim+=r[0].transcript}
       $("#inp").value=[base,(finalText+interim).trim()].filter(Boolean).join("\n")};
     rec.onstart=()=>{listening=true;b.classList.add("on");b.textContent=t("micOn")};
-    rec.onend=()=>{const had=listening;listening=false;b.classList.remove("on");b.textContent=t("mic");if(had&&finalText.trim())setTimeout(()=>$("#addBtn").click(),300)};
+    rec.onend=()=>{const had=listening;listening=false;b.classList.remove("on");b.textContent=t("micShort");if(had&&finalText.trim())setTimeout(()=>$("#addBtn").click(),300)};
     rec.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"){b.hidden=true}};
     try{rec.start()}catch(e){}
   };
@@ -654,14 +653,16 @@ function setupMic(){
 /* ---------- settings: API key + backup ---------- */
 function renderSettings(){
   const s=$("#settings");const has=!!getKey();
-  s.innerHTML=`<h3>${t("sKey")}</h3><p class="hint">${t("sKeyInfo")}</p>
+  s.innerHTML=`<h3>${t("lang")}</h3><select class="fld" id="langSel">${[["sv","Svenska"],["en","English"],["pl","Polski"],["da","Dansk"],["ar","العربية"]].map(([k,n])=>`<option value="${k}"${k===lang?" selected":""}>${n}</option>`).join("")}</select>
+    <h3>${t("sKey")}</h3><p class="hint">${t("sKeyInfo")}</p><p class="hint">${t("keyHow")}</p>
     <div class="row"><input class="fld" type="password" id="keyIn" placeholder="sk-ant-…" autocomplete="off" style="flex:1 1 220px"><button id="keySave">${t("sKeySave")}</button>${has?`<button class="del" id="keyDel">${t("sKeyDel")}</button>`:""}</div>
     <p class="hint ${has?"ok":""}">${has?t("sKeyOn"):t("sKeyOff")}</p>
     <h3>${t("sBackup")}</h3><p class="hint">${t("sBackupInfo")} <strong>${orders.length}</strong> ${t("sCount")}, <strong>${received.length}</strong> ${t("sCountIn")}.</p>
     <div class="row"><button id="expBtn">${t("sExport")}</button><button id="impBtn">${t("sImport")}</button><input type="file" id="impFile" accept=".json,application/json" hidden><span class="hint ok" id="impMsg"></span></div>
     <div class="row"><button id="closeSet">${t("sClose")}</button><span class="meta">Version ${APP_VERSION}</span></div>`;
-  $("#keySave").onclick=()=>{const k=$("#keyIn").value.trim();if(k){ls.set("ob_key",k);renderSettings()}};
-  const kd=$("#keyDel");if(kd)kd.onclick=()=>{ls.del("ob_key");renderSettings()};
+  $("#langSel").onchange=e=>{lang=e.target.value;ls.set("ob_lang",lang);applyLang()};
+  $("#keySave").onclick=()=>{const k=$("#keyIn").value.trim();if(k){ls.set("ob_key",k);renderSettings();render()}};
+  const kd=$("#keyDel");if(kd)kd.onclick=()=>{ls.del("ob_key");renderSettings();render()};
   $("#expBtn").onclick=()=>{const blob=new Blob([JSON.stringify({app:"orderboken",v:2,orders,received},null,1)],{type:"application/json"});
     const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="orderboken-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)};
   $("#impBtn").onclick=()=>$("#impFile").click();
@@ -677,9 +678,7 @@ $("#setBtn").onclick=()=>{const s=$("#settings");s.hidden=!s.hidden;if(!s.hidden
 function applyLang(){
   document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";
   document.querySelectorAll("[data-t]").forEach(el=>el.textContent=t(el.dataset.t));
-  $("#langSel").value=lang;
   applyMode();
-  if(!listening)$("#micBtn").textContent=t("mic");
   $("#calcIn").placeholder=t("calcPh");renderCalc();
   render();renderDraft();if(!$("#settings").hidden)renderSettings();
 }
@@ -701,15 +700,16 @@ function renderCalc(){
 }
 $("#calcIn").oninput=renderCalc;
 function applyMode(){
-  document.querySelectorAll(".mode button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.k===mode));
+  document.querySelectorAll("[role=tab]").forEach(x=>x.setAttribute("aria-selected",x.dataset.v===view));
+  $("#feed").hidden=view==="stock";
   $("#feed").classList.toggle("in",mode==="in");
-  $("#hint").textContent=mode==="in"?t("hintIn"):t("hint");
+  $("#calc").hidden=view!=="in";
+  $("#photoBtn").hidden=view!=="in";
   $("#inp").placeholder=mode==="in"?t("phIn"):t("phOrder");
-  $("#addBtn").textContent=mode==="in"?"🚚 "+t("add"):t("add");
-  $("#photoBtn").textContent=mode==="in"?t("photoIn"):t("photoOrder");
+  $("#addBtn").textContent=t("read");
+  $("#photoBtn").textContent=t("photoIn");
+  if(!listening)$("#micBtn").textContent=t("micShort");
 }
-document.querySelectorAll(".mode button").forEach(b=>b.onclick=()=>{mode=b.dataset.k;if(draft&&draft.kind!==mode){draft=null;renderDraft()}applyMode()});
-$("#langSel").onchange=e=>{lang=e.target.value;ls.set("ob_lang",lang);applyLang()};
 
 window.__ob={parseOffline,stockRows,parseOcr};
 load();setupMic();applyLang();
