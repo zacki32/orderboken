@@ -78,6 +78,21 @@ li:last-child{border-bottom:0}
 .settings h3:first-child{margin-top:0}
 .settings input[type=password]{width:100%}
 .ok{color:var(--ok);font-weight:600}
+.mode{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.mode button{border-radius:12px}
+.mode button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.feed.in{border-top:5px solid var(--ok)}
+.feed.in .big,.feed.in .pri{background:var(--ok);border-color:var(--ok)}
+.draft.in{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,var(--paper))}
+.slip.inl{border-top-color:var(--ok)}
+.srow{padding:10px 0;border-bottom:1px dashed var(--line)}
+.srow:last-child{border-bottom:0}
+.srow .top1{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.srow .have{font:800 22px/1.1 Archivo,"Noto Sans Arabic",sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap}
+.srow .nums{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;margin-top:4px;font-size:13px;color:var(--mute)}
+.srow .nums b{color:var(--ink);font-variant-numeric:tabular-nums}
+.neg,.srow .nums b.neg{color:var(--red)}
+.short{background:var(--redbg);color:var(--red);border-radius:999px;padding:1px 8px;font-weight:700;font-size:12px}
 @media (prefers-reduced-motion:no-preference){.slip{animation:in .25s ease-out}@keyframes in{from{opacity:0;transform:translateY(6px)}}}
 </style>
 </head>
@@ -86,11 +101,12 @@ li:last-child{border-bottom:0}
 <div class="hbtns"><button class="lang" id="langBtn">عربي</button><button class="lang" id="setBtn" aria-label="Inställningar">⚙</button></div></div></header>
 <main>
 <section class="settings" id="settings" hidden></section>
-<section class="feed">
+<section class="feed" id="feed">
+<div class="mode"><button data-k="order" aria-pressed="true" data-t="mOrder">📦 Kundorder</button><button data-k="in" aria-pressed="false" data-t="mIn">🚚 Inleverans</button></div>
 <button class="big" id="micBtn" hidden data-t="mic">🎙 Tryck och prata</button>
 <textarea id="inp" dir="auto"></textarea>
 <div class="row"><button class="pri" id="addBtn" data-t="add">Läs in beställning</button></div>
-<p class="hint" data-t="hint"></p>
+<p class="hint" id="hint"></p>
 <div class="status" id="status" role="status"></div>
 <div id="draft"></div>
 </section>
@@ -98,6 +114,8 @@ li:last-child{border-bottom:0}
 <nav class="tabs" role="tablist">
 <button role="tab" data-v="cust" aria-selected="true" data-t="tCust">Kunder</button>
 <button role="tab" data-v="tot" aria-selected="false" data-t="tTot">Totalt att plocka</button>
+<button role="tab" data-v="stock" aria-selected="false" data-t="tStock">Lager</button>
+<button role="tab" data-v="in" aria-selected="false" data-t="tIn">Inleveranser</button>
 <button role="tab" data-v="ask" aria-selected="false" data-t="tAsk">Fråga agenten</button>
 <button role="tab" data-v="done" aria-selected="false" data-t="tDone">Levererat</button>
 </nav>
@@ -119,7 +137,14 @@ addItem:"+ Vara",customer:"Kund",product:"Vara",
 sTitle:"Inställningar",sKey:"Egen Claude API-nyckel (valfritt)",sKeyInfo:"Med en nyckel blir tolkningen smartare och agenten kan svara på frågor. Nyckeln sparas bara på den här telefonen. Varje tolkning kostar en liten summa på ditt Anthropic-konto. Utan nyckel fungerar allt annat ändå.",
 sKeySave:"Spara nyckel",sKeyDel:"Ta bort nyckel",sKeyOn:"Nyckel sparad ✓",sKeyOff:"Ingen nyckel – enkel tolkning används.",
 sBackup:"Säkerhetskopia",sBackupInfo:"Allt sparas i telefonens webbläsare. Spara en kopia ibland så att inget försvinner om webbläsardata rensas.",
-sExport:"Spara kopia",sImport:"Läs in kopia",sImported:"Inläst ✓",sClose:"Stäng",sCount:"beställningar sparade"},
+sExport:"Spara kopia",sImport:"Läs in kopia",sImported:"Inläst ✓",sClose:"Stäng",sCount:"beställningar sparade",sCountIn:"inleveranser",
+mOrder:"📦 Kundorder",mIn:"🚚 Inleverans",tStock:"Lager",tIn:"Inleveranser",
+hintIn:'Skriv vem som levererade och vad som kom, t.ex. "Lindbergs: 200 kg kyckling, 150 kg kött, 40 kg lammkött". Lagret räknas upp automatiskt.',
+phIn:"Leverantör: 200 kg kyckling, 150 kg kött",checkIn:"🚚 Inleverans – stämmer det här?",savedIn:"Inleverans sparad – lagret uppdaterat ✓",
+supplier:"Leverantör",unknownSup:"Okänd leverantör",emptyIn:"Inga inleveranser än. Välj 🚚 Inleverans ovan och skriv vad som kom.",
+emptyStock:"Lagret är tomt. Registrera en inleverans först (🚚 ovan).",stockInfo:"I lager = allt som kommit in minus det du markerat som levererat till kunder.",
+stIn:"In",stOut:"Ut",stOpen:"Beställt",stLeft:"Kvar efter order",stShort:"Saknas",stHave:"i lager",
+adjust:"Räkna om",adjustQ:"Hur mycket {p} ({u}) finns i lager just nu?",adjName:"Lagerjustering",copyStock:"Dela lagerlista",stockTitle:"Lager",received:"inkommit",suppliers:"leverantörer"},
 ar:{title:"دفتر الطلبات",sub:"اكتب أو قل الطلبات – بالعربية أو السويدية.",add:"اقرأ الطلب",mic:"🎙 اضغط وتكلّم",micOn:"⏹ انتهيت – اضغط عند الانتهاء",
 hint:'مثال: "أحمد يريد ٥ كيلو لحم و٥ كيلو دجاج" أو "Ahmed: 5 kg kött, 5 kg kyckling". زبون واحد في كل سطر. لا يظهر زر الميكروفون؟ اضغط في المربع واستخدم ميكروفون لوحة المفاتيح.',
 tCust:"الزبائن",tTot:"المجموع للتجهيز",tAsk:"اسأل المساعد",tDone:"تم التسليم",reading:"جارٍ قراءة الطلب…",save:"حفظ",discard:"إلغاء",
@@ -132,7 +157,14 @@ addItem:"+ منتج",customer:"الزبون",product:"المنتج",
 sTitle:"الإعدادات",sKey:"مفتاح Claude API خاص بك (اختياري)",sKeyInfo:"مع المفتاح تصبح القراءة أذكى ويستطيع المساعد الإجابة على الأسئلة. يُحفظ المفتاح على هذا الهاتف فقط. كل قراءة تكلّف مبلغاً صغيراً من حسابك في Anthropic. بدون مفتاح يعمل كل شيء آخر.",
 sKeySave:"حفظ المفتاح",sKeyDel:"حذف المفتاح",sKeyOn:"تم حفظ المفتاح ✓",sKeyOff:"لا يوجد مفتاح – يُستخدم القارئ البسيط.",
 sBackup:"نسخة احتياطية",sBackupInfo:"كل شيء محفوظ في متصفح الهاتف. احفظ نسخة من وقت لآخر حتى لا يضيع شيء إذا مُسحت بيانات المتصفح.",
-sExport:"حفظ نسخة",sImport:"استعادة نسخة",sImported:"تمت الاستعادة ✓",sClose:"إغلاق",sCount:"طلبات محفوظة"}};
+sExport:"حفظ نسخة",sImport:"استعادة نسخة",sImported:"تمت الاستعادة ✓",sClose:"إغلاق",sCount:"طلبات محفوظة",sCountIn:"شحنات واردة",
+mOrder:"📦 طلب زبون",mIn:"🚚 شحنة واردة",tStock:"المخزون",tIn:"الشحنات الواردة",
+hintIn:'اكتب من الذي سلّم وماذا وصل، مثلاً "Lindbergs: ٢٠٠ كيلو دجاج، ١٥٠ كيلو لحم". يُحسب المخزون تلقائياً.',
+phIn:"المورّد: ٢٠٠ كيلو دجاج، ١٥٠ كيلو لحم",checkIn:"🚚 شحنة واردة – هل هذا صحيح؟",savedIn:"تم حفظ الشحنة – تم تحديث المخزون ✓",
+supplier:"المورّد",unknownSup:"مورّد غير معروف",emptyIn:"لا توجد شحنات واردة بعد. اختر 🚚 شحنة واردة في الأعلى واكتب ما وصل.",
+emptyStock:"المخزون فارغ. سجّل شحنة واردة أولاً (🚚 في الأعلى).",stockInfo:"في المخزون = كل ما وصل ناقص ما سلّمته للزبائن.",
+stIn:"وارد",stOut:"صادر",stOpen:"مطلوب",stLeft:"الباقي بعد الطلبات",stShort:"ناقص",stHave:"في المخزون",
+adjust:"إعادة العدّ",adjustQ:"كم يوجد من {p} ({u}) في المخزون الآن؟",adjName:"تعديل المخزون",copyStock:"مشاركة قائمة المخزون",stockTitle:"المخزون",received:"وارد",suppliers:"موردين"}};
 
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let lang=ls.get("ob_lang","sv");
@@ -142,11 +174,15 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const fmt=n=>(Math.round(n*100)/100).toLocaleString(lang==="ar"?"ar":"sv-SE");
 const UNITS=["kg","st","låda","liter","paket"];
 
-let orders=[],view="cust",draft=null,q="",armed=null;
+let orders=[],received=[],view="cust",draft=null,q="",armed=null,mode="order";
 
 /* ---------- storage: this phone only ---------- */
 const LS="ob_orders";
-function load(){try{orders=JSON.parse(ls.get(LS,"[]"))||[]}catch(e){orders=[]}}
+function load(){try{orders=JSON.parse(ls.get(LS,"[]"))||[]}catch(e){orders=[]}try{received=JSON.parse(ls.get(LSIN,"[]"))||[]}catch(e){received=[]}}
+const LSIN="ob_in";
+function persistIn(){ls.set(LSIN,JSON.stringify(received))}
+function putIn(r){const i=received.findIndex(x=>x.id===r.id);i<0?received.push(r):received[i]=r;persistIn();render()}
+function dropIn(id){received=received.filter(x=>x.id!==id);persistIn();render()}
 function persist(){ls.set(LS,JSON.stringify(orders))}
 function put(o){const i=orders.findIndex(x=>x.id===o.id);i<0?orders.push(o):orders[i]=o;persist();render()}
 function drop(id){orders=orders.filter(x=>x.id!==id);persist();render()}
@@ -261,8 +297,9 @@ async function claude(prompt,maxTokens){
   return (j.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("");
 }
 const knownCustomers=()=>[...new Set(orders.map(o=>o.customer))];
-async function parseAI(text){
-  const out=await claude(`You read order notes for a small food business in Malmö. Notes are in Swedish, Arabic, or a mix (Arabic may be in Arabic script or written with Latin letters; numbers may be Arabic-Indic digits like ٥).
+const knownSuppliers=()=>[...new Set(received.map(r=>r.supplier))];
+async function parseAI(text,kind){
+  const out=await claude((kind==="in"?`These notes record deliveries RECEIVED by a meat wholesaler from its suppliers. Put the SUPPLIER name in the "customer" field. Known suppliers: ${JSON.stringify(knownSuppliers())}; use an existing spelling if it matches. If no supplier is named, use "${t("unknownSup")}".\n`:"")+`You read order notes for a small food business in Malmö. Notes are in Swedish, Arabic, or a mix (Arabic may be in Arabic script or written with Latin letters; numbers may be Arabic-Indic digits like ٥).
 Extract every customer order. Return ONLY JSON, no other text:
 {"orders":[{"customer":"name","items":[{"product":"Swedish product name, lowercase, singular, e.g. kött, kyckling, lammkött, köttfärs, tomater","product_ar":"Arabic name","qty":number,"unit":"kg|st|låda|liter|paket"}],"note":"anything else, e.g. delivery day, or empty"}]}
 Rules: convert grams to kg (500 g -> 0.5 kg). "kilo"/"كيلو"/"kg" -> kg. "نص كيلو" = 0.5 kg. If no number is given, qty 1. Write product in Swedish so totals add up across languages (لحم=kött, دجاج=kyckling, لحم غنم=lammkött, لحم مفروم=köttfärs).
@@ -282,17 +319,19 @@ $("#addBtn").onclick=async()=>{
   const st=$("#status");st.textContent=t("reading");$("#addBtn").disabled=true;
   let parsed=[];
   try{
-    if(getKey()){try{parsed=await parseAI(text);st.textContent=""}catch(e){parsed=parseOffline(text);st.textContent=t("aiErr")+" ("+e.message+")"}}
+    if(getKey()){try{parsed=await parseAI(text,mode);st.textContent=""}catch(e){parsed=parseOffline(text);st.textContent=t("aiErr")+" ("+e.message+")"}}
     else{parsed=parseOffline(text);st.textContent=""}
     if(!parsed.length){st.textContent=t("fail");return}
-    draft={raw:text,orders:parsed};renderDraft();
+    if(mode==="in")parsed.forEach(o=>{if(o.customer==="Okänd")o.customer=t("unknownSup")});
+    draft={raw:text,orders:parsed,kind:mode};renderDraft();
   }finally{$("#addBtn").disabled=false}
 };
 function renderDraft(){
   const el=$("#draft");if(!draft){el.innerHTML="";return}
   const opt=u=>UNITS.map(x=>`<option${x===u?" selected":""}>${x}</option>`).join("");
-  el.innerHTML=`<div class="draft"><h3>${t("check")}</h3>${draft.orders.map((o,oi)=>`<div class="dord">
-    <input class="fld nm" dir="auto" data-f="${oi}:customer" value="${esc(o.customer)}" aria-label="${t("customer")}">
+  const isIn=draft.kind==="in";
+  el.innerHTML=`<div class="draft${isIn?" in":""}"><h3>${isIn?t("checkIn"):t("check")}</h3>${draft.orders.map((o,oi)=>`<div class="dord">
+    <input class="fld nm" dir="auto" data-f="${oi}:customer" value="${esc(o.customer)}" aria-label="${isIn?t("supplier"):t("customer")}">
     ${o.items.map((it,ii)=>`<div class="irow"><input class="fld" dir="auto" data-f="${oi}:${ii}:product" value="${esc(it.product)}" aria-label="${t("product")}">
       <input class="fld" type="number" step="any" inputmode="decimal" data-f="${oi}:${ii}:qty" value="${it.qty}">
       <select class="fld" data-f="${oi}:${ii}:unit">${opt(it.unit)}</select>
@@ -307,8 +346,11 @@ function renderDraft(){
   $("#saveBtn").onclick=()=>{
     const now=Date.now();
     draft.orders.forEach((o,i)=>{const items=o.items.filter(it=>String(it.product).trim()).map(it=>({product:String(it.product).trim().toLowerCase(),product_ar:it.product_ar||"",qty:Number(it.qty)||0,unit:it.unit||"st"}));
-      if(items.length)put({id:"o"+now+"_"+i,customer:String(o.customer).trim()||"Okänd",items,note:o.note||"",raw:draft.raw,created:now,done:false})});
-    draft=null;$("#inp").value="";renderDraft();const st=$("#status");st.textContent=t("saved");setTimeout(()=>{if(st.textContent===t("saved"))st.textContent=""},2000);
+      if(!items.length)return;
+      if(isIn)putIn({id:"i"+now+"_"+i,supplier:String(o.customer).trim()||t("unknownSup"),items,note:o.note||"",raw:draft.raw,created:now});
+      else put({id:"o"+now+"_"+i,customer:String(o.customer).trim()||"Okänd",items,note:o.note||"",raw:draft.raw,created:now,done:false})});
+    const msg=isIn?t("savedIn"):t("saved");
+    draft=null;$("#inp").value="";renderDraft();const st=$("#status");st.textContent=msg;setTimeout(()=>{if(st.textContent===msg)st.textContent=""},2500);
   };
 }
 
@@ -317,20 +359,32 @@ document.querySelectorAll("[role=tab]").forEach(b=>b.onclick=()=>{view=b.dataset
 const match=o=>!q||(o.customer+" "+o.items.map(i=>i.product+" "+i.product_ar).join(" ")+" "+o.note).toLowerCase().includes(q.toLowerCase());
 const sumItems=list=>{const m=new Map();for(const o of list)for(const it of o.items){const k=it.product+"|"+it.unit;const c=m.get(k)||{product:it.product,product_ar:it.product_ar,unit:it.unit,qty:0};c.qty+=it.qty;if(!c.product_ar&&it.product_ar)c.product_ar=it.product_ar;m.set(k,c)}return[...m.values()].sort((a,b)=>a.product.localeCompare(b.product,"sv"))};
 const when=ts=>new Date(ts).toLocaleString(lang==="ar"?"ar":"sv-SE",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+function stockRows(){
+  const m=new Map();
+  const add=(it,f)=>{const k=it.product+"|"+it.unit;const c=m.get(k)||{product:it.product,product_ar:it.product_ar,unit:it.unit,in:0,out:0,open:0};c[f]+=Number(it.qty)||0;if(!c.product_ar&&it.product_ar)c.product_ar=it.product_ar;m.set(k,c)};
+  for(const r of received)for(const it of r.items)add(it,"in");
+  for(const o of orders)for(const it of o.items)add(it,o.done?"out":"open");
+  return[...m.values()].map(c=>({...c,have:c.in-c.out,left:c.in-c.out-c.open})).sort((a,b)=>a.product.localeCompare(b.product,"sv"));
+}
+const stockMap=()=>new Map(stockRows().map(r=>[r.product+"|"+r.unit,r]));
+const shareText=(txt,btn)=>{(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>btn.textContent=t("copied")).catch(()=>{if(navigator.share)navigator.share({text:txt}).catch(()=>{})})};
 const itemLi=i=>`<li><span dir="auto">${esc(i.product)} <span class="ar">${esc(i.product_ar)}</span></span><span class="q">${fmt(i.qty)} ${esc(i.unit)}</span></li>`;
 
 function render(){
   const v=$("#view");
   if(view==="ask"){renderAsk(v);return}
+  if(view==="stock"||view==="in"){renderStockViews(v);return}
   const showDone=view==="done";
   const list=orders.filter(o=>!!o.done===showDone).filter(match).sort((a,b)=>b.created-a.created);
   const searchBox=`<input class="search" id="q" dir="auto" placeholder="${t("search")}" value="${esc(q)}">`;
   if(view==="tot"){
     const s=sumItems(list);
-    v.innerHTML=searchBox+(s.length?`<div class="slip tot"><ul>${s.map(itemLi).join("")}</ul>
+    const sm=stockMap();
+    const totLi=i=>{const r=sm.get(i.product+"|"+i.unit);const hasStock=r&&r.in!==0;
+      return `<li><span dir="auto">${esc(i.product)} <span class="ar">${esc(i.product_ar)}</span>${hasStock?`<br><span class="meta">${fmt(r.have)} ${esc(i.unit)} ${t("stHave")}</span>${r.left<0?` <span class="short">${t("stShort")} ${fmt(-r.left)} ${esc(i.unit)}</span>`:""}`:""}</span><span class="q">${fmt(i.qty)} ${esc(i.unit)}</span></li>`};
+    v.innerHTML=searchBox+(s.length?`<div class="slip tot"><ul>${s.map(totLi).join("")}</ul>
       <div class="row"><button id="copyBtn">${t("copy")}</button><span class="meta">${new Set(list.map(o=>o.customer)).size} ${t("tCust").toLowerCase()} · ${list.length} ${t("orders")}</span></div></div>`:`<div class="empty">${t("empty")}</div>`);
-    const cb=$("#copyBtn");if(cb)cb.onclick=()=>{const txt=s.map(i=>`${i.product}${i.product_ar?" ("+i.product_ar+")":""}: ${fmt(i.qty)} ${i.unit}`).join("\n");
-      (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>cb.textContent=t("copied")).catch(()=>{if(navigator.share)navigator.share({text:txt}).catch(()=>{})})};
+    const cb=$("#copyBtn");if(cb)cb.onclick=()=>shareText(s.map(i=>`${i.product}${i.product_ar?" ("+i.product_ar+")":""}: ${fmt(i.qty)} ${i.unit}`).join("\n"),cb);
   }else{
     const by=new Map();for(const o of list){if(!by.has(o.customer))by.set(o.customer,[]);by.get(o.customer).push(o)}
     v.innerHTML=searchBox+(by.size?`<div class="grid">${[...by].map(([c,os])=>`<article class="slip"><header><div><h2 dir="auto">${esc(c)}</h2>
@@ -347,6 +401,36 @@ function render(){
   }
   const qi=$("#q");if(qi)qi.oninput=e=>{q=e.target.value;const pos=e.target.selectionStart;render();const n=$("#q");n.focus();n.setSelectionRange(pos,pos)};
 }
+function renderStockViews(v){
+  const searchBox=`<input class="search" id="q" dir="auto" placeholder="${t("search")}" value="${esc(q)}">`;
+  const ql=q.toLowerCase();
+  if(view==="stock"){
+    const rows=stockRows().filter(r=>r.in!==0||r.out!==0).filter(r=>!q||(r.product+" "+r.product_ar).toLowerCase().includes(ql));
+    const short=rows.filter(r=>r.left<0).length;
+    v.innerHTML=searchBox+(rows.length?`<div class="slip tot"><p class="hint" style="margin-top:0">${t("stockInfo")}</p>${rows.map(r=>`<div class="srow">
+      <div class="top1"><span dir="auto"><strong>${esc(r.product)}</strong> <span class="ar">${esc(r.product_ar)}</span></span><span class="have${r.have<0?" neg":""}">${fmt(r.have)} ${esc(r.unit)}</span></div>
+      <div class="nums"><span>${t("stIn")} <b>${fmt(r.in)}</b></span><span>${t("stOut")} <b>${fmt(r.out)}</b></span><span>${t("stOpen")} <b>${fmt(r.open)}</b></span>
+        <span>${t("stLeft")} <b class="${r.left<0?"neg":""}">${fmt(r.left)}</b></span>${r.left<0?`<span class="short">${t("stShort")} ${fmt(-r.left)} ${esc(r.unit)}</span>`:""}
+        <button class="small" style="margin-inline-start:auto" data-adj="${esc(r.product)}|${esc(r.unit)}">${t("adjust")}</button></div></div>`).join("")}
+      <div class="row"><button id="copyBtn">${t("copyStock")}</button>${short?`<span class="short">${short} × ${t("stShort")}</span>`:""}</div></div>`
+      :`<div class="empty">${t("emptyStock")}</div>`);
+    v.querySelectorAll("[data-adj]").forEach(b=>b.onclick=()=>{const[prod,unit]=b.dataset.adj.split("|");const r=stockRows().find(x=>x.product===prod&&x.unit===unit);if(!r)return;
+      const ans=prompt(t("adjustQ").replace("{p}",prod).replace("{u}",unit),String(Math.round(r.have*100)/100));if(ans===null)return;
+      const n=Number(String(normalize(ans)).replace(",","."));if(!isFinite(n))return;const diff=Math.round((n-r.have)*1000)/1000;if(!diff)return;
+      const now=Date.now();putIn({id:"a"+now,supplier:t("adjName"),adjust:true,items:[{product:prod,product_ar:r.product_ar||"",qty:diff,unit}],note:"",raw:`${prod}: ${fmt(r.have)} → ${fmt(n)} ${unit}`,created:now})});
+    const cb=$("#copyBtn");if(cb)cb.onclick=()=>shareText(t("stockTitle")+" "+new Date().toLocaleDateString(lang==="ar"?"ar":"sv-SE")+"\n"+rows.map(r=>`${r.product}${r.product_ar?" ("+r.product_ar+")":""}: ${fmt(r.have)} ${r.unit}`).join("\n"),cb);
+  }else{
+    const list=received.filter(r=>!q||(r.supplier+" "+r.items.map(i=>i.product+" "+i.product_ar).join(" ")+" "+r.note).toLowerCase().includes(ql)).sort((a,b)=>b.created-a.created);
+    const tot=sumItems(list.filter(r=>!r.adjust));
+    v.innerHTML=searchBox+(list.length?`${tot.length?`<div class="slip inl tot" style="margin-bottom:14px"><div class="meta">${t("received")} · ${list.filter(r=>!r.adjust).length} ${t("tIn").toLowerCase()} · ${new Set(list.filter(r=>!r.adjust).map(r=>r.supplier)).size} ${t("suppliers")}</div><ul>${tot.map(itemLi).join("")}</ul></div>`:""}
+      <div class="grid">${list.map(r=>`<article class="slip inl"><h2 dir="auto">${r.adjust?"⚖️ ":"🚚 "}${esc(r.supplier)}</h2><div class="meta">${when(r.created)}${r.note?` · <span dir="auto">${esc(r.note)}</span>`:""}</div>
+      <ul>${r.items.map(itemLi).join("")}</ul><div class="raw" dir="auto" style="font-size:13px;color:var(--mute);font-style:italic">"${esc(r.raw.length>90?r.raw.slice(0,90)+"…":r.raw)}"</div>
+      <div class="row"><button class="small del" data-deli="${r.id}">${armed===r.id?t("sure"):t("remove")}</button></div></article>`).join("")}</div>`
+      :`<div class="empty">${t("emptyIn")}</div>`);
+    v.querySelectorAll("[data-deli]").forEach(b=>b.onclick=()=>{const id=b.dataset.deli;if(armed===id){armed=null;dropIn(id)}else{armed=id;render();setTimeout(()=>{if(armed===id){armed=null;render()}},4000)}});
+  }
+  const qi=$("#q");if(qi)qi.oninput=e=>{q=e.target.value;const pos=e.target.selectionStart;render();const n=$("#q");n.focus();n.setSelectionRange(pos,pos)};
+}
 let lastAnswer="";
 function renderAsk(v){
   v.innerHTML=`<div class="feed" style="margin-top:0"><textarea id="askIn" dir="auto" placeholder="${t("askPh")}"></textarea>
@@ -356,8 +440,12 @@ function renderAsk(v){
     if(!getKey()){a.textContent=t("noKey");return}
     a.textContent=t("thinking");$("#askBtn").disabled=true;
     const data=orders.map(o=>({customer:o.customer,items:o.items.map(i=>`${i.qty} ${i.unit} ${i.product}`),note:o.note,delivered:o.done,date:new Date(o.created).toISOString().slice(0,16)}));
-    try{lastAnswer=await claude(`You are the order assistant for a small food business. Answer the question using ONLY the order data below. Reply in the same language as the question (Swedish or Arabic). Be short and exact; add up quantities carefully and show totals with units. Plain text, no markdown. Today is ${new Date().toISOString().slice(0,10)}.
-ORDERS: ${JSON.stringify(data)}
+    const inData=received.map(r=>({supplier:r.supplier,adjustment:!!r.adjust,items:r.items.map(i=>`${i.qty} ${i.unit} ${i.product}`),date:new Date(r.created).toISOString().slice(0,16)}));
+    const stock=stockRows().map(r=>({product:r.product,unit:r.unit,received:r.in,delivered_to_customers:r.out,in_stock:r.have,open_orders:r.open,left_after_open_orders:r.left}));
+    try{lastAnswer=await claude(`You are the order and stock assistant for a meat wholesaler: big deliveries come IN from suppliers, and goods go OUT to customers. Answer the question using ONLY the data below. Reply in the same language as the question (Swedish or Arabic). Be short and exact; add up quantities carefully and show totals with units. Plain text, no markdown. Today is ${new Date().toISOString().slice(0,10)}.
+CUSTOMER ORDERS: ${JSON.stringify(data)}
+DELIVERIES RECEIVED FROM SUPPLIERS: ${JSON.stringify(inData)}
+CURRENT STOCK (computed): ${JSON.stringify(stock)}
 QUESTION: ${qq}`,4000);a.textContent=lastAnswer}
     catch(e){a.textContent="⚠ "+e.message}
     finally{$("#askBtn").disabled=false}
@@ -389,17 +477,18 @@ function renderSettings(){
   s.innerHTML=`<h3>${t("sKey")}</h3><p class="hint">${t("sKeyInfo")}</p>
     <div class="row"><input class="fld" type="password" id="keyIn" placeholder="sk-ant-…" autocomplete="off" style="flex:1 1 220px"><button id="keySave">${t("sKeySave")}</button>${has?`<button class="del" id="keyDel">${t("sKeyDel")}</button>`:""}</div>
     <p class="hint ${has?"ok":""}">${has?t("sKeyOn"):t("sKeyOff")}</p>
-    <h3>${t("sBackup")}</h3><p class="hint">${t("sBackupInfo")} <strong>${orders.length}</strong> ${t("sCount")}.</p>
+    <h3>${t("sBackup")}</h3><p class="hint">${t("sBackupInfo")} <strong>${orders.length}</strong> ${t("sCount")}, <strong>${received.length}</strong> ${t("sCountIn")}.</p>
     <div class="row"><button id="expBtn">${t("sExport")}</button><button id="impBtn">${t("sImport")}</button><input type="file" id="impFile" accept=".json,application/json" hidden><span class="hint ok" id="impMsg"></span></div>
     <div class="row"><button id="closeSet">${t("sClose")}</button></div>`;
   $("#keySave").onclick=()=>{const k=$("#keyIn").value.trim();if(k){ls.set("ob_key",k);renderSettings()}};
   const kd=$("#keyDel");if(kd)kd.onclick=()=>{ls.del("ob_key");renderSettings()};
-  $("#expBtn").onclick=()=>{const blob=new Blob([JSON.stringify({app:"orderboken",v:1,orders},null,1)],{type:"application/json"});
+  $("#expBtn").onclick=()=>{const blob=new Blob([JSON.stringify({app:"orderboken",v:2,orders,received},null,1)],{type:"application/json"});
     const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="orderboken-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)};
   $("#impBtn").onclick=()=>$("#impFile").click();
   $("#impFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());const list=Array.isArray(d)?d:d.orders;
-    for(const o of list)if(o&&o.id&&Array.isArray(o.items)){const i=orders.findIndex(x=>x.id===o.id);i<0?orders.push(o):orders[i]=o}
-    persist();render();renderSettings();$("#impMsg").textContent=t("sImported")}catch(err){$("#impMsg").textContent="⚠ "+err.message}};
+    for(const o of list||[])if(o&&o.id&&Array.isArray(o.items)){const i=orders.findIndex(x=>x.id===o.id);i<0?orders.push(o):orders[i]=o}
+    for(const r of (d&&d.received)||[])if(r&&r.id&&Array.isArray(r.items)){const i=received.findIndex(x=>x.id===r.id);i<0?received.push(r):received[i]=r}
+    persist();persistIn();render();renderSettings();$("#impMsg").textContent=t("sImported")}catch(err){$("#impMsg").textContent="⚠ "+err.message}};
   $("#closeSet").onclick=()=>{s.hidden=true};
 }
 $("#setBtn").onclick=()=>{const s=$("#settings");s.hidden=!s.hidden;if(!s.hidden)renderSettings()};
@@ -409,13 +498,21 @@ function applyLang(){
   document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";
   document.querySelectorAll("[data-t]").forEach(el=>el.textContent=t(el.dataset.t));
   $("#langBtn").textContent=lang==="ar"?"Svenska":"عربي";
-  $("#inp").placeholder=lang==="ar"?"أحمد: ٥ كيلو لحم، ٥ كيلو دجاج":"Ahmed: 5 kg kött, 5 kg kyckling, 2 lådor tomater";
+  applyMode();
   if(!listening)$("#micBtn").textContent=t("mic");
   render();renderDraft();if(!$("#settings").hidden)renderSettings();
 }
+function applyMode(){
+  document.querySelectorAll(".mode button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.k===mode));
+  $("#feed").classList.toggle("in",mode==="in");
+  $("#hint").textContent=mode==="in"?t("hintIn"):t("hint");
+  $("#inp").placeholder=mode==="in"?t("phIn"):(lang==="ar"?"أحمد: ٥ كيلو لحم، ٥ كيلو دجاج":"Ahmed: 5 kg kött, 5 kg kyckling, 2 lådor tomater");
+  $("#addBtn").textContent=mode==="in"?"🚚 "+t("add"):t("add");
+}
+document.querySelectorAll(".mode button").forEach(b=>b.onclick=()=>{mode=b.dataset.k;if(draft&&draft.kind!==mode){draft=null;renderDraft()}applyMode()});
 $("#langBtn").onclick=()=>{lang=lang==="sv"?"ar":"sv";ls.set("ob_lang",lang);applyLang()};
 
-window.__ob={parseOffline};
+window.__ob={parseOffline,stockRows};
 load();setupMic();applyLang();
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 }
