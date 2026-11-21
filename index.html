@@ -172,6 +172,7 @@ const t=k=>T[lang][k]??T.sv[k];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>(Math.round(n*100)/100).toLocaleString(lang==="ar"?"ar":"sv-SE");
+const APP_VERSION="3 · lager";
 const UNITS=["kg","st","låda","liter","paket"];
 
 let orders=[],received=[],view="cust",draft=null,q="",armed=null,mode="order";
@@ -479,7 +480,7 @@ function renderSettings(){
     <p class="hint ${has?"ok":""}">${has?t("sKeyOn"):t("sKeyOff")}</p>
     <h3>${t("sBackup")}</h3><p class="hint">${t("sBackupInfo")} <strong>${orders.length}</strong> ${t("sCount")}, <strong>${received.length}</strong> ${t("sCountIn")}.</p>
     <div class="row"><button id="expBtn">${t("sExport")}</button><button id="impBtn">${t("sImport")}</button><input type="file" id="impFile" accept=".json,application/json" hidden><span class="hint ok" id="impMsg"></span></div>
-    <div class="row"><button id="closeSet">${t("sClose")}</button></div>`;
+    <div class="row"><button id="closeSet">${t("sClose")}</button><span class="meta">Version ${APP_VERSION}</span></div>`;
   $("#keySave").onclick=()=>{const k=$("#keyIn").value.trim();if(k){ls.set("ob_key",k);renderSettings()}};
   const kd=$("#keyDel");if(kd)kd.onclick=()=>{ls.del("ob_key");renderSettings()};
   $("#expBtn").onclick=()=>{const blob=new Blob([JSON.stringify({app:"orderboken",v:2,orders,received},null,1)],{type:"application/json"});
@@ -514,7 +515,11 @@ $("#langBtn").onclick=()=>{lang=lang==="sv"?"ar":"sv";ls.set("ob_lang",lang);app
 
 window.__ob={parseOffline,stockRows};
 load();setupMic();applyLang();
-if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
+if("serviceWorker" in navigator&&location.protocol==="https:"){
+  const hadSW=!!navigator.serviceWorker.controller;let reloaded=false;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{if(hadSW&&!reloaded){reloaded=true;location.reload()}});
+  navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>{r.update();document.addEventListener("visibilitychange",()=>{if(!document.hidden)r.update()})}).catch(()=>{});
+}
 }
 </script>
 </body>
