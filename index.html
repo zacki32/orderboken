@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#a3162b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Orderboken">
+<title>Orderboken</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Noto+Sans+Arabic:wght@400;600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Standalone Orderboken: no claude.ai needed. Data lives on this phone (localStorage).
+   Optional: your own Claude API key for smarter reading + "ask" tab. */
+:root{color-scheme:light dark;
+--bg:light-dark(#fbf8f4,#171112);--paper:light-dark(#ffffff,#221a1b);--ink:light-dark(#1d1414,#f3ecea);
+--mute:light-dark(#6f6262,#b4a6a4);--red:light-dark(#a3162b,#e2465c);--redbg:light-dark(#f8e4e6,#3a1e22);
+--line:light-dark(#eadfda,#3a2f30);--ok:light-dark(#2f6b3a,#7fcf8c)}
+*{box-sizing:border-box;min-width:0}
+textarea,input,select{font-family:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,"Noto Sans Arabic",system-ui,sans-serif;overflow-x:clip}
+[dir=rtl] body,[dir=rtl] input,[dir=rtl] textarea{font-family:"Noto Sans Arabic",Inter,system-ui,sans-serif}
+header{background:var(--red);color:#fff;padding:calc(18px + env(safe-area-inset-top)) max(5vw,16px) 22px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;max-width:1240px;margin:auto}
+.hbtns{display:flex;gap:8px;flex:none}
+h1{font:800 clamp(28px,6vw,40px)/1.05 Archivo,"Noto Sans Arabic",sans-serif;margin:0}
+.sub{opacity:.85;font-size:14px;margin:4px 0 0}
+.lang{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:999px;min-height:44px;padding:0 16px;font:600 15px Inter,"Noto Sans Arabic";cursor:pointer}
+main{max-width:1240px;margin:auto;padding:0 max(5vw,16px) 48px}
+.feed{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:-12px;box-shadow:0 8px 24px rgba(60,10,20,.08)}
+textarea{width:100%;min-height:92px;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:17px;background:var(--bg);color:var(--ink);resize:vertical}
+textarea:focus,input:focus,select:focus,button:focus-visible{outline:3px solid color-mix(in srgb,var(--red) 45%,transparent);outline-offset:1px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+button{min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:0 16px;font:600 15px Inter,"Noto Sans Arabic",sans-serif;cursor:pointer}
+.pri{background:var(--red);border-color:var(--red);color:#fff;flex:1 1 160px}
+.big{display:block;width:100%;min-height:96px;font:800 24px Archivo,"Noto Sans Arabic",sans-serif;border-radius:16px;margin-bottom:10px;background:var(--red);border-color:var(--red);color:#fff}
+.big.on{animation:pulse 1.2s infinite}@keyframes pulse{50%{box-shadow:0 0 0 10px color-mix(in srgb,var(--red) 25%,transparent)}}
+.hint{color:var(--mute);font-size:13px;margin:8px 2px 0}
+.status{font-size:14px;color:var(--red);min-height:20px;margin:6px 2px 0}
+.draft{border:2px dashed var(--red);border-radius:14px;padding:12px;margin-top:12px;background:var(--redbg)}
+.draft h3{margin:0 0 6px;font:700 16px Archivo,"Noto Sans Arabic"}
+.draft .dord{background:var(--paper);border-radius:10px;padding:8px 10px;margin-bottom:8px}
+.fld{border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);min-height:40px;padding:0 8px;font-size:16px}
+.nm{width:100%;font-weight:700}
+.irow{display:grid;grid-template-columns:1fr 76px 84px 40px;gap:6px;align-items:center;padding:5px 0;border-bottom:1px dashed var(--line)}
+.irow:last-child{border-bottom:0}
+.tabs{display:flex;gap:6px;margin:22px 0 14px;overflow-x:auto}
+.tabs button{flex:none;border-radius:999px}
+.tabs button[aria-selected=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.search{width:100%;min-height:44px;border:1px solid var(--line);border-radius:12px;padding:0 12px;font-size:16px;background:var(--paper);color:var(--ink);margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));gap:14px}
+.slip{background:var(--paper);border:1px solid var(--line);border-top:5px solid var(--red);border-radius:12px;padding:14px 14px 10px}
+.slip header{all:unset;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.slip h2{font:800 20px/1.15 Archivo,"Noto Sans Arabic",sans-serif;margin:0 0 2px}
+.meta{color:var(--mute);font-size:13px}
+ul{list-style:none;margin:10px 0;padding:0}
+li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line)}
+li:last-child{border-bottom:0}
+.q{font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ar{color:var(--mute);font-size:13px}
+.order{border-top:1px solid var(--line);padding-top:8px;margin-top:8px}
+.order.done{opacity:.55}
+.order .raw{font-size:13px;color:var(--mute);font-style:italic}
+.small{min-height:36px;padding:0 10px;font-size:13px;border-radius:10px}
+.del{color:var(--red)}
+.tot li{font-size:17px}
+.tot .q{color:var(--red)}
+.empty{color:var(--mute);text-align:center;padding:40px 10px;border:1px dashed var(--line);border-radius:14px}
+.answer{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px;white-space:pre-wrap;margin-top:12px}
+.flag{background:#fff3cd;color:#5a4300;border-radius:10px;padding:8px 12px;font-size:14px;margin-top:10px}
+.settings{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:14px}
+.settings h3{margin:14px 0 4px;font:700 16px Archivo,"Noto Sans Arabic"}
+.settings h3:first-child{margin-top:0}
+.settings input[type=password]{width:100%}
+.ok{color:var(--ok);font-weight:600}
+@media (prefers-reduced-motion:no-preference){.slip{animation:in .25s ease-out}@keyframes in{from{opacity:0;transform:translateY(6px)}}}
+</style>
+</head>
+<body>
+<header><div class="top"><div><h1 data-t="title">Orderboken</h1><p class="sub" data-t="sub">Skriv eller prata in beställningar – på svenska eller arabiska.</p></div>
+<div class="hbtns"><button class="lang" id="langBtn">عربي</button><button class="lang" id="setBtn" aria-label="Inställningar">⚙</button></div></div></header>
+<main>
+<section class="settings" id="settings" hidden></section>
+<section class="feed">
+<button class="big" id="micBtn" hidden data-t="mic">🎙 Tryck och prata</button>
+<textarea id="inp" dir="auto"></textarea>
+<div class="row"><button class="pri" id="addBtn" data-t="add">Läs in beställning</button></div>
+<p class="hint" data-t="hint"></p>
+<div class="status" id="status" role="status"></div>
+<div id="draft"></div>
+</section>
+
+<nav class="tabs" role="tablist">
+<button role="tab" data-v="cust" aria-selected="true" data-t="tCust">Kunder</button>
+<button role="tab" data-v="tot" aria-selected="false" data-t="tTot">Totalt att plocka</button>
+<button role="tab" data-v="ask" aria-selected="false" data-t="tAsk">Fråga agenten</button>
+<button role="tab" data-v="done" aria-selected="false" data-t="tDone">Levererat</button>
+</nav>
+<div id="view"></div>
+</main>
+
+<script>
+{
+const T={
+sv:{title:"Orderboken",sub:"Skriv eller prata in beställningar – på svenska eller arabiska.",add:"Läs in beställning",mic:"🎙 Tryck och prata",micOn:"⏹ Klar – tryck när du pratat färdigt",
+hint:'Exempel: "Ahmed vill ha 5 kg kött och 5 kg kyckling" eller "محمد ٣ كيلو لحم وكيلو دجاج". En kund per rad. Syns ingen mikrofonknapp? Tryck i rutan och använd mikrofonen på tangentbordet.',
+tCust:"Kunder",tTot:"Totalt att plocka",tAsk:"Fråga agenten",tDone:"Levererat",reading:"Läser beställningen…",save:"Spara",discard:"Släng",
+check:"Stämmer det här? Ändra om något blev fel.",saved:"Sparat ✓",empty:"Inga öppna beställningar än. Skriv en ovan.",emptyDone:"Inget levererat än.",search:"Sök kund eller vara…",
+delivered:"Levererad",undo:"Ångra",remove:"Ta bort",orders:"beställningar",copy:"Kopiera lista",copied:"Kopierat ✓",askPh:"T.ex. Hur mycket kyckling behöver jag totalt? Vem har inte fått sin order?",
+askBtn:"Fråga",thinking:"Tänker…",fail:"Kunde inte tolka texten. Prova: Ahmed: 5 kg kött, 3 kg kyckling",
+noKey:"Agenten behöver en egen Claude API-nyckel. Lägg in den under ⚙. Fliken \"Totalt att plocka\" fungerar alltid utan nyckel.",
+aiErr:"AI-tolkningen misslyckades – jag använde den enkla tolkaren.",sure:"Säker? Tryck igen",rename:"Byt namn",renameQ:"Nytt namn för kunden (samma namn som en annan kund slår ihop dem):",
+addItem:"+ Vara",customer:"Kund",product:"Vara",
+sTitle:"Inställningar",sKey:"Egen Claude API-nyckel (valfritt)",sKeyInfo:"Med en nyckel blir tolkningen smartare och agenten kan svara på frågor. Nyckeln sparas bara på den här telefonen. Varje tolkning kostar en liten summa på ditt Anthropic-konto. Utan nyckel fungerar allt annat ändå.",
+sKeySave:"Spara nyckel",sKeyDel:"Ta bort nyckel",sKeyOn:"Nyckel sparad ✓",sKeyOff:"Ingen nyckel – enkel tolkning används.",
+sBackup:"Säkerhetskopia",sBackupInfo:"Allt sparas i telefonens webbläsare. Spara en kopia ibland så att inget försvinner om webbläsardata rensas.",
+sExport:"Spara kopia",sImport:"Läs in kopia",sImported:"Inläst ✓",sClose:"Stäng",sCount:"beställningar sparade"},
+ar:{title:"دفتر الطلبات",sub:"اكتب أو قل الطلبات – بالعربية أو السويدية.",add:"اقرأ الطلب",mic:"🎙 اضغط وتكلّم",micOn:"⏹ انتهيت – اضغط عند الانتهاء",
+hint:'مثال: "أحمد يريد ٥ كيلو لحم و٥ كيلو دجاج" أو "Ahmed: 5 kg kött, 5 kg kyckling". زبون واحد في كل سطر. لا يظهر زر الميكروفون؟ اضغط في المربع واستخدم ميكروفون لوحة المفاتيح.',
+tCust:"الزبائن",tTot:"المجموع للتجهيز",tAsk:"اسأل المساعد",tDone:"تم التسليم",reading:"جارٍ قراءة الطلب…",save:"حفظ",discard:"إلغاء",
+check:"هل هذا صحيح؟ عدّل إذا كان هناك خطأ.",saved:"تم الحفظ ✓",empty:"لا توجد طلبات مفتوحة بعد. اكتب طلباً في الأعلى.",emptyDone:"لا شيء مُسلَّم بعد.",search:"ابحث عن زبون أو منتج…",
+delivered:"تم التسليم",undo:"تراجع",remove:"حذف",orders:"طلبات",copy:"نسخ القائمة",copied:"تم النسخ ✓",askPh:"مثلاً: كم كيلو دجاج أحتاج بالمجموع؟ من لم يستلم طلبه؟",
+askBtn:"اسأل",thinking:"أفكر…",fail:"لم أفهم النص. جرّب: أحمد: 5 كيلو لحم، 3 كيلو دجاج",
+noKey:"المساعد يحتاج مفتاح Claude API خاص بك. أضفه من ⚙. تبويب \"المجموع للتجهيز\" يعمل دائماً بدون مفتاح.",
+aiErr:"فشلت القراءة بالذكاء الاصطناعي – استخدمت القارئ البسيط.",sure:"متأكد؟ اضغط مرة أخرى",rename:"تغيير الاسم",renameQ:"الاسم الجديد للزبون (نفس اسم زبون آخر يدمجهما):",
+addItem:"+ منتج",customer:"الزبون",product:"المنتج",
+sTitle:"الإعدادات",sKey:"مفتاح Claude API خاص بك (اختياري)",sKeyInfo:"مع المفتاح تصبح القراءة أذكى ويستطيع المساعد الإجابة على الأسئلة. يُحفظ المفتاح على هذا الهاتف فقط. كل قراءة تكلّف مبلغاً صغيراً من حسابك في Anthropic. بدون مفتاح يعمل كل شيء آخر.",
+sKeySave:"حفظ المفتاح",sKeyDel:"حذف المفتاح",sKeyOn:"تم حفظ المفتاح ✓",sKeyOff:"لا يوجد مفتاح – يُستخدم القارئ البسيط.",
+sBackup:"نسخة احتياطية",sBackupInfo:"كل شيء محفوظ في متصفح الهاتف. احفظ نسخة من وقت لآخر حتى لا يضيع شيء إذا مُسحت بيانات المتصفح.",
+sExport:"حفظ نسخة",sImport:"استعادة نسخة",sImported:"تمت الاستعادة ✓",sClose:"إغلاق",sCount:"طلبات محفوظة"}};
+
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+let lang=ls.get("ob_lang","sv");
+const t=k=>T[lang][k]??T.sv[k];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=n=>(Math.round(n*100)/100).toLocaleString(lang==="ar"?"ar":"sv-SE");
+const UNITS=["kg","st","låda","liter","paket"];
+
+let orders=[],view="cust",draft=null,q="",armed=null;
+
+/* ---------- storage: this phone only ---------- */
+const LS="ob_orders";
+function load(){try{orders=JSON.parse(ls.get(LS,"[]"))||[]}catch(e){orders=[]}}
+function persist(){ls.set(LS,JSON.stringify(orders))}
+function put(o){const i=orders.findIndex(x=>x.id===o.id);i<0?orders.push(o):orders[i]=o;persist();render()}
+function drop(id){orders=orders.filter(x=>x.id!==id);persist();render()}
+
+/* ---------- offline parser (Swedish + Arabic) ---------- */
+const PRODUCTS=[ // [swedish, arabic, default unit, aliases...]
+["lammkött","لحم غنم","kg","lammkött","lamm","lammkot","لحم غنم","لحم خروف","لحمة غنم","غنم","خروف","ghanam"],
+["köttfärs","لحم مفروم","kg","köttfärs","färs","kottfars","لحم مفروم","لحمة مفرومة","مفروم","مفرومة"],
+["nötkött","لحم بقر","kg","nötkött","notkott","لحم بقر","لحم عجل","بقر","عجل"],
+["kycklingfilé","صدر دجاج","kg","kycklingfilé","kycklingfile","kycklingbröst","صدر دجاج","صدور دجاج","فيليه دجاج"],
+["kycklinglår","فخذ دجاج","kg","kycklinglår","فخذ دجاج","افخاذ دجاج","أفخاذ دجاج"],
+["kyckling","دجاج","kg","kycklingar","kyckling","دجاج","جاج","فراخ","فروج","djaj","dajaj"],
+["kött","لحم","kg","kött","kott","lahme","lahm","laham","لحمة","لحم"],
+["tomater","طماطم","kg","tomater","tomat","طماطم","بندورة","بندوره"],
+["gurka","خيار","st","gurkor","gurka","خيار"],
+["lök","بصل","kg","lök","بصل"],
+["vitlök","ثوم","st","vitlök","ثوم"],
+["potatis","بطاطا","kg","potatis","بطاطا","بطاطس"],
+["paprika","فليفلة","st","paprikor","paprika","فليفلة","فلفل"],
+["persilja","بقدونس","st","persilja","بقدونس"],
+["citron","ليمون","st","citroner","citron","ليمون"],
+["ris","أرز","kg","ris","رز","أرز","ارز"],
+["olivolja","زيت زيتون","liter","olivolja","زيت زيتون"],
+["olja","زيت","liter","olja","زيت"],
+["ägg","بيض","st","ägg","بيض"],
+["bröd","خبز","st","bröd","خبز","عيش"],
+["mjölk","حليب","liter","mjölk","حليب"],
+["yoghurt","لبن","st","yoghurt","لبن","لبنة"]];
+const ALIASES=PRODUCTS.flatMap(p=>p.slice(3).map(a=>[a,p])).sort((a,b)=>b[0].length-a[0].length);
+const UNITMAP=[["kg",["kilogram","kilon","kilo","kg","كيلوغرام","كيلوات","كيلوين","كيلو","كغ","كجم"]],["g",["gram","gr","g","غرام","جرام"]],
+["st",["stycken","styck","stk","st","حبات","حبة","قطع","قطعة"]],["låda",["lådor","lådan","låda","låd","صناديق","صندوق","كراتين","كرتونة","كرتون","علب","علبة"]],
+["liter",["liter","litre","l","ليتر","لتر"]],["paket",["paket","förpackningar","förp","باكيتات","باكيت","أكياس","اكياس","كيس"]]];
+const UNITALIAS=UNITMAP.flatMap(([u,as])=>as.map(a=>[a,u])).sort((a,b)=>b[0].length-a[0].length);
+const NUMWORDS=[["ett halvt",.5],["en halv",.5],["halvt",.5],["halv",.5],["en",1],["ett",1],["två",2],["tre",3],["fyra",4],["fem",5],["sex",6],["sju",7],["åtta",8],["nio",9],["tio",10],["tolv",12],["femton",15],["tjugo",20],
+["نص",.5],["نصف",.5],["ربع",.25],["واحد",1],["اثنين",2],["اتنين",2],["ثلاث",3],["ثلاثة",3],["تلاتة",3],["تلات",3],["أربع",4],["اربع",4],["أربعة",4],["اربعة",4],["خمس",5],["خمسة",5],["ست",6],["ستة",6],["سبع",7],["سبعة",7],["ثمان",8],["ثمانية",8],["تمن",8],["تسع",9],["تسعة",9],["عشر",10],["عشرة",10]].sort((a,b)=>b[0].length-a[0].length);
+const FILLER=new Set(["vill","ha","ska","skall","beställer","beställning","beställt","till","för","från","tar","köper","och","wants","want","يريد","تريد","يبغى","بدو","بده","بدها","بدي","عايز","عاوز","طلب","طلبية","الى","إلى","من","ل"]);
+const END="(?=[\\s,.!?؟]|$)";
+const startRe=(list)=>new RegExp("^("+list.map(([a])=>a.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|")+")"+END,"i");
+const NUM_RE=startRe(NUMWORDS),UNIT_RE=startRe(UNITALIAS);
+const stripAl=s=>s.replace(/^ال(?=\S{2})/,"");
+function findProduct(s){
+  const low=s.toLowerCase().trim();if(!low)return null;
+  const words=low.split(/\s+/).map(stripAl),joined=words.join(" ");
+  for(const [a,p] of ALIASES){const al=a.toLowerCase();
+    if(joined===al||joined.startsWith(al+" ")||(" "+joined+" ").includes(" "+al+" "))return p;
+    if(/[a-zåäö]/.test(al)&&al.length>=4&&words.some(w=>w.startsWith(al)))return p;}
+  return null;
+}
+const normalize=s=>String(s).replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/٫/g,".").replace(/[،؛]/g,",").replace(/ـ/g,"");
+const toNum=s=>Number(String(s).replace(",","."));
+function productAtStart(s){
+  const words=s.toLowerCase().trim().split(/[\s,]+/).map(stripAl),joined=words.join(" ");
+  for(const [a] of ALIASES){const al=a.toLowerCase();
+    if(joined===al||joined.startsWith(al+" "))return true;
+    if(/[a-zåäö]/.test(al)&&al.length>=4&&words[0].startsWith(al))return true;}
+  return false;
+}
+const startsItem=s=>/^\d/.test(s)||NUM_RE.test(s)||UNIT_RE.test(s)||productAtStart(s);
+function parseItem(raw){
+  let s=raw.trim().replace(/^(och|samt|plus)\s+/i,"").replace(/[.!?؟]+$/,"").trim();
+  if(/^و/.test(s)&&startsItem(s.slice(1).trim()))s=s.slice(1).trim();
+  if(!s)return null;
+  let qty=null,unit=null,m;
+  if((m=s.match(/^(\d+(?:[.,]\d+)?)\s*/))){qty=toNum(m[1]);s=s.slice(m[0].length)}
+  else if((m=s.match(NUM_RE))){qty=NUMWORDS.find(([w])=>w.toLowerCase()===m[1].toLowerCase())[1];s=s.slice(m[0].length).trim()}
+  if((m=s.match(UNIT_RE))){const a=m[1].toLowerCase();unit=UNITALIAS.find(([x])=>x.toLowerCase()===a)[1];if(a==="كيلوين"&&qty===null)qty=2;s=s.slice(m[0].length).trim();if(qty===null)qty=1}
+  if(qty===null&&(m=s.match(/\s(\d+(?:[.,]\d+)?)\s*(\S+)?\s*$/))){const u=m[2]&&UNITALIAS.find(([x])=>x.toLowerCase()===m[2].toLowerCase());if(!m[2]||u){qty=toNum(m[1]);if(u)unit=u[1];s=s.slice(0,m.index).trim()}}
+  if(!unit){const w=s.split(/\s+/);const u=w.length>1&&UNITALIAS.find(([x])=>x.toLowerCase()===w[w.length-1].toLowerCase());if(u){unit=u[1];s=w.slice(0,-1).join(" ")}}
+  s=s.replace(/^(av|med|من)\s+/i,"").trim();
+  const hadQty=qty!==null;
+  if(!s){if(!hadQty)return null;if(unit==="g"){qty/=1000;unit="kg"}return{product:"",qty,unit,_qtyOnly:true}}
+  const p=findProduct(s);
+  if(qty===null)qty=1;
+  if(!unit)unit=p?p[2]:"st";
+  if(unit==="g"){qty=qty/1000;unit="kg"}
+  return p?{product:p[0],product_ar:p[1],qty,unit,_q:hadQty}:{product:s.toLowerCase(),product_ar:"",qty,unit,_q:hadQty};
+}
+function parseLine(line){
+  line=line.trim();if(!line)return null;
+  let name="",rest="",m;
+  if((m=line.match(/^([^:：\d]{1,40})[:：](.+)$/))){name=m[1];rest=m[2]}
+  else{
+    const tok=line.split(/\s+/);let i=0;
+    for(;i<tok.length;i++){if(startsItem(tok.slice(i).join(" ")))break}
+    name=tok.slice(0,i).join(" ");rest=tok.slice(i).join(" ");
+  }
+  name=name.split(/\s+/).filter(w=>w&&!FILLER.has(w.toLowerCase().replace(/[,.]/g,""))).join(" ").replace(/[,.:\-–]+$/,"").trim()||"Okänd";
+  rest=rest.replace(/([^\d\s,.])\s+(?=\d)/g,"$1,")
+           .replace(/\s+و\s*(?=\d|كيلو|نص|نصف|ربع|علب|صندوق|كرتون|حب)/g,",")
+           .replace(/\s+و(?=\S)/g,(x,off,str)=>startsItem(str.slice(off+x.length))?",":x);
+  const items=[];
+  for(const it of rest.split(/\s*,\s*|\s+och\s+|\s+samt\s+|\s+plus\s+|;|\s+و\s+/i).map(parseItem).filter(Boolean)){
+    const prev=items[items.length-1];
+    if(it._qtyOnly){if(prev&&!prev._q){prev.qty=it.qty;prev.unit=it.unit;prev._q=true}continue}
+    items.push(it);
+  }
+  items.forEach(i=>delete i._q);
+  return items.length?{customer:name,items,note:""}:null;
+}
+function parseOffline(text){return normalize(text).split(/\n+/).map(parseLine).filter(Boolean)}
+
+/* ---------- optional: own Claude API key ---------- */
+const getKey=()=>ls.get("ob_key","");
+async function claude(prompt,maxTokens){
+  const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{
+    "content-type":"application/json","x-api-key":getKey(),"anthropic-version":"2026-10-21",
+    "anthropic-beta":"server-side-fallback-2026-07-01","anthropic-dangerous-direct-browser-access":"true"},
+    body:JSON.stringify({model:"claude-opus-5-5",max_tokens:maxTokens,output_config:{effort:"low"},fallbacks:"default",messages:[{role:"user",content:prompt}]})});
+  const j=await r.json().catch(()=>null);
+  if(!r.ok||!j)throw new Error((j&&j.error&&j.error.message)||("HTTP "+r.status));
+  if(j.stop_reason==="refusal")throw new Error("refusal");
+  return (j.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("");
+}
+const knownCustomers=()=>[...new Set(orders.map(o=>o.customer))];
+async function parseAI(text){
+  const out=await claude(`You read order notes for a small food business in Malmö. Notes are in Swedish, Arabic, or a mix (Arabic may be in Arabic script or written with Latin letters; numbers may be Arabic-Indic digits like ٥).
+Extract every customer order. Return ONLY JSON, no other text:
+{"orders":[{"customer":"name","items":[{"product":"Swedish product name, lowercase, singular, e.g. kött, kyckling, lammkött, köttfärs, tomater","product_ar":"Arabic name","qty":number,"unit":"kg|st|låda|liter|paket"}],"note":"anything else, e.g. delivery day, or empty"}]}
+Rules: convert grams to kg (500 g -> 0.5 kg). "kilo"/"كيلو"/"kg" -> kg. "نص كيلو" = 0.5 kg. If no number is given, qty 1. Write product in Swedish so totals add up across languages (لحم=kött, دجاج=kyckling, لحم غنم=lammkött, لحم مفروم=köttfärs).
+Known customers already in the book: ${JSON.stringify(knownCustomers())}. If a name refers to one of them (also across scripts, e.g. أحمد = Ahmed), use the existing spelling exactly. Otherwise keep the name as written. If no customer name is given, use "Okänd".
+Note text:
+"""${text}"""`,4000);
+  const a=out.indexOf("{"),b=out.lastIndexOf("}");
+  const r=JSON.parse(out.slice(a,b+1));
+  if(!r||!Array.isArray(r.orders))throw new Error("bad");
+  return r.orders.filter(o=>o.items&&o.items.length).map(o=>({customer:String(o.customer||"Okänd"),note:o.note||"",
+    items:o.items.map(i=>({product:String(i.product||"").toLowerCase(),product_ar:i.product_ar||"",qty:Number(i.qty)||1,unit:UNITS.includes(i.unit)?i.unit:"st"}))}));
+}
+
+/* ---------- reading an order ---------- */
+$("#addBtn").onclick=async()=>{
+  const text=$("#inp").value.trim();if(!text)return;
+  const st=$("#status");st.textContent=t("reading");$("#addBtn").disabled=true;
+  let parsed=[];
+  try{
+    if(getKey()){try{parsed=await parseAI(text);st.textContent=""}catch(e){parsed=parseOffline(text);st.textContent=t("aiErr")+" ("+e.message+")"}}
+    else{parsed=parseOffline(text);st.textContent=""}
+    if(!parsed.length){st.textContent=t("fail");return}
+    draft={raw:text,orders:parsed};renderDraft();
+  }finally{$("#addBtn").disabled=false}
+};
+function renderDraft(){
+  const el=$("#draft");if(!draft){el.innerHTML="";return}
+  const opt=u=>UNITS.map(x=>`<option${x===u?" selected":""}>${x}</option>`).join("");
+  el.innerHTML=`<div class="draft"><h3>${t("check")}</h3>${draft.orders.map((o,oi)=>`<div class="dord">
+    <input class="fld nm" dir="auto" data-f="${oi}:customer" value="${esc(o.customer)}" aria-label="${t("customer")}">
+    ${o.items.map((it,ii)=>`<div class="irow"><input class="fld" dir="auto" data-f="${oi}:${ii}:product" value="${esc(it.product)}" aria-label="${t("product")}">
+      <input class="fld" type="number" step="any" inputmode="decimal" data-f="${oi}:${ii}:qty" value="${it.qty}">
+      <select class="fld" data-f="${oi}:${ii}:unit">${opt(it.unit)}</select>
+      <button class="small del" data-rm="${oi}:${ii}" aria-label="${t("remove")}">✕</button></div>`).join("")}
+    <div class="row" style="margin-top:6px"><button class="small" data-addi="${oi}">${t("addItem")}</button>${o.note?`<span class="meta" dir="auto">${esc(o.note)}</span>`:""}</div></div>`).join("")}
+    <div class="row"><button class="pri" id="saveBtn">${t("save")}</button><button id="discBtn">${t("discard")}</button></div></div>`;
+  el.querySelectorAll("[data-f]").forEach(f=>f.oninput=f.onchange=()=>{const p=f.dataset.f.split(":");const o=draft.orders[+p[0]];
+    if(p[1]==="customer")o.customer=f.value;else{const it=o.items[+p[1]];it[p[2]]=p[2]==="qty"?Number(f.value)||0:f.value;if(p[2]==="product"){const m=findProduct(f.value);it.product_ar=m&&m[0]===f.value.trim().toLowerCase()?m[1]:it.product_ar}}});
+  el.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{const[oi,ii]=b.dataset.rm.split(":").map(Number);draft.orders[oi].items.splice(ii,1);draft.orders=draft.orders.filter(o=>o.items.length);if(!draft.orders.length)draft=null;renderDraft()});
+  el.querySelectorAll("[data-addi]").forEach(b=>b.onclick=()=>{draft.orders[+b.dataset.addi].items.push({product:"",product_ar:"",qty:1,unit:"kg"});renderDraft()});
+  $("#discBtn").onclick=()=>{draft=null;renderDraft()};
+  $("#saveBtn").onclick=()=>{
+    const now=Date.now();
+    draft.orders.forEach((o,i)=>{const items=o.items.filter(it=>String(it.product).trim()).map(it=>({product:String(it.product).trim().toLowerCase(),product_ar:it.product_ar||"",qty:Number(it.qty)||0,unit:it.unit||"st"}));
+      if(items.length)put({id:"o"+now+"_"+i,customer:String(o.customer).trim()||"Okänd",items,note:o.note||"",raw:draft.raw,created:now,done:false})});
+    draft=null;$("#inp").value="";renderDraft();const st=$("#status");st.textContent=t("saved");setTimeout(()=>{if(st.textContent===t("saved"))st.textContent=""},2000);
+  };
+}
+
+/* ---------- views ---------- */
+document.querySelectorAll("[role=tab]").forEach(b=>b.onclick=()=>{view=b.dataset.v;document.querySelectorAll("[role=tab]").forEach(x=>x.setAttribute("aria-selected",x===b));render()});
+const match=o=>!q||(o.customer+" "+o.items.map(i=>i.product+" "+i.product_ar).join(" ")+" "+o.note).toLowerCase().includes(q.toLowerCase());
+const sumItems=list=>{const m=new Map();for(const o of list)for(const it of o.items){const k=it.product+"|"+it.unit;const c=m.get(k)||{product:it.product,product_ar:it.product_ar,unit:it.unit,qty:0};c.qty+=it.qty;if(!c.product_ar&&it.product_ar)c.product_ar=it.product_ar;m.set(k,c)}return[...m.values()].sort((a,b)=>a.product.localeCompare(b.product,"sv"))};
+const when=ts=>new Date(ts).toLocaleString(lang==="ar"?"ar":"sv-SE",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+const itemLi=i=>`<li><span dir="auto">${esc(i.product)} <span class="ar">${esc(i.product_ar)}</span></span><span class="q">${fmt(i.qty)} ${esc(i.unit)}</span></li>`;
+
+function render(){
+  const v=$("#view");
+  if(view==="ask"){renderAsk(v);return}
+  const showDone=view==="done";
+  const list=orders.filter(o=>!!o.done===showDone).filter(match).sort((a,b)=>b.created-a.created);
+  const searchBox=`<input class="search" id="q" dir="auto" placeholder="${t("search")}" value="${esc(q)}">`;
+  if(view==="tot"){
+    const s=sumItems(list);
+    v.innerHTML=searchBox+(s.length?`<div class="slip tot"><ul>${s.map(itemLi).join("")}</ul>
+      <div class="row"><button id="copyBtn">${t("copy")}</button><span class="meta">${new Set(list.map(o=>o.customer)).size} ${t("tCust").toLowerCase()} · ${list.length} ${t("orders")}</span></div></div>`:`<div class="empty">${t("empty")}</div>`);
+    const cb=$("#copyBtn");if(cb)cb.onclick=()=>{const txt=s.map(i=>`${i.product}${i.product_ar?" ("+i.product_ar+")":""}: ${fmt(i.qty)} ${i.unit}`).join("\n");
+      (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>cb.textContent=t("copied")).catch(()=>{if(navigator.share)navigator.share({text:txt}).catch(()=>{})})};
+  }else{
+    const by=new Map();for(const o of list){if(!by.has(o.customer))by.set(o.customer,[]);by.get(o.customer).push(o)}
+    v.innerHTML=searchBox+(by.size?`<div class="grid">${[...by].map(([c,os])=>`<article class="slip"><header><div><h2 dir="auto">${esc(c)}</h2>
+      <div class="meta">${os.length} ${t("orders")}</div></div><button class="small" data-ren="${esc(c)}" aria-label="${t("rename")}">✏️</button></header>
+      <ul>${sumItems(os).map(itemLi).join("")}</ul>
+      <div>${os.map(o=>`<div class="order${o.done?" done":""}"><div class="meta">${when(o.created)}${o.note?` · <span dir="auto">${esc(o.note)}</span>`:""}</div>
+        <div class="raw" dir="auto">"${esc(o.raw.length>90?o.raw.slice(0,90)+"…":o.raw)}"</div>
+        <div class="row"><button class="small" data-done="${o.id}">${o.done?t("undo"):"✓ "+t("delivered")}</button><button class="small del" data-del="${o.id}">${armed===o.id?t("sure"):t("remove")}</button></div></div>`).join("")}</div></article>`).join("")}</div>`
+      :`<div class="empty">${showDone?t("emptyDone"):t("empty")}</div>`);
+    v.querySelectorAll("[data-done]").forEach(b=>b.onclick=()=>{const o=orders.find(x=>x.id===b.dataset.done);if(o)put({...o,done:!o.done})});
+    v.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const id=b.dataset.del;if(armed===id){armed=null;drop(id)}else{armed=id;render();setTimeout(()=>{if(armed===id){armed=null;render()}},4000)}});
+    v.querySelectorAll("[data-ren]").forEach(b=>b.onclick=()=>{const old=b.dataset.ren;const nn=(prompt(t("renameQ"),old)||"").trim();if(!nn||nn===old)return;
+      orders=orders.map(o=>o.customer===old?{...o,customer:nn}:o);persist();render()});
+  }
+  const qi=$("#q");if(qi)qi.oninput=e=>{q=e.target.value;const pos=e.target.selectionStart;render();const n=$("#q");n.focus();n.setSelectionRange(pos,pos)};
+}
+let lastAnswer="";
+function renderAsk(v){
+  v.innerHTML=`<div class="feed" style="margin-top:0"><textarea id="askIn" dir="auto" placeholder="${t("askPh")}"></textarea>
+    <div class="row"><button class="pri" id="askBtn">${t("askBtn")}</button></div></div><div class="answer" id="ans" dir="auto" ${lastAnswer?"":"hidden"}>${esc(lastAnswer)}</div>`;
+  $("#askBtn").onclick=async()=>{
+    const qq=$("#askIn").value.trim();if(!qq)return;const a=$("#ans");a.hidden=false;
+    if(!getKey()){a.textContent=t("noKey");return}
+    a.textContent=t("thinking");$("#askBtn").disabled=true;
+    const data=orders.map(o=>({customer:o.customer,items:o.items.map(i=>`${i.qty} ${i.unit} ${i.product}`),note:o.note,delivered:o.done,date:new Date(o.created).toISOString().slice(0,16)}));
+    try{lastAnswer=await claude(`You are the order assistant for a small food business. Answer the question using ONLY the order data below. Reply in the same language as the question (Swedish or Arabic). Be short and exact; add up quantities carefully and show totals with units. Plain text, no markdown. Today is ${new Date().toISOString().slice(0,10)}.
+ORDERS: ${JSON.stringify(data)}
+QUESTION: ${qq}`,4000);a.textContent=lastAnswer}
+    catch(e){a.textContent="⚠ "+e.message}
+    finally{$("#askBtn").disabled=false}
+  };
+}
+
+/* ---------- voice: the phone's own speech recognition ---------- */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null,listening=false,base="",finalText="";
+function setupMic(){
+  if(!SR)return;
+  const b=$("#micBtn");b.hidden=false;
+  b.onclick=()=>{
+    if(listening){rec&&rec.stop();return}
+    rec=new SR();rec.lang=lang==="ar"?"ar-SA":"sv-SE";rec.continuous=true;rec.interimResults=true;
+    base=$("#inp").value.trim();finalText="";
+    rec.onresult=e=>{let interim="";for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)finalText+=r[0].transcript+" ";else interim+=r[0].transcript}
+      $("#inp").value=[base,(finalText+interim).trim()].filter(Boolean).join("\n")};
+    rec.onstart=()=>{listening=true;b.classList.add("on");b.textContent=t("micOn")};
+    rec.onend=()=>{const had=listening;listening=false;b.classList.remove("on");b.textContent=t("mic");if(had&&finalText.trim())setTimeout(()=>$("#addBtn").click(),300)};
+    rec.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"){b.hidden=true}};
+    try{rec.start()}catch(e){}
+  };
+}
+
+/* ---------- settings: API key + backup ---------- */
+function renderSettings(){
+  const s=$("#settings");const has=!!getKey();
+  s.innerHTML=`<h3>${t("sKey")}</h3><p class="hint">${t("sKeyInfo")}</p>
+    <div class="row"><input class="fld" type="password" id="keyIn" placeholder="sk-ant-…" autocomplete="off" style="flex:1 1 220px"><button id="keySave">${t("sKeySave")}</button>${has?`<button class="del" id="keyDel">${t("sKeyDel")}</button>`:""}</div>
+    <p class="hint ${has?"ok":""}">${has?t("sKeyOn"):t("sKeyOff")}</p>
+    <h3>${t("sBackup")}</h3><p class="hint">${t("sBackupInfo")} <strong>${orders.length}</strong> ${t("sCount")}.</p>
+    <div class="row"><button id="expBtn">${t("sExport")}</button><button id="impBtn">${t("sImport")}</button><input type="file" id="impFile" accept=".json,application/json" hidden><span class="hint ok" id="impMsg"></span></div>
+    <div class="row"><button id="closeSet">${t("sClose")}</button></div>`;
+  $("#keySave").onclick=()=>{const k=$("#keyIn").value.trim();if(k){ls.set("ob_key",k);renderSettings()}};
+  const kd=$("#keyDel");if(kd)kd.onclick=()=>{ls.del("ob_key");renderSettings()};
+  $("#expBtn").onclick=()=>{const blob=new Blob([JSON.stringify({app:"orderboken",v:1,orders},null,1)],{type:"application/json"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="orderboken-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)};
+  $("#impBtn").onclick=()=>$("#impFile").click();
+  $("#impFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());const list=Array.isArray(d)?d:d.orders;
+    for(const o of list)if(o&&o.id&&Array.isArray(o.items)){const i=orders.findIndex(x=>x.id===o.id);i<0?orders.push(o):orders[i]=o}
+    persist();render();renderSettings();$("#impMsg").textContent=t("sImported")}catch(err){$("#impMsg").textContent="⚠ "+err.message}};
+  $("#closeSet").onclick=()=>{s.hidden=true};
+}
+$("#setBtn").onclick=()=>{const s=$("#settings");s.hidden=!s.hidden;if(!s.hidden)renderSettings()};
+
+/* ---------- language ---------- */
+function applyLang(){
+  document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";
+  document.querySelectorAll("[data-t]").forEach(el=>el.textContent=t(el.dataset.t));
+  $("#langBtn").textContent=lang==="ar"?"Svenska":"عربي";
+  $("#inp").placeholder=lang==="ar"?"أحمد: ٥ كيلو لحم، ٥ كيلو دجاج":"Ahmed: 5 kg kött, 5 kg kyckling, 2 lådor tomater";
+  if(!listening)$("#micBtn").textContent=t("mic");
+  render();renderDraft();if(!$("#settings").hidden)renderSettings();
+}
+$("#langBtn").onclick=()=>{lang=lang==="sv"?"ar":"sv";ls.set("ob_lang",lang);applyLang()};
+
+window.__ob={parseOffline};
+load();setupMic();applyLang();
+}
+</script>
+</body>
+</html>
