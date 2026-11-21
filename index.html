@@ -117,7 +117,7 @@ li:last-child{border-bottom:0}
 <div class="mode"><button data-k="order" aria-pressed="true" data-t="mOrder">📦 Kundorder</button><button data-k="in" aria-pressed="false" data-t="mIn">🚚 Inleverans</button></div>
 <button class="big" id="micBtn" hidden data-t="mic">🎙 Tryck och prata</button>
 <textarea id="inp" dir="auto"></textarea>
-<div class="row"><button class="pri" id="addBtn" data-t="add">Läs in beställning</button></div>
+<div class="row"><button class="pri" id="addBtn" data-t="add">Läs in beställning</button><button id="photoBtn">📷</button><input type="file" id="photoIn" accept="image/*" capture="environment" hidden></div>
 <p class="hint" id="hint"></p>
 <details class="calc" id="calc"><summary data-t="calcTitle">🧮 Räkna kartonger</summary>
 <p class="hint" data-t="calcHelp"></p><textarea id="calcIn" dir="auto" rows="3"></textarea><div id="calcOut" aria-live="polite"></div></details>
@@ -183,6 +183,11 @@ en:{"title": "Order Book", "sub": "Type or speak orders – in Swedish, Arabic, 
 pl:{"title": "Książka zamówień", "sub": "Wpisz lub powiedz zamówienia – po szwedzku, arabsku, angielsku, polsku lub duńsku.", "add": "Wczytaj zamówienie", "mic": "🎙 Naciśnij i mów", "micOn": "⏹ Gotowe – naciśnij, gdy skończysz mówić", "hint": "Przykład: \"Ahmed chce 5 kg mięsa i 5 kg kurczaka\" lub \"Ahmed: 70 kartonów kurczaka 7,2\". Jeden klient w linii. Nie widzisz przycisku mikrofonu? Dotknij pola i użyj mikrofonu na klawiaturze.", "tCust": "Klienci", "tTot": "Razem do skompletowania", "tAsk": "Zapytaj asystenta", "tDone": "Dostarczone", "reading": "Czytam zamówienie…", "save": "Zapisz", "discard": "Odrzuć", "check": "Czy to się zgadza? Popraw, jeśli coś jest źle.", "saved": "Zapisano ✓", "empty": "Brak otwartych zamówień. Wpisz jedno powyżej.", "emptyDone": "Nic jeszcze nie dostarczono.", "search": "Szukaj klienta lub produktu…", "delivered": "Dostarczone", "undo": "Cofnij", "remove": "Usuń", "orders": "zamówień", "copy": "Kopiuj listę", "copied": "Skopiowano ✓", "askPh": "Np. Ile kurczaka potrzebuję łącznie? Kto nie dostał zamówienia?", "askBtn": "Zapytaj", "thinking": "Myślę…", "fail": "Nie udało się odczytać tekstu. Spróbuj: Ahmed: 5 kg mięsa, 3 kg kurczaka", "noKey": "Asystent potrzebuje własnego klucza Claude API. Dodaj go w ⚙. Zakładka \"Razem do skompletowania\" działa zawsze bez klucza.", "aiErr": "Odczyt AI nie powiódł się – użyłem prostego czytnika.", "sure": "Na pewno? Naciśnij ponownie", "rename": "Zmień nazwę", "renameQ": "Nowa nazwa klienta (ta sama nazwa co inny klient połączy ich):", "addItem": "+ Produkt", "customer": "Klient", "product": "Produkt", "sTitle": "Ustawienia", "sKey": "Własny klucz Claude API (opcjonalnie)", "sKeyInfo": "Z kluczem odczyt jest mądrzejszy, a asystent może odpowiadać na pytania. Klucz jest zapisany tylko na tym telefonie. Każdy odczyt kosztuje niewielką kwotę na Twoim koncie Anthropic. Bez klucza wszystko inne działa.", "sKeySave": "Zapisz klucz", "sKeyDel": "Usuń klucz", "sKeyOn": "Klucz zapisany ✓", "sKeyOff": "Brak klucza – używany jest prosty czytnik.", "sBackup": "Kopia zapasowa", "sBackupInfo": "Wszystko jest zapisane w przeglądarce telefonu. Czasem zapisz kopię, aby nic nie zginęło, jeśli dane przeglądarki zostaną usunięte.", "sExport": "Zapisz kopię", "sImport": "Wczytaj kopię", "sImported": "Wczytano ✓", "sClose": "Zamknij", "sCount": "zapisanych zamówień", "sCountIn": "dostaw", "mOrder": "📦 Zamówienie klienta", "mIn": "🚚 Dostawa do mnie", "tStock": "Magazyn", "tIn": "Dostawy", "hintIn": "Wpisz, kto dostarczył i co przyszło, np. \"Lindbergs: 70 kartonów kurczaka 7,2, 150 kg mięsa\". 70 kartonów 7,2 = 70 kartonów po 7,2 kg = 504 kg. Magazyn liczy się automatycznie.", "phIn": "Dostawca: 70 kartonów kurczaka 7,2, 150 kg mięsa", "checkIn": "🚚 Dostawa – czy to się zgadza?", "savedIn": "Dostawa zapisana – magazyn zaktualizowany ✓", "supplier": "Dostawca", "unknownSup": "Nieznany dostawca", "emptyIn": "Brak dostaw. Wybierz 🚚 Dostawa powyżej i wpisz, co przyszło.", "emptyStock": "Magazyn jest pusty. Najpierw zarejestruj dostawę (🚚 powyżej).", "stockInfo": "W magazynie = wszystko, co przyszło, minus to, co oznaczyłeś jako dostarczone klientom.", "stIn": "Przyjęto", "stOut": "Wydano", "stOpen": "Zamówiono", "stLeft": "Zostanie po zamówieniach", "stShort": "Brakuje", "stHave": "w magazynie", "adjust": "Przelicz", "adjustQ": "Ile {p} ({u}) jest teraz w magazynie?", "adjName": "Korekta magazynu", "copyStock": "Udostępnij stan magazynu", "krt": "kart.", "cartons": "Liczba kartonów", "perCarton": "Kilogramy na karton", "kgPer": "kg/kart.", "whichProd": "Jaki produkt?", "unknownProd": "nieznany produkt", "stockTitle": "Magazyn", "received": "przyjęto", "suppliers": "dostawców", "unknownCust": "Nieznany", "phOrder": "Ahmed: 5 kg mięsa, 5 kg kurczaka, 2 skrzynki pomidorów", "u_st": "szt.", "u_låda": "skrzynka", "u_liter": "l", "u_paket": "opak.", "calcTitle": "🧮 Kalkulator kartonów", "calcPh": "10 kartonów 7,2\n5 kart. 10", "calcHelp": "Wpisz liczbę kartonów i kilogramy na karton, jedna linia na rodzaj. Suma liczy się od razu.", "calcTotal": "Razem"},
 da:{"title": "Ordrebogen", "sub": "Skriv eller indtal ordrer – på svensk, arabisk, engelsk, polsk eller dansk.", "add": "Læs ordre", "mic": "🎙 Tryk og tal", "micOn": "⏹ Færdig – tryk når du har talt færdig", "hint": "Eksempel: \"Ahmed vil have 5 kg kød og 5 kg kylling\" eller \"Ahmed: 70 kartoner kylling 7,2\". Én kunde pr. linje. Ingen mikrofonknap? Tryk i feltet og brug mikrofonen på tastaturet.", "tCust": "Kunder", "tTot": "I alt at plukke", "tAsk": "Spørg assistenten", "tDone": "Leveret", "reading": "Læser ordren…", "save": "Gem", "discard": "Kassér", "check": "Passer det? Ret det, hvis noget blev forkert.", "saved": "Gemt ✓", "empty": "Ingen åbne ordrer endnu. Skriv en ovenfor.", "emptyDone": "Intet leveret endnu.", "search": "Søg kunde eller vare…", "delivered": "Leveret", "undo": "Fortryd", "remove": "Slet", "orders": "ordrer", "copy": "Kopiér liste", "copied": "Kopieret ✓", "askPh": "F.eks. Hvor meget kylling skal jeg bruge i alt? Hvem har ikke fået sin ordre?", "askBtn": "Spørg", "thinking": "Tænker…", "fail": "Kunne ikke læse teksten. Prøv: Ahmed: 5 kg kød, 3 kg kylling", "noKey": "Assistenten skal bruge din egen Claude API-nøgle. Tilføj den under ⚙. Fanen \"I alt at plukke\" virker altid uden nøgle.", "aiErr": "AI-læsningen mislykkedes – jeg brugte den simple læser.", "sure": "Sikker? Tryk igen", "rename": "Omdøb", "renameQ": "Nyt navn til kunden (samme navn som en anden kunde slår dem sammen):", "addItem": "+ Vare", "customer": "Kunde", "product": "Vare", "sTitle": "Indstillinger", "sKey": "Egen Claude API-nøgle (valgfri)", "sKeyInfo": "Med en nøgle bliver læsningen klogere, og assistenten kan svare på spørgsmål. Nøglen gemmes kun på denne telefon. Hver læsning koster et lille beløb på din Anthropic-konto. Uden nøgle virker alt andet stadig.", "sKeySave": "Gem nøgle", "sKeyDel": "Slet nøgle", "sKeyOn": "Nøgle gemt ✓", "sKeyOff": "Ingen nøgle – den simple læser bruges.", "sBackup": "Sikkerhedskopi", "sBackupInfo": "Alt gemmes i telefonens browser. Gem en kopi en gang imellem, så intet går tabt, hvis browserdata bliver slettet.", "sExport": "Gem kopi", "sImport": "Indlæs kopi", "sImported": "Indlæst ✓", "sClose": "Luk", "sCount": "ordrer gemt", "sCountIn": "indleveringer", "mOrder": "📦 Kundeordre", "mIn": "🚚 Indlevering", "tStock": "Lager", "tIn": "Indleveringer", "hintIn": "Skriv hvem der leverede og hvad der kom, f.eks. \"Lindbergs: 70 kartoner kylling 7,2, 150 kg kød\". 70 kartoner 7,2 = 70 kartoner à 7,2 kg = 504 kg. Lageret opdateres automatisk.", "phIn": "Leverandør: 70 kartoner kylling 7,2, 150 kg kød", "checkIn": "🚚 Indlevering – passer det?", "savedIn": "Indlevering gemt – lager opdateret ✓", "supplier": "Leverandør", "unknownSup": "Ukendt leverandør", "emptyIn": "Ingen indleveringer endnu. Vælg 🚚 Indlevering ovenfor og skriv hvad der kom.", "emptyStock": "Lageret er tomt. Registrér først en indlevering (🚚 ovenfor).", "stockInfo": "På lager = alt der er kommet ind minus det, du har markeret som leveret til kunder.", "stIn": "Ind", "stOut": "Ud", "stOpen": "Bestilt", "stLeft": "Tilbage efter ordrer", "stShort": "Mangler", "stHave": "på lager", "adjust": "Optæl", "adjustQ": "Hvor meget {p} ({u}) er der på lager lige nu?", "adjName": "Lagerregulering", "copyStock": "Del lagerliste", "krt": "krt", "cartons": "Antal kartoner", "perCarton": "Kilo pr. karton", "kgPer": "kg/krt", "whichProd": "Hvilken vare?", "unknownProd": "ukendt vare", "stockTitle": "Lager", "received": "modtaget", "suppliers": "leverandører", "unknownCust": "Ukendt", "phOrder": "Ahmed: 5 kg kød, 5 kg kylling, 2 kasser tomater", "u_st": "stk", "u_låda": "kasse", "u_liter": "l", "u_paket": "pakke", "calcTitle": "🧮 Kartonberegner", "calcPh": "10 kartoner 7,2\n5 krt 10", "calcHelp": "Skriv antal kartoner og kilo pr. karton, én linje pr. slags. Summen beregnes med det samme.", "calcTotal": "I alt"}};
 
+Object.assign(T.sv,{"photoIn": "📷 Fota följesedel", "photoOrder": "📷 Fota beställningslapp", "photoReading": "Läser följesedeln…", "photoOcr": "Läser texten i bilden – kan ta upp till en halv minut…", "photoFail": "Kunde inte läsa bilden. Ta ett nytt foto rakt ovanifrån i bra ljus.", "photoRaw": "📷 Foto av följesedel", "photoTip": "Kontrollera raderna noga. Med en Claude API-nyckel under ⚙ läses följesedlar mycket säkrare."});
+Object.assign(T.en,{"photoIn": "📷 Photo of delivery note", "photoOrder": "📷 Photo of order slip", "photoReading": "Reading the delivery note…", "photoOcr": "Reading the text in the photo – can take up to half a minute…", "photoFail": "Couldn't read the photo. Take a new one straight from above in good light.", "photoRaw": "📷 Photo of delivery note", "photoTip": "Check the lines carefully. With a Claude API key under ⚙, delivery notes are read much more reliably."});
+Object.assign(T.pl,{"photoIn": "📷 Zdjęcie dowodu dostawy", "photoOrder": "📷 Zdjęcie kartki z zamówieniem", "photoReading": "Czytam dowód dostawy…", "photoOcr": "Czytam tekst ze zdjęcia – może to potrwać do pół minuty…", "photoFail": "Nie udało się odczytać zdjęcia. Zrób nowe, prosto z góry, w dobrym świetle.", "photoRaw": "📷 Zdjęcie dowodu dostawy", "photoTip": "Sprawdź dokładnie wiersze. Z kluczem Claude API w ⚙ dowody dostawy są odczytywane dużo pewniej."});
+Object.assign(T.da,{"photoIn": "📷 Fotografér følgeseddel", "photoOrder": "📷 Fotografér ordreseddel", "photoReading": "Læser følgesedlen…", "photoOcr": "Læser teksten i billedet – kan tage op til et halvt minut…", "photoFail": "Kunne ikke læse billedet. Tag et nyt lige oppefra i godt lys.", "photoRaw": "📷 Foto af følgeseddel", "photoTip": "Tjek linjerne grundigt. Med en Claude API-nøgle under ⚙ læses følgesedler meget mere sikkert."});
+Object.assign(T.ar,{"photoIn": "📷 صوّر إشعار التسليم", "photoOrder": "📷 صوّر ورقة الطلب", "photoReading": "جارٍ قراءة إشعار التسليم…", "photoOcr": "جارٍ قراءة النص في الصورة – قد يستغرق حتى نصف دقيقة…", "photoFail": "تعذّرت قراءة الصورة. التقط صورة جديدة من الأعلى مباشرة في إضاءة جيدة.", "photoRaw": "📷 صورة إشعار التسليم", "photoTip": "تحقق من الأسطر جيداً. مع مفتاح Claude API في ⚙ تُقرأ إشعارات التسليم بدقة أكبر."});
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let lang=ls.get("ob_lang","sv");if(!["sv","en","pl","da","ar"].includes(lang))lang="sv";
 const LOC=()=>({sv:"sv-SE",en:"en-GB",pl:"pl-PL",da:"da-DK",ar:"ar"})[lang];
@@ -190,7 +195,7 @@ const t=k=>T[lang][k]??T.sv[k];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>(Math.round(n*100)/100).toLocaleString(LOC());
-const APP_VERSION="5 · språk";
+const APP_VERSION="6 · foto";
 const UNITS=["kg","kartong","st","låda","liter","paket"];
 
 let orders=[],received=[],view="cust",draft=null,q="",armed=null,mode="order";
@@ -274,6 +279,8 @@ function productAtStart(s){
 }
 const startsItem=s=>/^\d/.test(s)||NUM_RE.test(s)||UNIT_RE.test(s)||productAtStart(s);
 // cartons: keep the count, and when the weight per carton is known store the total in kg
+// a weight after a carton count: up to 40 kg is read as kg per carton, more as the total
+const perOrTotal=(n,w)=>w>40&&n>0?Math.round(w/n*1000)/1000:w;
 function cartonize(it,per){
   const n=Number(it.qty)||0;
   if(per>0)return{...it,qty:Math.round(n*per*1000)/1000,unit:"kg",cartons:n,perCarton:per};
@@ -300,7 +307,7 @@ function parseItem(raw){
   const it=p?{product:p[0],product_ar:p[1],qty,unit,_q:hadQty}:{product:s.toLowerCase(),product_ar:"",qty,unit,_q:hadQty};
   return unit==="kartong"?cartonize(it,per):it;
 }
-const CARTON_RE=/(\d+(?:\.\d+)?)\s*(?:kartonger|kartongen|kartonge|kartoner|kartonów|kartony|kartong|karton|cartons|carton|cases|case|ctns|ctn|kart\.|krt|kart|kolli|كراتين|كرتونات|كرتونة|كرتون)\s*([^\d,;@\n]*?)\s*(?:à|á|a|@|per|om|at|po|x|×|kg\/st|كل واحدة|كل واحد|كل|بوزن|وزن)?\s*(\d+(?:\.\d+)?)(?:\s*(?:kg|kilo|kilon|kilos|كيلو))?(?:\s*(?:each|każdy|hver))?(?=\s*(?:$|[,;.]|och\s|samt\s|and\s|oraz\s|og\s|i\s|و|\n))/gi;
+const CARTON_RE=/(\d+(?:\.\d+)?)\s*(?:kartonger|kartongen|kartonge|kartoner|kartonów|kartony|kartong|karton|cartons|carton|cases|case|ctns|ctn|kart\.|krt|kart|kolli|كراتين|كرتونات|كرتونة|كرتون)\s*([^\d,;@\n]*?)\s*(?:à|á|a|@|per|om|at|po|x|×|kg\/st|كل واحدة|كل واحد|كل|بوزن|وزن)?\s*(\d+(?:\.\d+)?)(?:\s*(?:kg|kilo|kilon|kilos|كيلو))?(?:\s*(?:each|każdy|hver))?(?=\s*(?:$|[,;]|\.(?!\d)|och\s|samt\s|and\s|oraz\s|og\s|i\s|و|\n))/gi;
 function parseLine(line){
   line=line.trim();if(!line)return null;
   let name="",rest="",m;
@@ -311,7 +318,7 @@ function parseLine(line){
     name=tok.slice(0,i).join(" ");rest=tok.slice(i).join(" ");
   }
   name=name.split(/\s+/).filter(w=>w&&!FILLER.has(w.toLowerCase().replace(/[,.]/g,""))).join(" ").replace(/[,.:\-–]+$/,"").trim()||"Okänd";
-  rest=rest.replace(CARTON_RE,(m0,n,prod,w)=>`${n} kartong ${prod.trim()} @${w}`)
+  rest=rest.replace(CARTON_RE,(m0,n,prod,w)=>`${n} kartong ${prod.trim()} @${perOrTotal(+n,+w)}`)
            .replace(/([^\d\s,.@])\s+(?=\d)/g,"$1,")
            .replace(/\s+و\s*(?=\d|كيلو|نص|نصف|ربع|علب|صندوق|كرتون|حب)/g,",")
            .replace(/\s+و(?=\S)/g,(x,off,str)=>startsItem(str.slice(off+x.length))?",":x);
@@ -319,9 +326,10 @@ function parseLine(line){
   for(const it of rest.split(/\s*,\s*|\s+och\s+|\s+samt\s+|\s+plus\s+|\s+and\s+|\s+&\s+|\s+oraz\s+|\s+og\s+|\s+i\s+|;|\s+و\s+/i).map(parseItem).filter(Boolean)){
     const prev=items[items.length-1];
     if(it._qtyOnly){
-      if(prev&&prev.unit==="kartong"&&!prev.perCarton&&(!it.unit||it.unit==="kg"))items[items.length-1]=cartonize(prev,it.qty); // "70 kartonger, 7.2"
+      if(prev&&prev.unit==="kartong"&&!prev.perCarton&&(!it.unit||it.unit==="kg"))items[items.length-1]=cartonize(prev,perOrTotal(prev.qty,it.qty)); // "70 kartonger, 7.2"
       else if(prev&&!prev._q){prev.qty=it.qty;prev.unit=it.unit;prev._q=true}
       continue}
+    if(it.cartons!=null&&!it.product&&prev&&prev.product&&!prev._q&&prev.cartons==null){items[items.length-1]={...it,product:prev.product,product_ar:prev.product_ar};continue} // "kyckling, 10 krt"
     items.push(it);
   }
   items.forEach(i=>delete i._q);
@@ -332,11 +340,11 @@ function parseOffline(text){return normalize(text).split(/\n+/).map(parseLine).f
 
 /* ---------- optional: own Claude API key ---------- */
 const getKey=()=>ls.get("ob_key","");
-async function claude(prompt,maxTokens){
+async function claude(prompt,maxTokens,img){
   const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{
     "content-type":"application/json","x-api-key":getKey(),"anthropic-version":"2026-10-21",
     "anthropic-beta":"server-side-fallback-2026-07-01","anthropic-dangerous-direct-browser-access":"true"},
-    body:JSON.stringify({model:"claude-opus-5-5",max_tokens:maxTokens,output_config:{effort:"low"},fallbacks:"default",messages:[{role:"user",content:prompt}]})});
+    body:JSON.stringify({model:"claude-opus-5-5",max_tokens:maxTokens,output_config:{effort:"low"},fallbacks:"default",messages:[{role:"user",content:img?[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:img.split(",")[1]}},{type:"text",text:prompt}]:prompt}]})});
   const j=await r.json().catch(()=>null);
   if(!r.ok||!j)throw new Error((j&&j.error&&j.error.message)||("HTTP "+r.status));
   if(j.stop_reason==="refusal")throw new Error("refusal");
@@ -344,23 +352,81 @@ async function claude(prompt,maxTokens){
 }
 function lastPerCarton(product){let best=null;for(const r of received)for(const it of r.items)if(it.product===product&&it.perCarton>0&&(!best||r.created>best.t))best={t:r.created,w:it.perCarton};return best?best.w:null}
 const knownCustomers=()=>[...new Set(orders.map(o=>o.customer))];
+const PHOTO_INSTR=`The notes are in the attached PHOTO: a delivery note (följesedel / følgeseddel / dowód dostawy / delivery note) or a handwritten note. Read EVERY product line.
+For each line: "qty" = the delivered NET weight in kg for that line (unit "kg"); "cartons" = the number of cartons / packages / kolli / colli / krt for that line; "perCarton" = kg per carton if printed, otherwise qty divided by cartons. If a line has only a count and no weight, use unit "kartong" (cartons) or "st" (pieces).
+Ignore prices, VAT, sums, addresses and total rows. Put the sender company in "customer" and the delivery note number and date in "note". If a number is hard to read, give your best reading.`;
 const knownSuppliers=()=>[...new Set(received.map(r=>r.supplier))];
-async function parseAI(text,kind){
+async function parseAI(text,kind,img){
   const out=await claude((kind==="in"?`These notes record deliveries RECEIVED by a meat wholesaler from its suppliers. Put the SUPPLIER name in the "customer" field. Known suppliers: ${JSON.stringify(knownSuppliers())}; use an existing spelling if it matches. If no supplier is named, use "${t("unknownSup")}".\n`:"")+`You read order notes for a small food business in Malmö. Notes may be in Swedish, Arabic, English, Polish, Danish, or a mix (Arabic may be in Arabic script or written with Latin letters; numbers may be Arabic-Indic digits like ٥).
 Extract every customer order. Return ONLY JSON, no other text:
 {"orders":[{"customer":"name","items":[{"product":"Swedish product name, lowercase, singular, e.g. kött, kyckling, lammkött, köttfärs, tomater","product_ar":"Arabic name","qty":number,"unit":"kg|st|låda|liter|paket"}],"note":"anything else, e.g. delivery day, or empty"}]}
 Cartons: "70 kartonger 7,2" / "70 kartonger kyckling à 7,2 kg" / "٧٠ كرتونة ٧٫٢" means 70 cartons of 7.2 kg each -> unit "kg", qty 504, plus "cartons":70,"perCarton":7.2. Cartons without a weight -> unit "kartong", qty = number of cartons, "cartons" = same number. A decimal comma (7,2) is a decimal point.
 Rules: convert grams to kg (500 g -> 0.5 kg). "kilo"/"كيلو"/"kg" -> kg. "نص كيلو" = 0.5 kg. If no number is given, qty 1. Write product in Swedish so totals add up across languages (لحم/meat/mięso/kød=kött, دجاج/chicken/kurczak/kylling=kyckling, لحم غنم/lamb=lammkött, لحم مفروم/minced meat=köttfärs).
 Known customers already in the book: ${JSON.stringify(knownCustomers())}. If a name refers to one of them (also across scripts, e.g. أحمد = Ahmed), use the existing spelling exactly. Otherwise keep the name as written. If no customer name is given, use "Okänd".
-Note text:
-"""${text}"""`,4000);
+${img?PHOTO_INSTR:`Note text:\n"""${text}"""`}`,6000,img);
   const a=out.indexOf("{"),b=out.lastIndexOf("}");
   const r=JSON.parse(out.slice(a,b+1));
   if(!r||!Array.isArray(r.orders))throw new Error("bad");
   return r.orders.filter(o=>o.items&&o.items.length).map(o=>({customer:String(o.customer||"Okänd"),note:o.note||"",
     items:o.items.map(i=>{const it={product:String(i.product||"").toLowerCase(),product_ar:i.product_ar||"",qty:Number(i.qty)||1,unit:UNITS.includes(i.unit)?i.unit:"st"};
-      if(Number(i.cartons)>0){it.cartons=Number(i.cartons);if(Number(i.perCarton)>0){it.perCarton=Number(i.perCarton);it.unit="kg";it.qty=Math.round(it.cartons*it.perCarton*1000)/1000}}
+      if(Number(i.cartons)>0){it.cartons=Number(i.cartons);const per=Number(i.perCarton);
+        if(it.unit==="kg"&&Number(i.qty)>0)it.perCarton=per>0?per:Math.round(it.qty/it.cartons*1000)/1000;
+        else if(per>0){it.perCarton=per;it.unit="kg";it.qty=Math.round(it.cartons*per*1000)/1000}
+        else{it.unit="kartong";it.qty=it.cartons}}
       return it})}));
+}
+
+/* ---------- photo of a delivery note ---------- */
+async function shrink(file){
+  const url=URL.createObjectURL(file);const img=new Image();
+  await new Promise((ok,no)=>{img.onload=ok;img.onerror=no;img.src=url});
+  const sc=Math.min(1,1800/Math.max(img.naturalWidth,img.naturalHeight));const c=document.createElement("canvas");
+  c.width=Math.round(img.naturalWidth*sc);c.height=Math.round(img.naturalHeight*sc);c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+  URL.revokeObjectURL(url);return c.toDataURL("image/jpeg",0.85);
+}
+const loadScript=src=>new Promise((ok,no)=>{const e=document.createElement("script");e.src=src;e.onload=ok;e.onerror=no;document.head.appendChild(e)});
+async function ocr(dataUrl){
+  if(!window.Tesseract)await loadScript("https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js");
+  const w=await Tesseract.createWorker(({sv:"swe+eng",en:"eng+swe",pl:"pol+swe",da:"dan+swe",ar:"swe+eng"})[lang]);
+  try{return(await w.recognize(dataUrl)).data.text}finally{await w.terminate()}
+}
+// text read from a photo without AI: first company-looking line = supplier, product lines = items
+function parseOcr(text){
+  const lines=normalize(text).split(/\n+/).map(l=>l.replace(/[|_]+/g," ").replace(/\s+/g," ").replace(/^\d{4,}\s+/,"").trim()).filter(l=>l.length>1);
+  if(!lines.length)return[];
+  const sup=lines.find(l=>/\b(AB|A\/S|ApS|Ltd|GmbH|Oy|AS|Sp\. ?z ?o\.?o\.?|HB|KB)\b/i.test(l))||lines[0];
+  const junk=/(kr\b|sek|dkk|pln|eur|moms|vat|total|summa|netto summa|att betala|org|tel|datum|date|faktura|invoice|adress|address|www|@)/i;
+  const head=/^(kund|customer|kunde|klient|odbiorca|leverans|levering|dostaw|datum|date|data|följesedel|følgeseddel|delivery|dowód|art|summa|sum|total|razem|i alt|org|tel|nr\b)/i;
+  const o=parseLine(t("unknownSup")+": "+lines.filter(l=>l!==sup&&/\d/.test(l)&&!head.test(l)).join(", "));
+  if(!o)return[];
+  o.items=o.items.filter(i=>i.product&&!junk.test(i.product)&&(i.product_ar||NAMES[i.product]||i.cartons!=null||(i.unit==="kg"&&/[a-zåäöæøąćęłńóśźż]{3,}/i.test(i.product))));
+  o.customer=sup.replace(/[^\p{L}\p{N} .&\/-]/gu,"").trim().slice(0,40)||t("unknownSup");
+  return o.items.length?[o]:[];
+}
+$("#photoBtn").onclick=()=>$("#photoIn").click();
+$("#photoIn").onchange=async e=>{
+  const f=e.target.files[0];e.target.value="";if(!f)return;
+  const st=$("#status");st.textContent=t("photoReading");$("#photoBtn").disabled=$("#addBtn").disabled=true;
+  try{
+    const img=await shrink(f);let parsed=[],raw=t("photoRaw"),tip="";
+    if(getKey()){
+      try{parsed=await parseAI("",mode,img)}catch(err){st.textContent=t("aiErr")+" ("+err.message+")"}
+    }
+    if(!parsed.length){
+      st.textContent=t("photoOcr");
+      const text=await ocr(img);raw=t("photoRaw")+": "+text.replace(/\s+/g," ").trim().slice(0,400);
+      parsed=mode==="in"?parseOcr(text):parseOffline(text);tip=getKey()?"":t("photoTip");
+    }
+    if(!parsed.length){st.textContent=t("photoFail");return}
+    showDraft(parsed,raw);st.textContent=tip;
+  }catch(err){st.textContent=t("photoFail")}
+  finally{$("#photoBtn").disabled=$("#addBtn").disabled=false}
+};
+function showDraft(parsed,raw){
+  parsed.forEach(o=>{if(o.customer==="Okänd")o.customer=mode==="in"?t("unknownSup"):t("unknownCust")});
+  parsed.forEach(o=>o.items=o.items.map(it=>it.unit==="kartong"&&it.product&&lastPerCarton(it.product)?cartonize(it,lastPerCarton(it.product)):it));
+  draft={raw,orders:parsed,kind:mode};renderDraft();
+  $("#draft").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
 /* ---------- reading an order ---------- */
@@ -372,9 +438,7 @@ $("#addBtn").onclick=async()=>{
     if(getKey()){try{parsed=await parseAI(text,mode);st.textContent=""}catch(e){parsed=parseOffline(text);st.textContent=t("aiErr")+" ("+e.message+")"}}
     else{parsed=parseOffline(text);st.textContent=""}
     if(!parsed.length){st.textContent=t("fail");return}
-    parsed.forEach(o=>{if(o.customer==="Okänd")o.customer=mode==="in"?t("unknownSup"):t("unknownCust")});
-    parsed.forEach(o=>o.items=o.items.map(it=>it.unit==="kartong"&&it.product&&lastPerCarton(it.product)?cartonize(it,lastPerCarton(it.product)):it));
-    draft={raw:text,orders:parsed,kind:mode};renderDraft();
+    showDraft(parsed,text);
   }finally{$("#addBtn").disabled=false}
 };
 function renderDraft(){
@@ -589,11 +653,12 @@ function applyMode(){
   $("#hint").textContent=mode==="in"?t("hintIn"):t("hint");
   $("#inp").placeholder=mode==="in"?t("phIn"):t("phOrder");
   $("#addBtn").textContent=mode==="in"?"🚚 "+t("add"):t("add");
+  $("#photoBtn").textContent=mode==="in"?t("photoIn"):t("photoOrder");
 }
 document.querySelectorAll(".mode button").forEach(b=>b.onclick=()=>{mode=b.dataset.k;if(draft&&draft.kind!==mode){draft=null;renderDraft()}applyMode()});
 $("#langSel").onchange=e=>{lang=e.target.value;ls.set("ob_lang",lang);applyLang()};
 
-window.__ob={parseOffline,stockRows};
+window.__ob={parseOffline,stockRows,parseOcr};
 load();setupMic();applyLang();
 if("serviceWorker" in navigator&&location.protocol==="https:"){
   const hadSW=!!navigator.serviceWorker.controller;let reloaded=false;
