@@ -87,6 +87,8 @@ li:last-child{border-bottom:0}
 .calc .ctot{display:flex;justify-content:space-between;gap:10px;padding:10px 0 12px;font:800 20px Archivo,"Noto Sans Arabic",sans-serif;color:var(--red)}
 .csum{color:var(--ink);white-space:nowrap}
 .crow{flex-wrap:wrap}
+.dimg{display:block;max-width:100%;max-height:220px;margin:4px 0 10px;border-radius:10px;border:1px solid var(--line);object-fit:contain;background:#fff;cursor:zoom-in}
+.dimg.big{max-height:none;cursor:zoom-out}
 .crow{display:flex;gap:6px;align-items:center;padding:0 0 6px;font-size:13px;color:var(--mute)}
 .crow .fld{width:76px;min-height:36px}
 .srow .have{text-align:end}
@@ -188,6 +190,11 @@ Object.assign(T.en,{"photoIn": "📷 Photo of delivery note", "photoOrder": "�
 Object.assign(T.pl,{"photoIn": "📷 Zdjęcie dowodu dostawy", "photoOrder": "📷 Zdjęcie kartki z zamówieniem", "photoReading": "Czytam dowód dostawy…", "photoOcr": "Czytam tekst ze zdjęcia – może to potrwać do pół minuty…", "photoFail": "Nie udało się odczytać zdjęcia. Zrób nowe, prosto z góry, w dobrym świetle.", "photoRaw": "📷 Zdjęcie dowodu dostawy", "photoTip": "Sprawdź dokładnie wiersze. Z kluczem Claude API w ⚙ dowody dostawy są odczytywane dużo pewniej."});
 Object.assign(T.da,{"photoIn": "📷 Fotografér følgeseddel", "photoOrder": "📷 Fotografér ordreseddel", "photoReading": "Læser følgesedlen…", "photoOcr": "Læser teksten i billedet – kan tage op til et halvt minut…", "photoFail": "Kunne ikke læse billedet. Tag et nyt lige oppefra i godt lys.", "photoRaw": "📷 Foto af følgeseddel", "photoTip": "Tjek linjerne grundigt. Med en Claude API-nøgle under ⚙ læses følgesedler meget mere sikkert."});
 Object.assign(T.ar,{"photoIn": "📷 صوّر إشعار التسليم", "photoOrder": "📷 صوّر ورقة الطلب", "photoReading": "جارٍ قراءة إشعار التسليم…", "photoOcr": "جارٍ قراءة النص في الصورة – قد يستغرق حتى نصف دقيقة…", "photoFail": "تعذّرت قراءة الصورة. التقط صورة جديدة من الأعلى مباشرة في إضاءة جيدة.", "photoRaw": "📷 صورة إشعار التسليم", "photoTip": "تحقق من الأسطر جيداً. مع مفتاح Claude API في ⚙ تُقرأ إشعارات التسليم بدقة أكبر."});
+Object.assign(T.sv,{"photoFail": "Kunde inte öppna bilden. Försök igen.", "photoNoLines": "Jag läste bilden men hittade inga varurader. Texten ligger nu i rutan ovan – rätta den (t.ex. \"Kyckling 10 krt 72 kg\") och tryck Läs in.", "photoNoText": "Hittade ingen text i bilden. Ta fotot närmare så att texten fyller bilden.", "photoNoNet": "Textigenkänningen kunde inte laddas – kontrollera internetanslutningen och försök igen."});
+Object.assign(T.en,{"photoFail": "Couldn't open the photo. Try again.", "photoNoLines": "I read the photo but found no product lines. The text is now in the box above – correct it (e.g. \"Chicken 10 ctn 72 kg\") and tap Read order.", "photoNoText": "Found no text in the photo. Take it closer so the text fills the picture.", "photoNoNet": "Text recognition couldn't load – check the internet connection and try again."});
+Object.assign(T.pl,{"photoFail": "Nie udało się otworzyć zdjęcia. Spróbuj ponownie.", "photoNoLines": "Odczytałem zdjęcie, ale nie znalazłem wierszy z towarem. Tekst jest teraz w polu powyżej – popraw go (np. \"Kurczak 10 kart. 72 kg\") i naciśnij Wczytaj zamówienie.", "photoNoText": "Nie znaleziono tekstu na zdjęciu. Zrób zdjęcie bliżej, aby tekst wypełniał kadr.", "photoNoNet": "Nie udało się załadować rozpoznawania tekstu – sprawdź połączenie z internetem i spróbuj ponownie."});
+Object.assign(T.da,{"photoFail": "Kunne ikke åbne billedet. Prøv igen.", "photoNoLines": "Jeg læste billedet, men fandt ingen varelinjer. Teksten står nu i feltet ovenfor – ret den (f.eks. \"Kylling 10 krt 72 kg\") og tryk Læs ordre.", "photoNoText": "Fandt ingen tekst i billedet. Tag billedet tættere på, så teksten fylder billedet.", "photoNoNet": "Tekstgenkendelsen kunne ikke indlæses – tjek internetforbindelsen og prøv igen."});
+Object.assign(T.ar,{"photoFail": "تعذّر فتح الصورة. حاول مرة أخرى.", "photoNoLines": "قرأت الصورة لكن لم أجد أسطر منتجات. النص الآن في المربع أعلاه – صحّحه (مثلاً \"دجاج ١٠ كرتونة ٧٢ كيلو\") ثم اضغط اقرأ الطلب.", "photoNoText": "لم أجد نصاً في الصورة. التقط الصورة من مسافة أقرب حتى يملأ النص الصورة.", "photoNoNet": "تعذّر تحميل التعرّف على النص – تحقق من الاتصال بالإنترنت وحاول مرة أخرى."});
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let lang=ls.get("ob_lang","sv");if(!["sv","en","pl","da","ar"].includes(lang))lang="sv";
 const LOC=()=>({sv:"sv-SE",en:"en-GB",pl:"pl-PL",da:"da-DK",ar:"ar"})[lang];
@@ -195,7 +202,7 @@ const t=k=>T[lang][k]??T.sv[k];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>(Math.round(n*100)/100).toLocaleString(LOC());
-const APP_VERSION="6 · foto";
+const APP_VERSION="7 · foto 2";
 const UNITS=["kg","kartong","st","låda","liter","paket"];
 
 let orders=[],received=[],view="cust",draft=null,q="",armed=null,mode="order";
@@ -377,18 +384,52 @@ ${img?PHOTO_INSTR:`Note text:\n"""${text}"""`}`,6000,img);
 }
 
 /* ---------- photo of a delivery note ---------- */
-async function shrink(file){
+async function toCanvas(file,max){
   const url=URL.createObjectURL(file);const img=new Image();
-  await new Promise((ok,no)=>{img.onload=ok;img.onerror=no;img.src=url});
-  const sc=Math.min(1,1800/Math.max(img.naturalWidth,img.naturalHeight));const c=document.createElement("canvas");
+  try{await new Promise((ok,no)=>{img.onload=ok;img.onerror=no;img.src=url})}finally{setTimeout(()=>URL.revokeObjectURL(url),0)}
+  const sc=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));const c=document.createElement("canvas");
   c.width=Math.round(img.naturalWidth*sc);c.height=Math.round(img.naturalHeight*sc);c.getContext("2d").drawImage(img,0,0,c.width,c.height);
-  URL.revokeObjectURL(url);return c.toDataURL("image/jpeg",0.85);
+  return c;
+}
+async function shrink(file,max=1800){return(await toCanvas(file,max)).toDataURL("image/jpeg",0.85)}
+// grey, high-contrast copy: much easier for text recognition on phone photos (shadows, grey paper)
+async function prepOcr(file){
+  const c=await toCanvas(file,2200),x=c.getContext("2d"),d=x.getImageData(0,0,c.width,c.height),a=d.data,h=new Uint32Array(256);
+  for(let i=0;i<a.length;i+=4){const g=(a[i]*299+a[i+1]*587+a[i+2]*114)/1000|0;a[i]=g;h[g]++}
+  const n=a.length/4;let lo=0,hi=255,acc=0;
+  for(let v=0;v<256;v++){acc+=h[v];if(acc>n*.02){lo=v;break}}acc=0;
+  for(let v=255;v>=0;v--){acc+=h[v];if(acc>n*.02){hi=v;break}}
+  const k=255/Math.max(1,hi-lo);
+  for(let i=0;i<a.length;i+=4){const g=Math.max(0,Math.min(255,(a[i]-lo)*k));a[i]=a[i+1]=a[i+2]=g}
+  x.putImageData(d,0,0);return c.toDataURL("image/jpeg",0.92);
 }
 const loadScript=src=>new Promise((ok,no)=>{const e=document.createElement("script");e.src=src;e.onload=ok;e.onerror=no;document.head.appendChild(e)});
 async function ocr(dataUrl){
   if(!window.Tesseract)await loadScript("https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js");
   const w=await Tesseract.createWorker(({sv:"swe+eng",en:"eng+swe",pl:"pol+swe",da:"dan+swe",ar:"swe+eng"})[lang]);
-  try{return(await w.recognize(dataUrl)).data.text}finally{await w.terminate()}
+  try{return(await w.recognize(dataUrl,{rotateAuto:true})).data.text}finally{await w.terminate()}
+}
+// one row of a delivery note. With units written ("10 krt 72 kg") the normal reader is used;
+// a bare table row ("Kycklingfilé 10 72,00 59,90") is read as description, cartons, kg, (price…)
+function ocrRow(line,kgFirst,inTable){
+  const m=line.match(/^(.*?\p{L}[^\d]*?)\s+(\d.*)$/u);if(!m)return[];
+  const pct=(m[2].match(/^\d+(?:\.\d+)?\s*%/)||[""])[0];
+  const desc=(m[1]+" "+pct).replace(/[^\p{L}\p{N}\s%\-\/]/gu," ").replace(/\s+/g," ").trim(),tail=m[2].slice(pct.length).replace(/\d+(?:\.\d+)?\s*%/g," ");
+  if(desc.replace(/[^\p{L}]/gu,"").length<3)return[];
+  if(/(^|[\s\d])(kg|kilo|krt|kart|kolli|colli|ctn|kartong\w*|karton\w*|cartons?|st|stk|szt)(?=[\s.,]|$)/i.test(tail)){
+    const o=parseLine("X: "+line);return o?o.items.filter(i=>i.product&&/\p{L}{2}/u.test(i.product)):[];
+  }
+  const toks=[...tail.matchAll(/\d+(?:\.\d+)?/g)].map(x=>x[0]);
+  if(!toks.length||(!inTable&&toks.length<2&&!findProduct(desc)))return[];
+  const ints=toks.filter(x=>!x.includes(".")),decs=toks.filter(x=>x.includes("."));
+  let c=null,w=null;
+  if(toks.length===1){if(decs.length)w=+toks[0];else c=+toks[0]}
+  else if(decs.length&&ints.length){c=+ints[0];w=+decs[0]}
+  else{[c,w]=kgFirst?[+toks[1],+toks[0]]:[+toks[0],+toks[1]]}
+  const p=findProduct(desc.replace(/\d+(?:\.\d+)?\s*%/g,"")),base=p?{product:p[0],product_ar:p[1]}:{product:desc.toLowerCase().slice(0,40),product_ar:""};
+  if(c>0&&w>0)return[{...base,qty:w,unit:"kg",cartons:c,perCarton:Math.round(w/c*1000)/1000}];
+  if(w>0)return[{...base,qty:w,unit:"kg"}];
+  return c>0?[{...base,qty:c,unit:"kartong",cartons:c}]:[];
 }
 // text read from a photo without AI: first company-looking line = supplier, product lines = items
 function parseOcr(text){
@@ -397,35 +438,46 @@ function parseOcr(text){
   const sup=lines.find(l=>/\b(AB|A\/S|ApS|Ltd|GmbH|Oy|AS|Sp\. ?z ?o\.?o\.?|HB|KB)\b/i.test(l))||lines[0];
   const junk=/(kr\b|sek|dkk|pln|eur|moms|vat|total|summa|netto summa|att betala|org|tel|datum|date|faktura|invoice|adress|address|www|@)/i;
   const head=/^(kund|customer|kunde|klient|odbiorca|leverans|levering|dostaw|datum|date|data|följesedel|følgeseddel|delivery|dowód|art|summa|sum|total|razem|i alt|org|tel|nr\b)/i;
-  const o=parseLine(t("unknownSup")+": "+lines.filter(l=>l!==sup&&/\d/.test(l)&&!head.test(l)).join(", "));
-  if(!o)return[];
-  o.items=o.items.filter(i=>i.product&&!junk.test(i.product)&&(i.product_ar||NAMES[i.product]||i.cartons!=null||(i.unit==="kg"&&/[a-zåäöæøąćęłńóśźż]{3,}/i.test(i.product))));
-  o.customer=sup.replace(/[^\p{L}\p{N} .&\/-]/gu,"").trim().slice(0,40)||t("unknownSup");
-  return o.items.length?[o]:[];
+  // column header: is the kg column before the carton column?
+  const cw=/(kolli|colli|krt|kart|antal|ilość|ilosc|ctn|cartons?|kartong|karton|pkt|pk)/i,kw=/(kg|vikt|netto|weight|waga|vægt|vaegt)/i;
+  let hi=lines.findIndex(l=>cw.test(l)&&kw.test(l)&&!/\d{2,}/.test(l.replace(/kg/ig,"")));
+  const kgFirst=hi>=0&&lines[hi].search(kw)<lines[hi].search(cw);
+  let end=lines.findIndex((l,i)=>i>hi&&/^(summa|sum|total|razem|i alt|netto summa|att betala)/i.test(l));if(end<0)end=lines.length;
+  const body=lines.slice(hi>=0?hi+1:0,end).filter(l=>l!==sup&&/\d/.test(l)&&!head.test(l)&&!junk.test(l.replace(/\d[\d.\s]*kg/ig,"")));
+  const items=[];
+  for(const l of body)for(const it of ocrRow(l,kgFirst,hi>=0))if(it.product&&!junk.test(it.product))items.push(it);
+  return items.length?[{customer:sup.replace(/[^\p{L}\p{N} .&\/-]/gu,"").replace(/^[\s.\-]+|[\s.\-]+$/g,"").slice(0,40)||t("unknownSup"),items,note:""}]:[];
 }
 $("#photoBtn").onclick=()=>$("#photoIn").click();
 $("#photoIn").onchange=async e=>{
   const f=e.target.files[0];e.target.value="";if(!f)return;
   const st=$("#status");st.textContent=t("photoReading");$("#photoBtn").disabled=$("#addBtn").disabled=true;
   try{
-    const img=await shrink(f);let parsed=[],raw=t("photoRaw"),tip="";
+    let img,thumb;
+    try{img=await shrink(f,1800);thumb=await shrink(f,700)}catch(err){st.textContent=t("photoFail");return}
+    let parsed=[],raw=t("photoRaw"),msg="",text="";
     if(getKey()){
-      try{parsed=await parseAI("",mode,img)}catch(err){st.textContent=t("aiErr")+" ("+err.message+")"}
+      try{parsed=await parseAI("",mode,img)}catch(err){msg=t("aiErr")+" ("+err.message+")"}
     }
     if(!parsed.length){
       st.textContent=t("photoOcr");
-      const text=await ocr(img);raw=t("photoRaw")+": "+text.replace(/\s+/g," ").trim().slice(0,400);
-      parsed=mode==="in"?parseOcr(text):parseOffline(text);tip=getKey()?"":t("photoTip");
+      try{text=(await ocr(await prepOcr(f))).trim()}catch(err){st.textContent=(msg?msg+" ":"")+t("photoNoNet");return}
+      raw=t("photoRaw")+": "+text.replace(/\s+/g," ").slice(0,400);
+      parsed=mode==="in"?parseOcr(text):parseOffline(text);
+      if(!getKey())msg=t("photoTip");
     }
-    if(!parsed.length){st.textContent=t("photoFail");return}
-    showDraft(parsed,raw);st.textContent=tip;
-  }catch(err){st.textContent=t("photoFail")}
-  finally{$("#photoBtn").disabled=$("#addBtn").disabled=false}
+    if(!parsed.length){
+      if(text.replace(/[^\p{L}\p{N}]/gu,"").length>3){$("#inp").value=text;st.textContent=t("photoNoLines");$("#inp").focus()}
+      else st.textContent=t("photoNoText");
+      return;
+    }
+    showDraft(parsed,raw,thumb);st.textContent=msg;
+  }finally{$("#photoBtn").disabled=$("#addBtn").disabled=false}
 };
-function showDraft(parsed,raw){
+function showDraft(parsed,raw,img){
   parsed.forEach(o=>{if(o.customer==="Okänd")o.customer=mode==="in"?t("unknownSup"):t("unknownCust")});
   parsed.forEach(o=>o.items=o.items.map(it=>it.unit==="kartong"&&it.product&&lastPerCarton(it.product)?cartonize(it,lastPerCarton(it.product)):it));
-  draft={raw,orders:parsed,kind:mode};renderDraft();
+  draft={raw,orders:parsed,kind:mode,img};renderDraft();
   $("#draft").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
@@ -445,7 +497,7 @@ function renderDraft(){
   const el=$("#draft");if(!draft){el.innerHTML="";return}
   const opt=u=>UNITS.map(x=>`<option value="${x}"${x===u?" selected":""}>${esc(unitTxt(x))}</option>`).join("");
   const isIn=draft.kind==="in";
-  el.innerHTML=`<div class="draft${isIn?" in":""}"><h3>${isIn?t("checkIn"):t("check")}</h3>${draft.orders.map((o,oi)=>`<div class="dord">
+  el.innerHTML=`<div class="draft${isIn?" in":""}"><h3>${isIn?t("checkIn"):t("check")}</h3>${draft.img?`<img class="dimg" src="${draft.img}" alt="">`:""}${draft.orders.map((o,oi)=>`<div class="dord">
     <input class="fld nm" dir="auto" data-f="${oi}:customer" value="${esc(o.customer)}" aria-label="${isIn?t("supplier"):t("customer")}">
     ${o.items.map((it,ii)=>`<div class="irow"><input class="fld" dir="auto" data-f="${oi}:${ii}:product" value="${esc(it.product)}" placeholder="${t("whichProd")}" aria-label="${t("product")}">
       <input class="fld" type="number" step="any" inputmode="decimal" data-f="${oi}:${ii}:qty" value="${it.qty}">
@@ -456,6 +508,7 @@ function renderDraft(){
     <div class="row"><button class="pri" id="saveBtn">${t("save")}</button><button id="discBtn">${t("discard")}</button></div></div>`;
   el.querySelectorAll("[data-f]").forEach(f=>f.oninput=f.onchange=()=>{const p=f.dataset.f.split(":");const o=draft.orders[+p[0]];
     if(p[1]==="customer")o.customer=f.value;else{const it=o.items[+p[1]];it[p[2]]=p[2]==="qty"?Number(f.value)||0:f.value;if(p[2]==="product"){const m=findProduct(f.value);it.product_ar=m&&m[0]===f.value.trim().toLowerCase()?m[1]:it.product_ar}}});
+  const di=el.querySelector(".dimg");if(di)di.onclick=()=>di.classList.toggle("big");
   el.querySelectorAll("[data-c]").forEach(f=>f.oninput=()=>{const[oi,ii,k]=f.dataset.c.split(":");const it=draft.orders[+oi].items[+ii];
     const v=Number(f.value);if(k==="cartons")it.cartons=v>0?v:0;else it.perCarton=v>0?v:undefined;
     const qf=el.querySelector(`[data-f="${oi}:${ii}:qty"]`),uf=el.querySelector(`[data-f="${oi}:${ii}:unit"]`);
