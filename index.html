@@ -140,6 +140,7 @@ li:last-child{border-bottom:0}
 .week .grid{padding-bottom:12px}
 .wkprint{margin:0 0 10px}
 .slip.hist{border-top-color:var(--ok)}
+.week .slip{animation:none}
 .editbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding:10px 12px;border-radius:12px;background:#fff3cd;color:#5a4300;font-weight:700;font-size:17px}
 .editbar .small{flex:none;white-space:nowrap;width:auto}
 .qn small{font:600 13px Inter,"Noto Sans Arabic"}
@@ -402,14 +403,19 @@ T.en.delivery1="delivery";
 T.pl.delivery1="dostawa";
 T.da.delivery1="levering";
 T.ar.delivery1="تسليم";
-const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+Object.assign(T.sv,{"histSearch": "Sök kund, vara eller vecka – t.ex. vecka 28 2025", "jumpWeek": "📅 Hoppa till vecka…", "storeUsed": "Använt lagringsutrymme: {p} %", "storeFull": "Lagringen på telefonen är full! Spara en kopia under ⚙ direkt."});
+Object.assign(T.en,{"histSearch": "Search customer, product or week – e.g. week 28 2025", "jumpWeek": "📅 Jump to week…", "storeUsed": "Storage used: {p} %", "storeFull": "The phone storage is full! Save a copy under ⚙ right away."});
+Object.assign(T.pl,{"histSearch": "Szukaj klienta, produktu lub tygodnia – np. tydzień 28 2025", "jumpWeek": "📅 Przejdź do tygodnia…", "storeUsed": "Użyte miejsce: {p} %", "storeFull": "Pamięć telefonu jest pełna! Od razu zapisz kopię w ⚙."});
+Object.assign(T.da,{"histSearch": "Søg kunde, vare eller uge – f.eks. uge 28 2025", "jumpWeek": "📅 Gå til uge…", "storeUsed": "Brugt lagerplads: {p} %", "storeFull": "Telefonens lager er fuldt! Gem en kopi under ⚙ med det samme."});
+Object.assign(T.ar,{"histSearch": "ابحث عن زبون أو منتج أو أسبوع – مثلاً الأسبوع 28 2025", "jumpWeek": "📅 انتقل إلى أسبوع…", "storeUsed": "المساحة المستخدمة: {p} ٪", "storeFull": "ذاكرة الهاتف ممتلئة! احفظ نسخة من ⚙ فوراً."});
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){if(!ls._warned){ls._warned=true;setTimeout(()=>{try{alert(T[lang]?T[lang].storeFull:T.sv.storeFull)}catch(_){}},0)}}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let lang=ls.get("ob_lang","sv");if(!["sv","en","pl","da","ar"].includes(lang))lang="sv";
 const LOC=()=>({sv:"sv-SE",en:"en-GB",pl:"pl-PL",da:"da-DK",ar:"ar"})[lang];
 const t=k=>T[lang][k]??T.sv[k];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>(Math.round(n*100)/100).toLocaleString(LOC());
-const APP_VERSION="20 · levererat";
+const APP_VERSION="21 · sök vecka";
 const UNITS=["kg","kartong","st","låda","liter","paket"];
 
 const CATS=[["kyckling","🐔","catKyckling"],["kott","🐄","catKott"],["lamm","🐑","catLamm"],["ovrigt","🍟","catOvrigt"]];
@@ -453,14 +459,46 @@ mode=view==="in"?"in":"order";
 
 /* ---------- storage: this phone only ---------- */
 const LS="ob_orders";
-function load(){try{orders=JSON.parse(ls.get(LS,"[]"))||[]}catch(e){orders=[]}try{received=JSON.parse(ls.get(LSIN,"[]"))||[]}catch(e){received=[]}}
+function load(){try{orders=JSON.parse(ls.get(LS,"[]"))||[]}catch(e){orders=[]}try{received=JSON.parse(ls.get(LSIN,"[]"))||[]}catch(e){received=[]}orders=applyPending(LS,orders);received=applyPending(LSIN,received)}
 const LSIN="ob_in";
-function persistIn(){ls.set(LSIN,JSON.stringify(received))}
-function putIn(r){const i=received.findIndex(x=>x.id===r.id);i<0?received.push(r):received[i]=r;persistIn();render()}
-function dropIn(id){received=received.filter(x=>x.id!==id);persistIn();render()}
-function persist(){ls.set(LS,JSON.stringify(orders))}
-function put(o){const i=orders.findIndex(x=>x.id===o.id);i<0?orders.push(o):orders[i]=o;persist();render()}
-function drop(id){orders=orders.filter(x=>x.id!==id);persist();render()}
+function persistIn(){saveBig(LSIN,received)}
+function putIn(r){const i=received.findIndex(x=>x.id===r.id);i<0?received.push(r):received[i]=r;markPending(LSIN,r);persistIn();render()}
+function dropIn(id){received=received.filter(x=>x.id!==id);markPending(LSIN,null,id);persistIn();render()}
+function persist(){saveBig(LS,orders)}
+const idb=(()=>{let dbp=null;
+  const open=()=>dbp||(dbp=new Promise((ok,no)=>{if(!window.indexedDB)return no(new Error("no idb"));const r=indexedDB.open("orderboken",1);
+    r.onupgradeneeded=()=>r.result.createObjectStore("kv");r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}));
+  return{get:k=>open().then(db=>new Promise((ok,no)=>{const q=db.transaction("kv").objectStore("kv").get(k);q.onsuccess=()=>ok(q.result);q.onerror=()=>no(q.error)})),
+    set:(k,v)=>open().then(db=>new Promise((ok,no)=>{const tx=db.transaction("kv","readwrite");tx.objectStore("kv").put(v,k);tx.oncomplete=()=>ok();tx.onerror=()=>no(tx.error)}))}})();
+let idbReady=false;
+function saveBig(key,list){
+  const json=JSON.stringify(list);let quick=true;
+  try{localStorage.setItem(key,json)}catch(e){quick=false;try{localStorage.removeItem(key)}catch(_){}}   // too big for quick storage: the database keeps it
+  if(!idbReady&&!quick)return;
+  const pend=localStorage.getItem("pend_"+key);
+  idb.set(key,json).then(()=>{try{if(localStorage.getItem("pend_"+key)===pend)localStorage.removeItem("pend_"+key)}catch(e){}})
+    .catch(()=>{if(!quick&&!ls._warned){ls._warned=true;alert(t("storeFull"))}});
+}
+// on start: the database is the full record; merge in anything newer from quick storage (same id = newest wins)
+function loadBig(){
+  Promise.all([idb.get(LS),idb.get(LSIN)]).then(([a,b])=>{
+    const merge=(saved,cur)=>{if(!saved)return null;let list;try{list=JSON.parse(saved)}catch(e){return null}
+      const m=new Map(list.map(x=>[x.id,x]));for(const x of cur)m.set(x.id,x);return[...m.values()]};
+    const o=merge(a,orders),r=merge(b,received);idbReady=true;
+    if(o)orders=o;if(r)received=r;
+    orders=applyPending(LS,orders);received=applyPending(LSIN,received);
+    saveBig(LS,orders);saveBig(LSIN,received);
+    if(o||r){render();renderPick()}
+  }).catch(()=>{idbReady=true});
+}
+function put(o){const i=orders.findIndex(x=>x.id===o.id);i<0?orders.push(o):orders[i]=o;markPending(LS,o);persist();render()}
+function drop(id){orders=orders.filter(x=>x.id!==id);markPending(LS,null,id);persist();render()}
+// small notepad in quick storage: each change waits here until the database has confirmed it
+function markPending(key,rec,delId){const k="pend_"+key;let m={};try{m=JSON.parse(localStorage.getItem(k)||"{}")}catch(e){}
+  if(delId)m[delId]={__del:true};else if(rec)m[rec.id]=rec;try{localStorage.setItem(k,JSON.stringify(m))}catch(e){}}
+function applyPending(key,list){let m={};try{m=JSON.parse(localStorage.getItem("pend_"+key)||"{}")}catch(e){}
+  const ids=Object.keys(m);if(!ids.length)return list;const map=new Map(list.map(x=>[x.id,x]));
+  for(const id of ids){if(m[id]&&m[id].__del)map.delete(id);else map.set(id,m[id])}return[...map.values()]}
 
 /* ---------- offline parser (Swedish + Arabic) ---------- */
 const PRODUCTS=[ // [swedish, arabic, default unit, aliases...]
@@ -957,27 +995,41 @@ const weekLabel=wk=>{const sun=new Date(wk.mon);sun.setDate(sun.getDate()+6);con
   return `${t("week")} ${wk.w} · ${f(wk.mon)} – ${f(sun)}${wk.y!==new Date().getFullYear()?" "+wk.y:""}`};
 const longWhen=ts=>new Date(ts).toLocaleString(LOC(),{weekday:"short",day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
 let histOpen=null;
+// "vecka 28 2025", "v28", "week 28/2025", "28/2025" -> {w, y?}
+function weekQuery(q){q=String(q).trim().toLowerCase();
+  let m=q.match(/^(?:vecka|veckan|v|week|wk|uge|tydzie[nń]|tydz|tyg|الأسبوع|أسبوع|اسبوع)\.?\s*(\d{1,2})(?:\s*[,/ -]\s*(\d{4}))?$/i)||q.match(/^(\d{1,2})\s*[/ -]\s*(\d{4})$/);
+  if(!m)return null;const w=+m[1];return w>=1&&w<=53?{w,y:m[2]?+m[2]:null}:null}
 function renderHist(v){
-  const all=orders.filter(o=>o.done);
-  const list=all.filter(match).sort((a,b)=>deliveredAt(b)-deliveredAt(a));
+  const all=orders.filter(o=>o.done),wq=weekQuery(q);
+  const list=all.filter(o=>{if(!wq)return match(o);const k=weekOf(deliveredAt(o));return k.w===wq.w&&(!wq.y||k.y===wq.y)}).sort((a,b)=>deliveredAt(b)-deliveredAt(a));
   const weeks=new Map();for(const o of list){const wk=weekOf(deliveredAt(o));if(!weeks.has(wk.key))weeks.set(wk.key,{wk,os:[]});weeks.get(wk.key).os.push(o)}
   const cur=weekOf(Date.now()).key;if(histOpen===null)histOpen=new Set([cur]);
-  const searchBox=all.length?`<input class="search" id="q" dir="auto" placeholder="${t("search")}" value="${esc(q)}">`:"";
+  const allWeeks=[...new Map(all.map(o=>{const k=weekOf(deliveredAt(o));return[k.key,k]})).values()].sort((a,b)=>b.mon-a.mon);
+  const searchBox=all.length?`<input class="search" id="q" dir="auto" placeholder="${t("histSearch")}" value="${esc(q)}">
+    <select class="fld search" id="jumpWk"><option value="">${t("jumpWeek")}</option>${allWeeks.map(k=>`<option value="${t("week").toLowerCase()} ${k.w} ${k.y}">${t("week")} ${k.w} · ${k.y}</option>`).join("")}</select>`:"";
   const sums=os=>{const s=sumItems(os),k=s.filter(i=>i.unit==="kartong").reduce((a,i)=>a+i.qty,0),g=s.filter(i=>i.unit==="kg").reduce((a,i)=>a+i.qty,0);
     return [k?fmt(k)+" "+t("krt"):"",g?fmt(g)+" kg":""].filter(Boolean).join(" · ")};
   v.innerHTML=searchBox+(list.length?[...weeks.values()].map(({wk,os})=>`<details class="week" data-wk="${wk.key}"${q||histOpen.has(wk.key)?" open":""}>
       <summary><span class="wkt">${esc(weekLabel(wk))}</span><span class="meta">${os.length} ${os.length===1?t("delivery1"):t("deliveries")}${sums(os)?" · "+sums(os):""}</span></summary>
-      <button class="small wkprint" data-wkp="${wk.key}">${t("printWeek")}</button>
-      <div class="grid">${os.map(o=>`<article class="slip hist"><h2 dir="auto">${esc(o.customer)}</h2>
-        <div class="meta">✓ ${t("delivAt")}: <b>${esc(longWhen(deliveredAt(o)))}</b></div><div class="meta">${t("orderedAt")}: ${esc(longWhen(o.created))}</div>
-        <ul>${sumItems([o]).map(itemLi).join("")}</ul>
-        <div class="row"><button class="small" data-undo="${o.id}">${t("undoDeliv")}</button></div></article>`).join("")}</div></details>`).join("")
+      <div class="wkbody">${q||histOpen.has(wk.key)?weekBody(wk,os):""}</div></details>`).join("")
     :`<div class="empty">${all.length?t("noMatch"):t("histEmpty")}</div>`);
-  v.querySelectorAll("details.week").forEach(d=>d.ontoggle=()=>{if(q)return;d.open?histOpen.add(d.dataset.wk):histOpen.delete(d.dataset.wk)});
-  v.querySelectorAll("[data-undo]").forEach(b=>b.onclick=()=>{const o=orders.find(x=>x.id===b.dataset.undo);if(!o||!confirm(t("undoQ")))return;
+  const jw=$("#jumpWk");if(jw)jw.onchange=()=>{if(!jw.value)return;q=jw.value;render();window.scrollTo(0,0)};
+  const bind=root=>{
+  root.querySelectorAll("[data-undo]").forEach(b=>b.onclick=()=>{const o=orders.find(x=>x.id===b.dataset.undo);if(!o||!confirm(t("undoQ")))return;
     put({...o,done:false,doneAt:null});toast(t("delivUndo")+" "+o.items.map(i=>`${fmt(i.qty)} ${unitTxt(i.unit)} ${pn(i.product)}`).join(", "))});
-  v.querySelectorAll("[data-wkp]").forEach(b=>b.onclick=()=>{const w=weeks.get(b.dataset.wkp);if(w)printDelivered(w.os,weekLabel(w.wk))});
+  root.querySelectorAll("[data-wkp]").forEach(b=>b.onclick=()=>{const w=weeks.get(b.dataset.wkp);if(w)printDelivered(w.os,weekLabel(w.wk))});};
+  bind(v);
+  v.querySelectorAll("details.week").forEach(d=>d.ontoggle=()=>{const body=d.querySelector(".wkbody");
+    if(d.open&&!body.innerHTML){const w=weeks.get(d.dataset.wk);body.innerHTML=weekBody(w.wk,w.os);bind(body)}
+    if(q)return;d.open?histOpen.add(d.dataset.wk):histOpen.delete(d.dataset.wk)});
   const qi=$("#q");if(qi)qi.oninput=e=>{q=e.target.value;const pos=e.target.selectionStart;render();const n=$("#q");n.focus();n.setSelectionRange(pos,pos)};
+}
+function weekBody(wk,os){
+  return `<button class="small wkprint" data-wkp="${wk.key}">${t("printWeek")}</button>
+    <div class="grid">${os.map(o=>`<article class="slip hist"><h2 dir="auto">${esc(o.customer)}</h2>
+      <div class="meta">✓ ${t("delivAt")}: <b>${esc(longWhen(deliveredAt(o)))}</b></div><div class="meta">${t("orderedAt")}: ${esc(longWhen(o.created))}</div>
+      <ul>${sumItems([o]).map(itemLi).join("")}</ul>
+      <div class="row"><button class="small" data-undo="${o.id}">${t("undoDeliv")}</button></div></article>`).join("")}</div>`;
 }
 function printDelivered(os,label){
   const rows=items=>{let cur=null,h="";for(const i of items){const c=catOf(i.product);
@@ -1109,7 +1161,7 @@ function renderSettings(){
     <h3>${t("sKey")}</h3><p class="hint">${t("sKeyInfo")}</p><p class="hint">${t("keyHow")}</p>
     <div class="row"><input class="fld" type="password" id="keyIn" placeholder="sk-ant-…" autocomplete="off" style="flex:1 1 220px"><button id="keySave">${t("sKeySave")}</button>${has?`<button class="del" id="keyDel">${t("sKeyDel")}</button>`:""}</div>
     <p class="hint ${has?"ok":""}">${has?t("sKeyOn"):t("sKeyOff")}</p>
-    <h3>${t("storeTitle")}</h3><p class="hint ok">✓ ${t("storeOk")}</p><p class="hint ok" id="storeSafe" hidden>✓ ${t("storeSafe")}</p>
+    <h3>${t("storeTitle")}</h3><p class="hint ok">✓ ${t("storeOk")}</p><p class="hint">${t("storeUsed").replace("{p}",(()=>{let n=0;try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);n+=k.length+(localStorage.getItem(k)||"").length}}catch(e){}return Math.max(1,Math.round(n/5e6*100))})())}</p><p class="hint ok" id="storeSafe" hidden>✓ ${t("storeSafe")}</p>
     <h3>${t("products")} (${catalog.length})</h3><p class="hint">${t("prodInfo")}</p>
     <details><summary class="hint" style="cursor:pointer;min-height:36px;display:flex;align-items:center">${t("products")} ▾</summary>
     ${CATS.map(([k,e,l])=>`<div class="ghead"><span>${e} ${t(l)}</span></div><div class="plist">${catalog.map((p,i)=>[p,i]).filter(([p])=>p.cat===k).map(([p,i])=>`<div class="pline"><span dir="auto">${esc(p.name)}</span>
@@ -1181,8 +1233,8 @@ function applyMode(){
   if(!listening)$("#micBtn").textContent=t("micShort");
 }
 
-window.__ob={parseOffline,stockRows,parseOcr,matchCatalog,catOf,toCatalogItem,buildPrint};
-load();
+window.__ob={parseOffline,stockRows,parseOcr,matchCatalog,catOf,toCatalogItem,buildPrint,weekQuery,weekOf};
+load();loadBig();
 // renamed products: update a saved product list and earlier orders/deliveries once
 (()=>{if(ls.get("ob_mig_names1",""))return;
   const ren={"Tajt":"Tigh","Leg quarter":"Lamm leg quarter"};
