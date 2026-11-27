@@ -144,6 +144,8 @@ li:last-child{border-bottom:0}
 #sheetBody{overflow-y:auto;padding:4px 16px 16px;-webkit-overflow-scrolling:touch}
 .prow{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;min-height:56px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:none;font-size:18px;font-weight:600;text-align:start;padding:0 4px}
 .prow .badge{background:var(--redbg);color:var(--red);border-radius:999px;padding:2px 10px;font-size:14px;white-space:nowrap}
+.erow{cursor:default}
+.eact{display:flex;gap:6px;flex:none}
 .prow.newp{color:var(--mute);font-weight:600;border-bottom:0}
 .qtybox{text-align:center;padding:8px 0 4px}
 .qtybox .pname{font:800 24px/1.2 Archivo,"Noto Sans Arabic",sans-serif;margin:8px 0 4px}
@@ -203,6 +205,25 @@ li{font-size:19px;padding:9px 0}
 .bottom button{font-size:14px;min-height:64px}
 .bottom .ico{font-size:28px}
 .donebtn{font-size:17px}
+.printbtn{width:100%;min-height:56px;margin-bottom:14px;font-size:18px}
+#printArea{display:none}
+@media print{
+  @page{margin:12mm}
+  body{background:#fff!important;color:#000!important;font:12pt/1.35 Inter,"Noto Sans Arabic",Arial,sans-serif}
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block!important}
+  #printArea h1{font:800 20pt Archivo,Arial,sans-serif;margin:0 0 2pt}
+  #printArea .pdate{margin:0 0 12pt;color:#333}
+  #printArea .pcust{break-inside:avoid;page-break-inside:avoid;border:1.5pt solid #000;border-radius:6pt;padding:8pt 10pt;margin:0 0 10pt}
+  #printArea h2{font:800 16pt Archivo,Arial,sans-serif;margin:0 0 4pt}
+  #printArea table{width:100%;border-collapse:collapse}
+  #printArea th{text-align:start;font-size:10pt;color:#333;border-bottom:1pt solid #000;padding:2pt 4pt}
+  #printArea td{padding:4pt;border-bottom:.5pt solid #999;vertical-align:top}
+  #printArea td.n{text-align:end;white-space:nowrap;font-weight:700;width:30%}
+  #printArea td.box{width:18pt;font-size:14pt}
+  #printArea tr.pg td{font-weight:800;background:#eee;border-bottom:1pt solid #000;padding-top:6pt}
+  #printArea .ptot{break-before:page;page-break-before:always}
+}
 @media (prefers-reduced-motion:no-preference){.slip{animation:in .25s ease-out}@keyframes in{from{opacity:0;transform:translateY(6px)}}}
 </style>
 </head>
@@ -234,6 +255,7 @@ li{font-size:19px;padding:9px 0}
 <button role="tab" data-v="tot"><span class="ico">🧮</span><span data-t="tTotShort">Totalt</span></button>
 <button role="tab" data-v="stock"><span class="ico">📊</span><span data-t="tStock">Lager</span></button>
 </nav>
+<div id="printArea" aria-hidden="true"></div>
 <div class="sheet" id="sheet" hidden><div class="sheetbox" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
 <div class="sheethead"><h2 id="sheetTitle"></h2><span class="sheetmsg" id="sheetMsg"></span><button id="sheetClose" data-t="done">Klar</button></div>
 <div id="sheetBody"></div></div></div>
@@ -310,6 +332,21 @@ T.en.tInShort="Goods in";
 T.pl.tInShort="Dostawy";
 T.da.tInShort="Varer ind";
 T.ar.tInShort="الوارد";
+Object.assign(T.sv,{"editProds": "✏️ Ändra eller ta bort produkter", "editDone": "✓ Klar med ändringar", "delProdQ": "Ta bort {p} från listan?", "renameBtn": "Byt namn", "delBtn": "Ta bort"});
+Object.assign(T.en,{"editProds": "✏️ Change or remove products", "editDone": "✓ Done editing", "delProdQ": "Remove {p} from the list?", "renameBtn": "Rename", "delBtn": "Remove"});
+Object.assign(T.pl,{"editProds": "✏️ Zmień lub usuń produkty", "editDone": "✓ Koniec edycji", "delProdQ": "Usunąć {p} z listy?", "renameBtn": "Zmień nazwę", "delBtn": "Usuń"});
+Object.assign(T.da,{"editProds": "✏️ Ret eller slet varer", "editDone": "✓ Færdig med at rette", "delProdQ": "Slet {p} fra listen?", "renameBtn": "Omdøb", "delBtn": "Slet"});
+Object.assign(T.ar,{"editProds": "✏️ تعديل أو حذف المنتجات", "editDone": "✓ انتهيت من التعديل", "delProdQ": "حذف {p} من القائمة؟", "renameBtn": "إعادة تسمية", "delBtn": "حذف"});
+Object.assign(T.sv,{"print": "🖨 Skriv ut alla kunder", "printTitle": "Beställningar", "printProd": "Vara", "printQty": "Antal", "printTotal": "Totalt att plocka", "printNone": "Inga öppna beställningar att skriva ut.", "printCusts": "kunder"});
+Object.assign(T.en,{"print": "🖨 Print all customers", "printTitle": "Orders", "printProd": "Product", "printQty": "Qty", "printTotal": "Total to pick", "printNone": "No open orders to print.", "printCusts": "customers"});
+Object.assign(T.pl,{"print": "🖨 Drukuj wszystkich klientów", "printTitle": "Zamówienia", "printProd": "Produkt", "printQty": "Ilość", "printTotal": "Razem do skompletowania", "printNone": "Brak otwartych zamówień do wydruku.", "printCusts": "klientów"});
+Object.assign(T.da,{"print": "🖨 Udskriv alle kunder", "printTitle": "Ordrer", "printProd": "Vare", "printQty": "Antal", "printTotal": "I alt at plukke", "printNone": "Ingen åbne ordrer at udskrive.", "printCusts": "kunder"});
+Object.assign(T.ar,{"print": "🖨 طباعة كل الزبائن", "printTitle": "الطلبات", "printProd": "المنتج", "printQty": "الكمية", "printTotal": "المجموع للتجهيز", "printNone": "لا توجد طلبات مفتوحة للطباعة.", "printCusts": "زبائن"});
+T.sv.printTot="🖨 Skriv ut totalt-listan";
+T.en.printTot="🖨 Print the total list";
+T.pl.printTot="🖨 Drukuj listę razem";
+T.da.printTot="🖨 Udskriv i alt-listen";
+T.ar.printTot="🖨 طباعة قائمة المجموع";
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let lang=ls.get("ob_lang","sv");if(!["sv","en","pl","da","ar"].includes(lang))lang="sv";
 const LOC=()=>({sv:"sv-SE",en:"en-GB",pl:"pl-PL",da:"da-DK",ar:"ar"})[lang];
@@ -317,7 +354,7 @@ const t=k=>T[lang][k]??T.sv[k];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>(Math.round(n*100)/100).toLocaleString(LOC());
-const APP_VERSION="11";
+const APP_VERSION="13 · utskrift";
 const UNITS=["kg","kartong","st","låda","liter","paket"];
 
 const CATS=[["kyckling","🐔","catKyckling"],["kott","🐄","catKott"],["lamm","🐑","catLamm"],["ovrigt","🍟","catOvrigt"]];
@@ -650,8 +687,13 @@ function renderPick(){
   const sb=$("#cartSave");sb.textContent=isIn?t("saveIn"):t("saveNext");sb.disabled=!c.items.length;
 }
 $("#who").oninput=e=>{cart().who=e.target.value;saveCarts()};
-let sheetCat=null;
-function openSheet(cat){sheetCat=cat;$("#sheet").hidden=false;$("#sheetMsg").textContent="";showList();document.body.style.overflow="hidden"}
+function renameProduct(old,nn){
+  const p=catProd(old);if(!p||!nn||nn===old||catProd(nn))return false;p.name=nn;saveCatalog();
+  const ren=list=>list.forEach(o=>(o.items||[]).forEach(it=>{if(it.product===old)it.product=nn}));
+  ren(orders);ren(received);ren([carts.order,carts.in]);persist();persistIn();saveCarts();return true;
+}
+let sheetCat=null,sheetEdit=false;
+function openSheet(cat){sheetCat=cat;sheetEdit=false;$("#sheet").hidden=false;$("#sheetMsg").textContent="";showList();document.body.style.overflow="hidden"}
 function closeSheet(){$("#sheet").hidden=true;document.body.style.overflow="";renderPick()}
 $("#sheetClose").onclick=closeSheet;
 $("#sheet").onclick=e=>{if(e.target.id==="sheet")closeSheet()};
@@ -659,12 +701,21 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#sheet").hidden
 function showList(){
   const [k,e,l]=CATS.find(x=>x[0]===sheetCat),c=cart();
   $("#sheetTitle").textContent=e+" "+t(l);
-  $("#sheetBody").innerHTML=catalog.filter(p=>p.cat===k).map(p=>{const it=c.items.find(i=>i.product===p.name);
-    return `<button class="prow" data-p="${esc(p.name)}" dir="auto"><span>${esc(p.name)}</span>${it?`<span class="badge">${fmt(it.qty)} ${t("krt")}</span>`:""}</button>`}).join("")
-    +`<button class="prow newp" id="newP">${t("newProd")}</button>`;
+  const prods=catalog.filter(p=>p.cat===k);
+  $("#sheetBody").innerHTML=(sheetEdit
+    ?prods.map(p=>`<div class="prow erow" dir="auto"><span>${esc(p.name)}</span><span class="eact"><button class="small" data-ren="${esc(p.name)}">${t("renameBtn")}</button><button class="small del" data-del="${esc(p.name)}">${t("delBtn")}</button></span></div>`).join("")
+    :prods.map(p=>{const it=c.items.find(i=>i.product===p.name);
+      return `<button class="prow" data-p="${esc(p.name)}" dir="auto"><span>${esc(p.name)}</span>${it?`<span class="badge">${fmt(it.qty)} ${t("krt")}</span>`:""}</button>`}).join(""))
+    +(sheetEdit?"":`<button class="prow newp" id="newP">${t("newProd")}</button>`)
+    +`<button class="prow newp" id="editP">${sheetEdit?t("editDone"):t("editProds")}</button>`;
+  $("#editP").onclick=()=>{sheetEdit=!sheetEdit;$("#sheetMsg").textContent="";showList()};
+  $("#sheetBody").querySelectorAll("[data-ren]").forEach(b=>b.onclick=()=>{const old=b.dataset.ren,nn=(prompt(t("renameProdQ"),old)||"").trim();
+    if(renameProduct(old,nn)){showList();renderPick();render()}});
+  $("#sheetBody").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const n=b.dataset.del;
+    if(!confirm(t("delProdQ").replace("{p}",n)))return;catalog=catalog.filter(p=>p.name!==n);saveCatalog();showList();renderPick()});
   $("#sheetBody").scrollTop=0;
   $("#sheetBody").querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>showQty(b.dataset.p));
-  $("#newP").onclick=()=>{const n=(prompt(t("newProdQ"))||"").trim();if(!n)return;
+  if(!sheetEdit)$("#newP").onclick=()=>{const n=(prompt(t("newProdQ"))||"").trim();if(!n)return;
     if(!catProd(n)){catalog.push({cat:k,name:n});saveCatalog()}showQty(n)};
 }
 function showQty(name){
@@ -775,6 +826,30 @@ function groupHtml(rows,rowHtml){
       out+=`<div class="ghead"><span>${e} ${t(l)}</span>${sum?`<span class="meta">${fmt(sum)} ${t("krtTotal")}</span>`:""}</div>`}
     out+=rowHtml(r)}return out;
 }
+// paper: one box per customer with what they should have, then the totals
+function buildPrint(kind){
+  const open=orders.filter(o=>!o.done);if(!open.length)return false;
+  const by=new Map();for(const o of open){if(!by.has(o.customer))by.set(o.customer,[]);by.get(o.customer).push(o)}
+  const rowsHtml=(items,box)=>{let cur=null,h="";for(const i of items){const c=catOf(i.product);
+      if(c!==cur){cur=c;h+=`<tr class="pg"><td colspan="${box?3:2}">${esc(t(CATS.find(x=>x[0]===c)[2]))}</td></tr>`}
+      h+=`<tr>${box?'<td class="box">☐</td>':""}<td>${esc(pn(i.product))}${i.who?`<div style="font-size:9.5pt;color:#333">${esc(i.who)}</div>`:""}</td><td class="n">${fmt(i.qty)} ${esc(unitTxt(i.unit))}${i.unit==="kartong"&&i.perCarton?` <span style="font-weight:400">(≈ ${fmt(i.qty*i.perCarton)} kg)</span>`:""}</td></tr>`}return h};
+  const head=box=>`<tr>${box?"<th></th>":""}<th>${t("printProd")}</th><th style="text-align:end">${t("printQty")}</th></tr>`;
+  const date=new Date().toLocaleString(LOC(),{weekday:"long",day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"});
+  const custs=[...by].sort((a,b)=>a[0].localeCompare(b[0],"sv"));
+  const sub=`<p class="pdate">${esc(date)} · ${custs.length} ${t("printCusts")} · ${open.length} ${t("orders")}</p>`;
+  if(kind==="tot"){
+    // the total list on its own; under each product: which customers it is for
+    const tot=sumItems(open).map(i=>({...i,perCarton:i.unit==="kartong"?(catProd(i.product)||{}).per||null:null,
+      who:custs.map(([c,os])=>{const q=os.reduce((a,o)=>a+o.items.filter(x=>x.product===i.product&&x.unit===i.unit).reduce((b,x)=>b+(Number(x.qty)||0),0),0);return q?`${c} ${fmt(q)}`:""}).filter(Boolean).join(" · ")}));
+    $("#printArea").innerHTML=`<h1>Orderboken – ${t("printTotal")}</h1>${sub}<table>${head(true)}${rowsHtml(tot,true)}</table>`;
+  }else{
+    $("#printArea").innerHTML=`<h1>Orderboken – ${t("printTitle")}</h1>${sub}`
+      +custs.map(([c,os])=>{const items=sumItems(os).map(i=>({...i,perCarton:i.unit==="kartong"?(catProd(i.product)||{}).per||null:null}));
+        return `<section class="pcust"><h2 dir="auto">${esc(c)}</h2><table>${head(true)}${rowsHtml(items,true)}</table></section>`}).join("");
+  }
+  return true;
+}
+function doPrint(kind){if(!buildPrint(kind)){$("#status").textContent=t("printNone");return}try{window.print()}catch(e){}}
 function renderTotals(v){
   const open=orders.filter(o=>!o.done),m=new Map();
   for(const o of open)for(const it of o.items){const k=it.product+"|"+it.unit;const c=m.get(k)||{product:it.product,product_ar:it.product_ar,unit:it.unit,qty:0,per:it.perCarton||null,cust:new Map()};
@@ -784,8 +859,9 @@ function renderTotals(v){
       const s=sm.get(r.product+"|"+r.unit),hasS=s&&s.in!==0;
       return `<ul style="margin:0"><li><span dir="auto">${esc(pn(r.product))}${r.per&&r.unit==="kartong"?`<br><span class="meta">≈ ${fmt(r.qty*r.per)} kg</span>`:""}${hasS?`<br><span class="meta">${fmt(s.have)} ${esc(unitTxt(r.unit))} ${t("stHave")}</span>${s.left<0?` <span class="short">${t("stShort")} ${fmt(-s.left)}</span>`:""}`:""}
         <details class="pc"><summary>${t("perCust")} (${r.cust.size})</summary>${[...r.cust].sort((a,b)=>b[1]-a[1]).map(([c,q])=>`<div><span dir="auto">${esc(c)}</span><b>${fmt(q)}</b></div>`).join("")}</details></span>
-        <span class="q">${fmt(r.qty)} ${esc(unitTxt(r.unit))}</span></li></ul>`})+`<div class="row"><button id="copyBtn">${t("copy")}</button></div></div>`
+        <span class="q">${fmt(r.qty)} ${esc(unitTxt(r.unit))}</span></li></ul>`})+`<div class="row"><button id="printBtn2">${t("printTot")}</button><button id="copyBtn">${t("copy")}</button></div></div>`
     :`<div class="empty">${t("totEmpty")}</div>`;
+  const pb2=$("#printBtn2");if(pb2)pb2.onclick=()=>doPrint("tot");
   const cb=$("#copyBtn");if(cb)cb.onclick=()=>{let cur=null,txt=t("tTot")+" "+new Date().toLocaleDateString(LOC())+"\n";
     for(const r of rows){const c=catOf(r.product);if(c!==cur){cur=c;const x=CATS.find(y=>y[0]===c);txt+="\n"+x[1]+" "+t(x[2])+"\n"}txt+=`${pn(r.product)}: ${fmt(r.qty)} ${unitTxt(r.unit)}\n`}
     shareText(txt.trim(),cb)};
@@ -802,9 +878,10 @@ function render(){
       <ul>${sumItems(os).map(itemLi).join("")}</ul>
       ${os.map(o=>`<div class="order${o.done?" done":""}">${os.length>1||o.note?`<div class="meta">${when(o.created)}${o.note?` · <span dir="auto">${esc(o.note)}</span>`:""}</div>`:""}
         <div class="row" style="margin-top:4px"><button class="small" data-done="${o.id}">${o.done?t("undo"):"✓ "+t("delivered")}</button><button class="small del" data-del="${o.id}">${armed===o.id?t("sure"):t("remove")}</button></div></div>`).join("")}</article>`).join("")}</div>`};
-  v.innerHTML=searchBox+(open.length?slips(open):`<div class="empty">${t("empty")}</div>`)
+  v.innerHTML=(open.length?`<button class="printbtn" id="printBtn">${t("print")}</button>`:"")+searchBox+(open.length?slips(open):`<div class="empty">${t("empty")}</div>`)
     +(done.length?`<button class="donebtn" id="doneTog">${showDone?t("hideDone"):t("showDone")} (${done.length})</button>${showDone?`<div style="margin-top:14px">${slips(done)}</div>`:""}`:"");
   const dt=$("#doneTog");if(dt)dt.onclick=()=>{showDone=!showDone;render()};
+  const pb=$("#printBtn");if(pb)pb.onclick=()=>doPrint("cust");
   v.querySelectorAll("[data-done]").forEach(b=>b.onclick=()=>{const o=orders.find(x=>x.id===b.dataset.done);if(o)put({...o,done:!o.done})});
   v.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const id=b.dataset.del;if(armed===id){armed=null;drop(id)}else{armed=id;render();setTimeout(()=>{if(armed===id){armed=null;render()}},4000)}});
   v.querySelectorAll("[data-ren]").forEach(b=>b.onclick=()=>{const old=b.dataset.ren;const nn=(prompt(t("renameQ"),old)||"").trim();if(!nn||nn===old)return;
@@ -899,8 +976,7 @@ function renderSettings(){
   $("#langSel").onchange=e=>{lang=e.target.value;ls.set("ob_lang",lang);applyLang()};
   s.querySelectorAll("[data-mv]").forEach(x=>x.onchange=()=>{catalog[+x.dataset.mv].cat=x.value;saveCatalog();renderSettings();renderPick();render()});
   s.querySelectorAll("[data-pren]").forEach(b=>b.onclick=()=>{const p=catalog[+b.dataset.pren],nn=(prompt(t("renameProdQ"),p.name)||"").trim();if(!nn||nn===p.name)return;
-    const old=p.name;p.name=nn;saveCatalog();
-    const ren=list=>list.forEach(o=>o.items.forEach(it=>{if(it.product===old)it.product=nn}));ren(orders);ren(received);ren([carts.order,carts.in]);persist();persistIn();saveCarts();renderSettings();renderPick();render()});
+    if(renameProduct(p.name,nn)){renderSettings();renderPick();render()}});
   s.querySelectorAll("[data-pdel]").forEach(b=>b.onclick=()=>{const i=+b.dataset.pdel,id="p"+i;
     if(armed===id){armed=null;catalog.splice(i,1);saveCatalog();renderSettings();renderPick()}else{armed=id;renderSettings();setTimeout(()=>{if(armed===id){armed=null;renderSettings()}},4000)}
     const d=s.querySelector("details");if(d)d.open=true});
@@ -958,7 +1034,7 @@ function applyMode(){
   if(!listening)$("#micBtn").textContent=t("micShort");
 }
 
-window.__ob={parseOffline,stockRows,parseOcr,matchCatalog,catOf,toCatalogItem};
+window.__ob={parseOffline,stockRows,parseOcr,matchCatalog,catOf,toCatalogItem,buildPrint};
 load();
 // renamed products: update a saved product list and earlier orders/deliveries once
 (()=>{if(ls.get("ob_mig_names1",""))return;
