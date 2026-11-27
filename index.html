@@ -355,6 +355,11 @@ Object.assign(T.en,{"edit": "✏️ Change", "editing": "✏️ You are changing
 Object.assign(T.pl,{"edit": "✏️ Zmień", "editing": "✏️ Zmieniasz zamówienie dla {who}", "editingIn": "✏️ Zmieniasz dostawę od {who}", "saveEdit": "💾 Zapisz zmiany", "cancel": "Anuluj", "replaceCart": "Jest niezapisane zamówienie. Przełączyć na to?", "updated": "Zmiany zapisane ✓"});
 Object.assign(T.da,{"edit": "✏️ Ret", "editing": "✏️ Du retter ordren for {who}", "editingIn": "✏️ Du retter indleveringen fra {who}", "saveEdit": "💾 Gem ændringer", "cancel": "Annullér", "replaceCart": "Der er en ordre, der ikke er gemt. Skift til denne i stedet?", "updated": "Ændringerne er gemt ✓"});
 Object.assign(T.ar,{"edit": "✏️ تعديل", "editing": "✏️ أنت تعدّل طلب {who}", "editingIn": "✏️ أنت تعدّل شحنة {who}", "saveEdit": "💾 حفظ التعديلات", "cancel": "إلغاء", "replaceCart": "يوجد طلب غير محفوظ. هل تريد الانتقال إلى هذا بدلاً منه؟", "updated": "تم حفظ التعديلات ✓"});
+Object.assign(T.sv,{"howManyKg": "Hur många kilo?", "inTotal": "totalt"});
+Object.assign(T.en,{"howManyKg": "How many kilos?", "inTotal": "in total"});
+Object.assign(T.pl,{"howManyKg": "Ile kilogramów?", "inTotal": "razem"});
+Object.assign(T.da,{"howManyKg": "Hvor mange kilo?", "inTotal": "i alt"});
+Object.assign(T.ar,{"howManyKg": "كم كيلو؟", "inTotal": "بالمجموع"});
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let lang=ls.get("ob_lang","sv");if(!["sv","en","pl","da","ar"].includes(lang))lang="sv";
 const LOC=()=>({sv:"sv-SE",en:"en-GB",pl:"pl-PL",da:"da-DK",ar:"ar"})[lang];
@@ -362,7 +367,7 @@ const t=k=>T[lang][k]??T.sv[k];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>(Math.round(n*100)/100).toLocaleString(LOC());
-const APP_VERSION="14 · ändra order";
+const APP_VERSION="15 · kött i kg";
 const UNITS=["kg","kartong","st","låda","liter","paket"];
 
 const CATS=[["kyckling","🐔","catKyckling"],["kott","🐄","catKott"],["lamm","🐑","catLamm"],["ovrigt","🍟","catOvrigt"]];
@@ -375,6 +380,7 @@ function catOf(name){const c=catProd(name);if(c)return c.cat;const n=String(name
   if(/kyckling|chicken|kurcz|kylling|دجاج|فراخ/.test(n))return"kyckling";
   if(/lamm|lamb|lam\b|jagni|baran|غنم|خروف/.test(n))return"lamm";
   if(/kött|kött|kalv|nöt|färs|oxe|biff|beef|wołow|mięso|kød|لحم|بقر|عجل/.test(n))return"kott";return"ovrigt"}
+const unitOf=name=>catOf(name)==="kott"?"kg":"kartong";
 const catIdx=c=>CATS.findIndex(x=>x[0]===c);
 const prodOrder=name=>{const i=catalog.findIndex(x=>x.name===name);return catIdx(catOf(name))*10000+(i<0?9000:i)};
 const byProd=(a,b)=>prodOrder(a.product)-prodOrder(b.product)||a.product.localeCompare(b.product,"sv");
@@ -389,6 +395,8 @@ function matchCatalog(it){
 }
 function toCatalogItem(it){
   const c=matchCatalog(it);if(!c)return it;
+  if(unitOf(c.name)==="kg"){const kg=it.unit==="kg"?Number(it.qty):(it.perCarton>0?Math.round((it.cartons??it.qty)*it.perCarton*1000)/1000:null);
+    return kg!=null?{product:c.name,product_ar:"",qty:kg,unit:"kg",cat:true}:{...it,product:c.name,product_ar:""}}
   const per=c.per||it.perCarton||null;
   let n=it.cartons!=null?Number(it.cartons):it.unit==="kartong"?Number(it.qty):(per&&it.unit==="kg"?Math.round(it.qty/per*100)/100:null);
   if(n==null)return{...it,product:c.name,product_ar:""};
@@ -563,6 +571,7 @@ Extract every customer order. Return ONLY JSON, no other text:
 Cartons: "70 kartonger 7,2" / "70 kartonger kyckling à 7,2 kg" / "٧٠ كرتونة ٧٫٢" means 70 cartons of 7.2 kg each -> unit "kg", qty 504, plus "cartons":70,"perCarton":7.2. Cartons without a weight -> unit "kartong", qty = number of cartons, "cartons" = same number. A decimal comma (7,2) is a decimal point.
 Rules: convert grams to kg (500 g -> 0.5 kg). "kilo"/"كيلو"/"kg" -> kg. "نص كيلو" = 0.5 kg. If no number is given, qty 1. Write product in Swedish so totals add up across languages (لحم/meat/mięso/kød=kött, دجاج/chicken/kurczak/kylling=kyckling, لحم غنم/lamb=lammkött, لحم مفروم/minced meat=köttfärs).
 Product list (when an item is one of these, use EXACTLY this name and give "cartons" = number of cartons; "Hel kyckling 7,2" etc. are whole chickens named by kg per carton): ${JSON.stringify(catalog.map(c=>c.name))}.
+Meat products (the "Köttfärs…", "…kött", beef and veal cuts in the list) are counted in kg: give qty in kg and unit "kg" for those.
 Known customers already in the book: ${JSON.stringify(knownCustomers())}. If a name refers to one of them (also across scripts, e.g. أحمد = Ahmed), use the existing spelling exactly. Otherwise keep the name as written. If no customer name is given, use "Okänd".
 ${img?PHOTO_INSTR:`Note text:\n"""${text}"""`}`,6000,img);
   const a=out.indexOf("{"),b=out.lastIndexOf("}");
@@ -683,7 +692,7 @@ function renderPick(){
   const names=[...new Set((isIn?received.filter(r=>!r.adjust).map(r=>r.supplier):orders.map(o=>o.customer)))].sort((a,b)=>a.localeCompare(b,"sv"));
   $("#whoList").innerHTML=names.map(n=>`<option value="${esc(n)}"></option>`).join("");
   $("#cats").innerHTML=CATS.map(([k,e,l])=>{const n=c.items.filter(i=>catOf(i.product)===k).reduce((a,i)=>a+i.qty,0);
-    return `<button class="cat" data-cat="${k}"><span class="ce">${e}</span>${t(l)}<span class="cn">${n?fmt(n)+" "+t("krt"):""}</span></button>`}).join("");
+    return `<button class="cat" data-cat="${k}"><span class="ce">${e}</span>${t(l)}<span class="cn">${n?fmt(n)+" "+(k==="kott"?"kg":t("krt")):""}</span></button>`}).join("");
   $("#cats").querySelectorAll("[data-cat]").forEach(b=>b.onclick=()=>openSheet(b.dataset.cat));
   const items=[...c.items].sort(byProd);
   $("#cart").innerHTML=(c.editId?`<div class="editbar"><span>${esc((isIn?t("editingIn"):t("editing")).replace("{who}",c.who||"…"))}</span><button class="small" id="editCancel">${t("cancel")}</button></div>`:"")+(items.length?`<div class="cart"><p class="carth">${isIn?t("cartIn"):t("cartOrder")}</p>${items.map(i=>`<div class="cline"><span class="cp" dir="auto">${esc(i.product)}${i.perCarton?`<br><span class="meta">≈ ${fmt(i.qty*i.perCarton)} kg</span>`:""}</span>
@@ -708,20 +717,21 @@ function editSaved(rec,isIn){
     items:rec.items.map(it=>({product:it.product,product_ar:it.product_ar||"",qty:Number(it.qty)||0,unit:it.unit||"kartong",...(it.perCarton?{perCarton:it.perCarton}:{})}))};
   saveCarts();renderPick();$("#status").textContent="";window.scrollTo({top:0,behavior:"smooth"});
 }
-let sheetCat=null,sheetEdit=false;
+let sheetCat=null,sheetEdit=false,qtyCommit=null;
 function openSheet(cat){sheetCat=cat;sheetEdit=false;$("#sheet").hidden=false;$("#sheetMsg").textContent="";showList();document.body.style.overflow="hidden"}
-function closeSheet(){$("#sheet").hidden=true;document.body.style.overflow="";renderPick()}
+function closeSheet(){if(qtyCommit){const f=qtyCommit;qtyCommit=null;f()}$("#sheet").hidden=true;document.body.style.overflow="";renderPick()}
 $("#sheetClose").onclick=closeSheet;
 $("#sheet").onclick=e=>{if(e.target.id==="sheet")closeSheet()};
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#sheet").hidden)closeSheet()});
 function showList(){
+  qtyCommit=null;
   const [k,e,l]=CATS.find(x=>x[0]===sheetCat),c=cart();
   $("#sheetTitle").textContent=e+" "+t(l);
   const prods=catalog.filter(p=>p.cat===k);
   $("#sheetBody").innerHTML=(sheetEdit
     ?prods.map(p=>`<div class="prow erow" dir="auto"><span>${esc(p.name)}</span><span class="eact"><button class="small" data-ren="${esc(p.name)}">${t("renameBtn")}</button><button class="small del" data-del="${esc(p.name)}">${t("delBtn")}</button></span></div>`).join("")
     :prods.map(p=>{const it=c.items.find(i=>i.product===p.name);
-      return `<button class="prow" data-p="${esc(p.name)}" dir="auto"><span>${esc(p.name)}</span>${it?`<span class="badge">${fmt(it.qty)} ${t("krt")}</span>`:""}</button>`}).join(""))
+      return `<button class="prow" data-p="${esc(p.name)}" dir="auto"><span>${esc(p.name)}</span>${it?`<span class="badge">${fmt(it.qty)} ${esc(unitTxt(it.unit||"kartong"))}</span>`:""}</button>`}).join(""))
     +(sheetEdit?"":`<button class="prow newp" id="newP">${t("newProd")}</button>`)
     +`<button class="prow newp" id="editP">${sheetEdit?t("editDone"):t("editProds")}</button>`;
   $("#editP").onclick=()=>{sheetEdit=!sheetEdit;$("#sheetMsg").textContent="";showList()};
@@ -735,23 +745,30 @@ function showList(){
     if(!catProd(n)){catalog.push({cat:k,name:n});saveCatalog()}showQty(n)};
 }
 function showQty(name){
-  const c=cart(),it=c.items.find(i=>i.product===name),p=catProd(name)||{};
+  const c=cart(),it=c.items.find(i=>i.product===name),p=catProd(name)||{},u=unitOf(name),kgU=u==="kg";
   $("#sheetMsg").textContent="";
-  $("#sheetBody").innerHTML=`<div class="qtybox"><div class="pname" dir="auto">${esc(name)}</div><div class="meta">${t("howMany")}</div>
-    <div class="qrow"><button class="qb" id="qMinus" aria-label="−">−</button><input class="qin" id="qIn" type="number" inputmode="decimal" step="any" min="0" value="${it?it.qty:1}" aria-label="${t("howMany")}"><button class="qb" id="qPlus" aria-label="+">+</button></div>
-    <div class="meta" id="qKg" style="min-height:20px;margin-top:6px"></div>
-    <div class="quick">${[1,2,3,5,10,20,50].map(n=>`<button data-qq="${n}">${n}</button>`).join("")}</div>
+  const ask=kgU?t("howManyKg"):t("howMany");
+  $("#sheetBody").innerHTML=`<div class="qtybox"><div class="pname" dir="auto">${esc(name)}</div><div class="meta">${ask}</div>
+    <div class="qrow"><button class="qb" id="qMinus" aria-label="−">−</button><input class="qin" id="qIn" type="text" inputmode="decimal" autocomplete="off" value="${it?String(it.qty).replace(".",lang==="en"?".":","):""}" placeholder="0" aria-label="${ask}"><button class="qb" id="qPlus" aria-label="+">+</button></div>
+    <div class="meta" id="qKg" style="min-height:20px;margin-top:6px">${kgU?"kg":""}</div>
+    <div class="quick">${(kgU?[1,2,5,10,20,50,100]:[1,2,3,5,10,20,50]).map(n=>`<button data-qq="${n}">${n}</button>`).join("")}</div>
     <button class="pri" id="qAdd">${t("addToOrder")}</button><button id="qBack" style="width:100%;margin-top:8px">${t("back")}</button></div>`;
-  const qi=$("#qIn"),kg=()=>{const v=Number(qi.value)||0;$("#qKg").textContent=p.per&&v?`≈ ${fmt(v*p.per)} kg`:""};kg();
+  const qi=$("#qIn"),pq=()=>Number(String(qi.value).trim().replace(",","."))||0,show=v=>String(Math.round(v*100)/100).replace(".",lang==="en"?".":",");
+  const kg=()=>{const v=pq();$("#qKg").textContent=kgU?"kg":p.per&&v?`≈ ${fmt(v*p.per)} kg`:""};kg();
   qi.oninput=kg;
-  $("#qMinus").onclick=()=>{qi.value=Math.max(0,(Number(qi.value)||0)-1);kg()};
-  $("#qPlus").onclick=()=>{qi.value=(Number(qi.value)||0)+1;kg()};
+  $("#qMinus").onclick=()=>{qi.value=show(Math.max(0,pq()-1));kg()};
+  qi.onkeydown=ev=>{if(ev.key==="Enter"){ev.preventDefault();$("#qAdd").click()}};
+  $("#qPlus").onclick=()=>{qi.value=show(pq()+1);kg()};
   $("#sheetBody").querySelectorAll("[data-qq]").forEach(b=>b.onclick=()=>{qi.value=b.dataset.qq;kg()});
-  $("#qBack").onclick=showList;
-  $("#qAdd").onclick=()=>{const v=Math.round((Number(String(qi.value).replace(",","."))||0)*100)/100;
+  $("#qBack").onclick=()=>{qtyCommit=null;showList()};
+  // empty box = no change; 0 = remove; otherwise set the amount
+  const commit=()=>{const raw=String(qi.value).trim().replace(",",".");if(raw==="")return null;
+    const v=Math.round((Number(raw)||0)*100)/100;
     c.items=c.items.filter(i=>i.product!==name);
-    if(v>0){const x={product:name,qty:v,unit:"kartong"};if(p.per)x.perCarton=p.per;c.items.push(x)}
-    saveCarts();renderPick();showList();$("#sheetMsg").textContent=v>0?t("added"):"";};
+    if(v>0){const x={product:name,qty:v,unit:u};if(p.per&&!kgU)x.perCarton=p.per;c.items.push(x)}
+    saveCarts();return v};
+  qtyCommit=commit;
+  $("#qAdd").onclick=()=>{const v=commit();qtyCommit=null;renderPick();showList();$("#sheetMsg").textContent=v>0?t("added"):""};
 }
 $("#cartSave").onclick=()=>{
   const c=cart(),isIn=mode==="in",who=c.who.trim(),st=$("#status");
@@ -839,8 +856,10 @@ const itemLi=i=>`<li><span dir="auto">${esc(pn(i.product))} <span class="ar">${e
 
 function groupHtml(rows,rowHtml){
   let out="",cur=null;for(const r of rows){const c=catOf(r.product);
-    if(c!==cur){cur=c;const [k,e,l]=CATS.find(x=>x[0]===c);const sum=rows.filter(x=>catOf(x.product)===c&&x.unit==="kartong").reduce((a,x)=>a+(x.qty??x.have),0);
-      out+=`<div class="ghead"><span>${e} ${t(l)}</span>${sum?`<span class="meta">${fmt(sum)} ${t("krtTotal")}</span>`:""}</div>`}
+    if(c!==cur){cur=c;const [k,e,l]=CATS.find(x=>x[0]===c),g=rows.filter(x=>catOf(x.product)===c);
+      const sK=g.filter(x=>x.unit==="kartong").reduce((a,x)=>a+(x.qty??x.have),0),sKg=g.filter(x=>x.unit==="kg").reduce((a,x)=>a+(x.qty??x.have),0);
+      const parts=[sK?fmt(sK)+" "+t("krt"):"",sKg?fmt(sKg)+" kg":""].filter(Boolean);
+      out+=`<div class="ghead"><span>${e} ${t(l)}</span>${parts.length?`<span class="meta">${parts.join(" · ")} ${t("inTotal")}</span>`:""}</div>`}
     out+=rowHtml(r)}return out;
 }
 // paper: one box per customer with what they should have, then the totals
@@ -1062,6 +1081,9 @@ load();
   const fix=list=>list.forEach(o=>(o.items||[]).forEach(it=>{if(ren[it.product])it.product=ren[it.product]}));
   fix(orders);fix(received);fix([carts.order,carts.in]);
   if(ls.get("ob_catalog",""))saveCatalog();persist();persistIn();saveCarts();ls.set("ob_mig_names1","1")})();
+(()=>{if(ls.get("ob_mig_kg1",""))return;
+  const fix=list=>list.forEach(o=>(o.items||[]).forEach(it=>{if(catProd(it.product)&&unitOf(it.product)==="kg"&&it.unit==="kartong"){it.unit="kg";delete it.cartons;delete it.perCarton}}));
+  fix(orders);fix(received);fix([carts.order,carts.in]);persist();persistIn();saveCarts();ls.set("ob_mig_kg1","1")})();
 setupMic();applyLang();
 if("serviceWorker" in navigator&&location.protocol==="https:"){
   const hadSW=!!navigator.serviceWorker.controller;let reloaded=false;
