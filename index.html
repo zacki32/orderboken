@@ -111,7 +111,7 @@ li:last-child{border-bottom:0}
 .acts .big{flex:1 1 0;min-height:84px;font-size:20px;margin-bottom:10px}
 .acts .big[hidden]{display:none}
 #view{margin-top:18px}
-.bottom{position:fixed;left:0;right:0;bottom:0;z-index:5;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--paper);border-top:1px solid var(--line);padding:6px 10px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(0,0,0,.06)}
+.bottom{position:fixed;left:0;right:0;bottom:0;z-index:5;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;background:var(--paper);border-top:1px solid var(--line);padding:6px 10px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(0,0,0,.06)}
 .bottom button{border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:58px;font-size:13px;color:var(--mute);border-radius:14px;padding:0 4px}
 .bottom .ico{font-size:24px;line-height:1}
 .bottom button[aria-selected=true]{color:var(--ink);background:var(--redbg)}
@@ -130,6 +130,16 @@ li:last-child{border-bottom:0}
 .cline .cp{flex:1 1 150px;font-weight:600}
 .toast{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:15;max-width:620px;margin:auto;background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:14px;font-size:17px;font-weight:600;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .toast[hidden]{display:none}
+.week{background:var(--paper);border:1px solid var(--line);border-radius:14px;margin-bottom:12px;padding:0 12px}
+.week summary{display:block;padding:12px 2px;cursor:pointer;list-style:none}
+.week summary .wkt,.week summary .meta{display:block}
+.week summary::-webkit-details-marker{display:none}
+.week summary .wkt::before{content:"▸ ";color:var(--mute)}
+.week[open] summary .wkt::before{content:"▾ "}
+.week .wkt{font:800 19px Archivo,"Noto Sans Arabic",sans-serif}
+.week .grid{padding-bottom:12px}
+.wkprint{margin:0 0 10px}
+.slip.hist{border-top-color:var(--ok)}
 .editbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding:10px 12px;border-radius:12px;background:#fff3cd;color:#5a4300;font-weight:700;font-size:17px}
 .editbar .small{flex:none;white-space:nowrap;width:auto}
 .qn small{font:600 13px Inter,"Noto Sans Arabic"}
@@ -210,7 +220,7 @@ li{font-size:19px;padding:9px 0}
 .settings h3{font-size:19px}
 .short{font-size:14px}
 .big{font-size:22px}
-.bottom button{font-size:14px;min-height:64px}
+.bottom button{font-size:13px;min-height:64px;line-height:1.1;padding:0 2px;word-break:break-word}
 .bottom .ico{font-size:28px}
 .donebtn{font-size:17px}
 .printbtn{width:100%;min-height:56px;margin-bottom:14px;font-size:18px}
@@ -262,6 +272,7 @@ li{font-size:19px;padding:9px 0}
 <button role="tab" data-v="cust"><span class="ico">📦</span><span data-t="tCust">Kunder</span></button>
 <button role="tab" data-v="tot"><span class="ico">🧮</span><span data-t="tTotShort">Totalt</span></button>
 <button role="tab" data-v="stock"><span class="ico">📊</span><span data-t="tStock">Lager</span></button>
+<button role="tab" data-v="hist"><span class="ico">✅</span><span data-t="tDelivShort">Levererat</span></button>
 </nav>
 <div class="toast" id="toast" role="status" hidden></div>
 <div id="printArea" aria-hidden="true"></div>
@@ -381,6 +392,16 @@ Object.assign(T.en,{"delivDone": "✓ Delivered – removed from stock:", "deliv
 Object.assign(T.pl,{"delivDone": "✓ Dostarczono – usunięto z magazynu:", "delivUndo": "↩ Z powrotem w magazynie:"});
 Object.assign(T.da,{"delivDone": "✓ Leveret – fjernet fra lageret:", "delivUndo": "↩ Tilbage på lager:"});
 Object.assign(T.ar,{"delivDone": "✓ تم التسليم – أُزيل من المخزون:", "delivUndo": "↩ أُعيد إلى المخزون:"});
+Object.assign(T.sv,{"tDelivShort": "Levererat", "week": "Vecka", "delivAt": "Levererad", "orderedAt": "Beställd", "histEmpty": "Inga levererade beställningar än. När du trycker ✓ Levererad hamnar beställningen här.", "undoDeliv": "↩ Ångra leverans", "undoQ": "Flytta tillbaka beställningen till Kunder (inte levererad)?", "printWeek": "🖨 Skriv ut veckan", "deliveries": "leveranser", "histTitle": "Levererat"});
+Object.assign(T.en,{"tDelivShort": "Delivered", "week": "Week", "delivAt": "Delivered", "orderedAt": "Ordered", "histEmpty": "No delivered orders yet. When you tap ✓ Delivered, the order ends up here.", "undoDeliv": "↩ Undo delivery", "undoQ": "Move the order back to Customers (not delivered)?", "printWeek": "🖨 Print the week", "deliveries": "deliveries", "histTitle": "Delivered"});
+Object.assign(T.pl,{"tDelivShort": "Dostarczone", "week": "Tydzień", "delivAt": "Dostarczono", "orderedAt": "Zamówiono", "histEmpty": "Brak dostarczonych zamówień. Po naciśnięciu ✓ Dostarczone zamówienie trafi tutaj.", "undoDeliv": "↩ Cofnij dostawę", "undoQ": "Przenieść zamówienie z powrotem do Klientów (niedostarczone)?", "printWeek": "🖨 Drukuj tydzień", "deliveries": "dostaw", "histTitle": "Dostarczone"});
+Object.assign(T.da,{"tDelivShort": "Leveret", "week": "Uge", "delivAt": "Leveret", "orderedAt": "Bestilt", "histEmpty": "Ingen leverede ordrer endnu. Når du trykker ✓ Leveret, havner ordren her.", "undoDeliv": "↩ Fortryd levering", "undoQ": "Flyt ordren tilbage til Kunder (ikke leveret)?", "printWeek": "🖨 Udskriv ugen", "deliveries": "leveringer", "histTitle": "Leveret"});
+Object.assign(T.ar,{"tDelivShort": "المُسلَّم", "week": "الأسبوع", "delivAt": "سُلّم", "orderedAt": "طُلب", "histEmpty": "لا توجد طلبات مُسلَّمة بعد. عند الضغط على ✓ تم التسليم يظهر الطلب هنا.", "undoDeliv": "↩ إلغاء التسليم", "undoQ": "إعادة الطلب إلى الزبائن (غير مُسلَّم)؟", "printWeek": "🖨 طباعة الأسبوع", "deliveries": "تسليمات", "histTitle": "المُسلَّم"});
+T.sv.delivery1="leverans";
+T.en.delivery1="delivery";
+T.pl.delivery1="dostawa";
+T.da.delivery1="levering";
+T.ar.delivery1="تسليم";
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let lang=ls.get("ob_lang","sv");if(!["sv","en","pl","da","ar"].includes(lang))lang="sv";
 const LOC=()=>({sv:"sv-SE",en:"en-GB",pl:"pl-PL",da:"da-DK",ar:"ar"})[lang];
@@ -388,7 +409,7 @@ const t=k=>T[lang][k]??T.sv[k];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>(Math.round(n*100)/100).toLocaleString(LOC());
-const APP_VERSION="19";
+const APP_VERSION="20 · levererat";
 const UNITS=["kg","kartong","st","låda","liter","paket"];
 
 const CATS=[["kyckling","🐔","catKyckling"],["kott","🐄","catKott"],["lamm","🐑","catLamm"],["ovrigt","🍟","catOvrigt"]];
@@ -427,7 +448,7 @@ function toCatalogItem(it){
 let carts=(()=>{try{return{order:{who:"",items:[]},in:{who:"",items:[]},...JSON.parse(ls.get("ob_carts",""))}}catch(e){return{order:{who:"",items:[]},in:{who:"",items:[]}}}})();
 const saveCarts=()=>ls.set("ob_carts",JSON.stringify(carts));
 let orders=[],received=[],view=ls.get("ob_view","cust"),draft=null,q="",armed=null,mode="order",showDone=false;
-if(!["in","cust","tot","stock"].includes(view))view="cust";
+if(!["in","cust","tot","stock","hist"].includes(view))view="cust";
 mode=view==="in"?"in":"order";
 
 /* ---------- storage: this phone only ---------- */
@@ -925,6 +946,49 @@ function doPrint(kind){if(!buildPrint(kind)){$("#status").textContent=t("printNo
 let toastTimer=null;
 function toast(msg){const e=$("#toast");e.textContent=msg;e.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{e.hidden=true},5000)}
 $("#toast").onclick=()=>{$("#toast").hidden=true};
+/* ---------- delivered orders, kept for good, by week ---------- */
+const deliveredAt=o=>o.doneAt||o.created;
+function weekOf(ts){
+  const d=new Date(ts);d.setHours(0,0,0,0);const mon=new Date(d);mon.setDate(d.getDate()-((d.getDay()+6)%7));
+  const th=new Date(mon);th.setDate(mon.getDate()+3);const y=th.getFullYear(),jan4=new Date(y,0,4);
+  const w=1+Math.round(((th-jan4)/864e5-3+((jan4.getDay()+6)%7))/7);return{key:y+"-"+String(w).padStart(2,"0"),y,w,mon:mon.getTime()};
+}
+const weekLabel=wk=>{const sun=new Date(wk.mon);sun.setDate(sun.getDate()+6);const f=d=>new Date(d).toLocaleDateString(LOC(),{day:"numeric",month:"short"});
+  return `${t("week")} ${wk.w} · ${f(wk.mon)} – ${f(sun)}${wk.y!==new Date().getFullYear()?" "+wk.y:""}`};
+const longWhen=ts=>new Date(ts).toLocaleString(LOC(),{weekday:"short",day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
+let histOpen=null;
+function renderHist(v){
+  const all=orders.filter(o=>o.done);
+  const list=all.filter(match).sort((a,b)=>deliveredAt(b)-deliveredAt(a));
+  const weeks=new Map();for(const o of list){const wk=weekOf(deliveredAt(o));if(!weeks.has(wk.key))weeks.set(wk.key,{wk,os:[]});weeks.get(wk.key).os.push(o)}
+  const cur=weekOf(Date.now()).key;if(histOpen===null)histOpen=new Set([cur]);
+  const searchBox=all.length?`<input class="search" id="q" dir="auto" placeholder="${t("search")}" value="${esc(q)}">`:"";
+  const sums=os=>{const s=sumItems(os),k=s.filter(i=>i.unit==="kartong").reduce((a,i)=>a+i.qty,0),g=s.filter(i=>i.unit==="kg").reduce((a,i)=>a+i.qty,0);
+    return [k?fmt(k)+" "+t("krt"):"",g?fmt(g)+" kg":""].filter(Boolean).join(" · ")};
+  v.innerHTML=searchBox+(list.length?[...weeks.values()].map(({wk,os})=>`<details class="week" data-wk="${wk.key}"${q||histOpen.has(wk.key)?" open":""}>
+      <summary><span class="wkt">${esc(weekLabel(wk))}</span><span class="meta">${os.length} ${os.length===1?t("delivery1"):t("deliveries")}${sums(os)?" · "+sums(os):""}</span></summary>
+      <button class="small wkprint" data-wkp="${wk.key}">${t("printWeek")}</button>
+      <div class="grid">${os.map(o=>`<article class="slip hist"><h2 dir="auto">${esc(o.customer)}</h2>
+        <div class="meta">✓ ${t("delivAt")}: <b>${esc(longWhen(deliveredAt(o)))}</b></div><div class="meta">${t("orderedAt")}: ${esc(longWhen(o.created))}</div>
+        <ul>${sumItems([o]).map(itemLi).join("")}</ul>
+        <div class="row"><button class="small" data-undo="${o.id}">${t("undoDeliv")}</button></div></article>`).join("")}</div></details>`).join("")
+    :`<div class="empty">${all.length?t("noMatch"):t("histEmpty")}</div>`);
+  v.querySelectorAll("details.week").forEach(d=>d.ontoggle=()=>{if(q)return;d.open?histOpen.add(d.dataset.wk):histOpen.delete(d.dataset.wk)});
+  v.querySelectorAll("[data-undo]").forEach(b=>b.onclick=()=>{const o=orders.find(x=>x.id===b.dataset.undo);if(!o||!confirm(t("undoQ")))return;
+    put({...o,done:false,doneAt:null});toast(t("delivUndo")+" "+o.items.map(i=>`${fmt(i.qty)} ${unitTxt(i.unit)} ${pn(i.product)}`).join(", "))});
+  v.querySelectorAll("[data-wkp]").forEach(b=>b.onclick=()=>{const w=weeks.get(b.dataset.wkp);if(w)printDelivered(w.os,weekLabel(w.wk))});
+  const qi=$("#q");if(qi)qi.oninput=e=>{q=e.target.value;const pos=e.target.selectionStart;render();const n=$("#q");n.focus();n.setSelectionRange(pos,pos)};
+}
+function printDelivered(os,label){
+  const rows=items=>{let cur=null,h="";for(const i of items){const c=catOf(i.product);
+    if(c!==cur){cur=c;h+=`<tr class="pg"><td colspan="2">${esc(t(CATS.find(x=>x[0]===c)[2]))}</td></tr>`}
+    h+=`<tr><td>${esc(pn(i.product))}</td><td class="n">${fmt(i.qty)} ${esc(unitTxt(i.unit))}</td></tr>`}return h};
+  $("#printArea").innerHTML=`<h1>Orderboken – ${t("histTitle")}</h1><p class="pdate">${esc(label)} · ${os.length} ${t("deliveries")}</p>`
+    +[...os].sort((a,b)=>deliveredAt(a)-deliveredAt(b)).map(o=>`<section class="pcust"><h2 dir="auto">${esc(o.customer)}</h2>
+      <p style="margin:0 0 4pt">${t("delivAt")}: <b>${esc(longWhen(deliveredAt(o)))}</b></p>
+      <table><tr><th>${t("printProd")}</th><th style="text-align:end">${t("printQty")}</th></tr>${rows(sumItems([o]))}</table></section>`).join("");
+  try{window.print()}catch(e){}
+}
 function renderTotals(v){
   const open=orders.filter(o=>!o.done),m=new Map();
   for(const o of open)for(const it of o.items){const k=it.product+"|"+it.unit;const c=m.get(k)||{product:it.product,product_ar:it.product_ar,unit:it.unit,qty:0,per:it.perCarton||null,cust:new Map()};
@@ -944,6 +1008,7 @@ function renderTotals(v){
 function render(){
   const v=$("#view");
   if(view==="tot"){renderTotals(v);return}
+  if(view==="hist"){renderHist(v);return}
   if(view==="stock"||view==="in"){renderStockViews(v);return}
   const byNew=(a,b)=>b.created-a.created;
   const open=orders.filter(o=>!o.done).filter(match).sort(byNew),done=orders.filter(o=>o.done).filter(match).sort(byNew);
@@ -954,7 +1019,7 @@ function render(){
       ${os.map(o=>`<div class="order${o.done?" done":""}">${os.length>1||o.note?`<div class="meta">${when(o.created)}${o.note?` · <span dir="auto">${esc(o.note)}</span>`:""}</div>`:""}
         <div class="row" style="margin-top:4px">${o.done?"":`<button class="small" data-edit="${o.id}">${t("edit")}</button>`}<button class="small" data-done="${o.id}">${o.done?t("undo"):"✓ "+t("delivered")}</button><button class="small del" data-del="${o.id}">${armed===o.id?t("sure"):t("remove")}</button></div></div>`).join("")}</article>`).join("")}</div>`};
   v.innerHTML=(open.length?`<button class="printbtn" id="printBtn">${t("print")}</button>`:"")+searchBox+(open.length?slips(open):`<div class="empty">${t("empty")}</div>`)
-    +(done.length?`<button class="donebtn" id="doneTog">${showDone?t("hideDone"):t("showDone")} (${done.length})</button>${showDone?`<div style="margin-top:14px">${slips(done)}</div>`:""}`:"");
+    ;
   const dt=$("#doneTog");if(dt)dt.onclick=()=>{showDone=!showDone;render()};
   const pb=$("#printBtn");if(pb)pb.onclick=()=>doPrint("cust");
   // delivered: the order leaves the stock (stock = in − delivered); undo puts it back
@@ -1104,7 +1169,7 @@ function renderCalc(){
 $("#calcIn").oninput=renderCalc;
 function applyMode(){
   document.querySelectorAll("[role=tab]").forEach(x=>x.setAttribute("aria-selected",x.dataset.v===view));
-  $("#feed").hidden=view==="stock"||view==="tot";
+  $("#feed").hidden=view==="stock"||view==="tot"||view==="hist";
   $("#feed").classList.toggle("in",mode==="in");
   $("#calc").hidden=true;
   $("#photoBtn").hidden=view!=="in";
