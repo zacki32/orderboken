@@ -128,6 +128,9 @@ li:last-child{border-bottom:0}
 .cline{display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px dashed var(--line)}
 .cline{flex-wrap:wrap}
 .cline .cp{flex:1 1 150px;font-weight:600}
+.editbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding:10px 12px;border-radius:12px;background:#fff3cd;color:#5a4300;font-weight:700;font-size:17px}
+.editbar .small{flex:none;white-space:nowrap;width:auto}
+.qn small{font:600 13px Inter,"Noto Sans Arabic"}
 .ctl{display:flex;align-items:center;gap:6px;margin-inline-start:auto}
 .cline .qn{min-width:58px;text-align:center;font:800 17px Archivo,"Noto Sans Arabic";font-variant-numeric:tabular-nums}
 .qb{min-width:44px;padding:0;font-size:20px}
@@ -347,6 +350,11 @@ T.en.printTot="🖨 Print the total list";
 T.pl.printTot="🖨 Drukuj listę razem";
 T.da.printTot="🖨 Udskriv i alt-listen";
 T.ar.printTot="🖨 طباعة قائمة المجموع";
+Object.assign(T.sv,{"edit": "✏️ Ändra", "editing": "✏️ Du ändrar beställningen för {who}", "editingIn": "✏️ Du ändrar inleveransen från {who}", "saveEdit": "💾 Spara ändringar", "cancel": "Avbryt", "replaceCart": "Det finns en beställning som inte är sparad. Vill du byta till den här istället?", "updated": "Ändringarna är sparade ✓"});
+Object.assign(T.en,{"edit": "✏️ Change", "editing": "✏️ You are changing the order for {who}", "editingIn": "✏️ You are changing the delivery from {who}", "saveEdit": "💾 Save changes", "cancel": "Cancel", "replaceCart": "There is an order that isn't saved. Switch to this one instead?", "updated": "Changes saved ✓"});
+Object.assign(T.pl,{"edit": "✏️ Zmień", "editing": "✏️ Zmieniasz zamówienie dla {who}", "editingIn": "✏️ Zmieniasz dostawę od {who}", "saveEdit": "💾 Zapisz zmiany", "cancel": "Anuluj", "replaceCart": "Jest niezapisane zamówienie. Przełączyć na to?", "updated": "Zmiany zapisane ✓"});
+Object.assign(T.da,{"edit": "✏️ Ret", "editing": "✏️ Du retter ordren for {who}", "editingIn": "✏️ Du retter indleveringen fra {who}", "saveEdit": "💾 Gem ændringer", "cancel": "Annullér", "replaceCart": "Der er en ordre, der ikke er gemt. Skift til denne i stedet?", "updated": "Ændringerne er gemt ✓"});
+Object.assign(T.ar,{"edit": "✏️ تعديل", "editing": "✏️ أنت تعدّل طلب {who}", "editingIn": "✏️ أنت تعدّل شحنة {who}", "saveEdit": "💾 حفظ التعديلات", "cancel": "إلغاء", "replaceCart": "يوجد طلب غير محفوظ. هل تريد الانتقال إلى هذا بدلاً منه؟", "updated": "تم حفظ التعديلات ✓"});
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let lang=ls.get("ob_lang","sv");if(!["sv","en","pl","da","ar"].includes(lang))lang="sv";
 const LOC=()=>({sv:"sv-SE",en:"en-GB",pl:"pl-PL",da:"da-DK",ar:"ar"})[lang];
@@ -354,7 +362,7 @@ const t=k=>T[lang][k]??T.sv[k];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>(Math.round(n*100)/100).toLocaleString(LOC());
-const APP_VERSION="13 · utskrift";
+const APP_VERSION="14 · ändra order";
 const UNITS=["kg","kartong","st","låda","liter","paket"];
 
 const CATS=[["kyckling","🐔","catKyckling"],["kott","🐄","catKott"],["lamm","🐑","catLamm"],["ovrigt","🍟","catOvrigt"]];
@@ -678,19 +686,27 @@ function renderPick(){
     return `<button class="cat" data-cat="${k}"><span class="ce">${e}</span>${t(l)}<span class="cn">${n?fmt(n)+" "+t("krt"):""}</span></button>`}).join("");
   $("#cats").querySelectorAll("[data-cat]").forEach(b=>b.onclick=()=>openSheet(b.dataset.cat));
   const items=[...c.items].sort(byProd);
-  $("#cart").innerHTML=items.length?`<div class="cart"><p class="carth">${isIn?t("cartIn"):t("cartOrder")}</p>${items.map(i=>`<div class="cline"><span class="cp" dir="auto">${esc(i.product)}${i.perCarton?`<br><span class="meta">≈ ${fmt(i.qty*i.perCarton)} kg</span>`:""}</span>
-      <span class="ctl"><button class="qb" data-dec="${esc(i.product)}" aria-label="−">−</button><span class="qn">${fmt(i.qty)}</span><button class="qb" data-inc="${esc(i.product)}" aria-label="+">+</button></span></div>`).join("")}</div>`:`<p class="hint" style="text-align:center">${t("cartEmpty")}</p>`;
+  $("#cart").innerHTML=(c.editId?`<div class="editbar"><span>${esc((isIn?t("editingIn"):t("editing")).replace("{who}",c.who||"…"))}</span><button class="small" id="editCancel">${t("cancel")}</button></div>`:"")+(items.length?`<div class="cart"><p class="carth">${isIn?t("cartIn"):t("cartOrder")}</p>${items.map(i=>`<div class="cline"><span class="cp" dir="auto">${esc(i.product)}${i.perCarton?`<br><span class="meta">≈ ${fmt(i.qty*i.perCarton)} kg</span>`:""}</span>
+      <span class="ctl"><button class="qb" data-dec="${esc(i.product)}" aria-label="−">−</button><span class="qn">${fmt(i.qty)}${i.unit&&i.unit!=="kartong"?` <small>${esc(unitTxt(i.unit))}</small>`:""}</span><button class="qb" data-inc="${esc(i.product)}" aria-label="+">+</button></span></div>`).join("")}</div>`:`<p class="hint" style="text-align:center">${t("cartEmpty")}</p>`);
+  const ec=$("#editCancel");if(ec)ec.onclick=()=>{carts[mode]={who:"",items:[]};saveCarts();renderPick();$("#status").textContent=""};
   const set=(name,q)=>{const it=c.items.find(i=>i.product===name);if(!it)return;it.qty=Math.max(0,Math.round(q*100)/100);if(!it.qty)c.items=c.items.filter(i=>i!==it);saveCarts();renderPick()};
   $("#cart").querySelectorAll("[data-inc]").forEach(b=>b.onclick=()=>set(b.dataset.inc,c.items.find(i=>i.product===b.dataset.inc).qty+1));
   $("#cart").querySelectorAll("[data-dec]").forEach(b=>b.onclick=()=>set(b.dataset.dec,c.items.find(i=>i.product===b.dataset.dec).qty-1));
   $("#cart").querySelectorAll("[data-crm]").forEach(b=>b.onclick=()=>set(b.dataset.crm,0));
-  const sb=$("#cartSave");sb.textContent=isIn?t("saveIn"):t("saveNext");sb.disabled=!c.items.length;
+  const sb=$("#cartSave");sb.textContent=c.editId?t("saveEdit"):isIn?t("saveIn"):t("saveNext");sb.disabled=!c.items.length;
 }
 $("#who").oninput=e=>{cart().who=e.target.value;saveCarts()};
 function renameProduct(old,nn){
   const p=catProd(old);if(!p||!nn||nn===old||catProd(nn))return false;p.name=nn;saveCatalog();
   const ren=list=>list.forEach(o=>(o.items||[]).forEach(it=>{if(it.product===old)it.product=nn}));
   ren(orders);ren(received);ren([carts.order,carts.in]);persist();persistIn();saveCarts();return true;
+}
+function editSaved(rec,isIn){
+  const c=carts[isIn?"in":"order"];
+  if(c.items.length&&c.editId!==rec.id&&!confirm(t("replaceCart")))return;
+  carts[isIn?"in":"order"]={who:isIn?rec.supplier:rec.customer,editId:rec.id,
+    items:rec.items.map(it=>({product:it.product,product_ar:it.product_ar||"",qty:Number(it.qty)||0,unit:it.unit||"kartong",...(it.perCarton?{perCarton:it.perCarton}:{})}))};
+  saveCarts();renderPick();$("#status").textContent="";window.scrollTo({top:0,behavior:"smooth"});
 }
 let sheetCat=null,sheetEdit=false;
 function openSheet(cat){sheetCat=cat;sheetEdit=false;$("#sheet").hidden=false;$("#sheetMsg").textContent="";showList();document.body.style.overflow="hidden"}
@@ -741,11 +757,12 @@ $("#cartSave").onclick=()=>{
   const c=cart(),isIn=mode==="in",who=c.who.trim(),st=$("#status");
   if(!c.items.length)return;
   if(!who){st.textContent=t("needName");$("#who").focus();return}
-  const now=Date.now(),items=c.items.map(i=>({product:i.product,product_ar:"",qty:i.qty,unit:"kartong",cartons:i.qty,...(i.perCarton?{perCarton:i.perCarton}:{})}));
-  if(isIn)putIn({id:"i"+now,supplier:who,items,note:"",raw:"",created:now});
-  else put({id:"o"+now,customer:who,items,note:"",raw:"",created:now,done:false});
+  const now=Date.now(),items=c.items.map(i=>{const u=i.unit||"kartong";return{product:i.product,product_ar:i.product_ar||"",qty:i.qty,unit:u,...(u==="kartong"?{cartons:i.qty}:{}),...(i.perCarton?{perCarton:i.perCarton}:{})}});
+  const old=c.editId?(isIn?received:orders).find(x=>x.id===c.editId):null;
+  if(isIn)putIn(old?{...old,supplier:who,items}:{id:"i"+now,supplier:who,items,note:"",raw:"",created:now});
+  else put(old?{...old,customer:who,items}:{id:"o"+now,customer:who,items,note:"",raw:"",created:now,done:false});
   carts[mode]={who:"",items:[]};saveCarts();renderPick();
-  const msg=isIn?t("savedIn"):t("saved");st.textContent=msg;setTimeout(()=>{if(st.textContent===msg)st.textContent=""},2500);
+  const msg=old?t("updated"):isIn?t("savedIn"):t("saved");st.textContent=msg;setTimeout(()=>{if(st.textContent===msg)st.textContent=""},2500);
   $("#who").focus();
 };
 $("#textTog").onclick=()=>{const b=$("#textBox");b.hidden=!b.hidden;if(!b.hidden)$("#inp").focus()};
@@ -877,12 +894,13 @@ function render(){
     return `<div class="grid">${[...by].map(([c,os])=>`<article class="slip"><header><h2 dir="auto">${esc(c)}</h2><button class="small" data-ren="${esc(c)}" aria-label="${t("rename")}">✏️</button></header>
       <ul>${sumItems(os).map(itemLi).join("")}</ul>
       ${os.map(o=>`<div class="order${o.done?" done":""}">${os.length>1||o.note?`<div class="meta">${when(o.created)}${o.note?` · <span dir="auto">${esc(o.note)}</span>`:""}</div>`:""}
-        <div class="row" style="margin-top:4px"><button class="small" data-done="${o.id}">${o.done?t("undo"):"✓ "+t("delivered")}</button><button class="small del" data-del="${o.id}">${armed===o.id?t("sure"):t("remove")}</button></div></div>`).join("")}</article>`).join("")}</div>`};
+        <div class="row" style="margin-top:4px">${o.done?"":`<button class="small" data-edit="${o.id}">${t("edit")}</button>`}<button class="small" data-done="${o.id}">${o.done?t("undo"):"✓ "+t("delivered")}</button><button class="small del" data-del="${o.id}">${armed===o.id?t("sure"):t("remove")}</button></div></div>`).join("")}</article>`).join("")}</div>`};
   v.innerHTML=(open.length?`<button class="printbtn" id="printBtn">${t("print")}</button>`:"")+searchBox+(open.length?slips(open):`<div class="empty">${t("empty")}</div>`)
     +(done.length?`<button class="donebtn" id="doneTog">${showDone?t("hideDone"):t("showDone")} (${done.length})</button>${showDone?`<div style="margin-top:14px">${slips(done)}</div>`:""}`:"");
   const dt=$("#doneTog");if(dt)dt.onclick=()=>{showDone=!showDone;render()};
   const pb=$("#printBtn");if(pb)pb.onclick=()=>doPrint("cust");
   v.querySelectorAll("[data-done]").forEach(b=>b.onclick=()=>{const o=orders.find(x=>x.id===b.dataset.done);if(o)put({...o,done:!o.done})});
+  v.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>{const o=orders.find(x=>x.id===b.dataset.edit);if(o)editSaved(o,false)});
   v.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const id=b.dataset.del;if(armed===id){armed=null;drop(id)}else{armed=id;render();setTimeout(()=>{if(armed===id){armed=null;render()}},4000)}});
   v.querySelectorAll("[data-ren]").forEach(b=>b.onclick=()=>{const old=b.dataset.ren;const nn=(prompt(t("renameQ"),old)||"").trim();if(!nn||nn===old)return;
     orders=orders.map(o=>o.customer===old?{...o,customer:nn}:o);persist();render()});
@@ -911,8 +929,9 @@ function renderStockViews(v){
     const list=received.filter(r=>!q||(r.supplier+" "+r.items.map(i=>i.product+" "+i.product_ar).join(" ")+" "+r.note).toLowerCase().includes(ql)).sort((a,b)=>b.created-a.created);
     v.innerHTML=searchBox+(list.length?`<div class="grid">${list.map(r=>`<article class="slip inl"><h2 dir="auto">${r.adjust?"⚖️ ":"🚚 "}${esc(r.supplier)}</h2><div class="meta">${when(r.created)}${r.note?` · <span dir="auto">${esc(r.note)}</span>`:""}</div>
       <ul>${r.items.map(itemLi).join("")}</ul>
-      <div class="row"><button class="small del" data-deli="${r.id}">${armed===r.id?t("sure"):t("remove")}</button></div></article>`).join("")}</div>`
+      <div class="row">${r.adjust?"":`<button class="small" data-editin="${r.id}">${t("edit")}</button>`}<button class="small del" data-deli="${r.id}">${armed===r.id?t("sure"):t("remove")}</button></div></article>`).join("")}</div>`
       :`<div class="empty">${t("emptyIn")}</div>`);
+    v.querySelectorAll("[data-editin]").forEach(b=>b.onclick=()=>{const r=received.find(x=>x.id===b.dataset.editin);if(r)editSaved(r,true)});
     v.querySelectorAll("[data-deli]").forEach(b=>b.onclick=()=>{const id=b.dataset.deli;if(armed===id){armed=null;dropIn(id)}else{armed=id;render();setTimeout(()=>{if(armed===id){armed=null;render()}},4000)}});
   }
   const qi=$("#q");if(qi)qi.oninput=e=>{q=e.target.value;const pos=e.target.selectionStart;render();const n=$("#q");n.focus();n.setSelectionRange(pos,pos)};
