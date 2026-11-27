@@ -128,6 +128,8 @@ li:last-child{border-bottom:0}
 .cline{display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px dashed var(--line)}
 .cline{flex-wrap:wrap}
 .cline .cp{flex:1 1 150px;font-weight:600}
+.toast{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:15;max-width:620px;margin:auto;background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:14px;font-size:17px;font-weight:600;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.toast[hidden]{display:none}
 .editbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding:10px 12px;border-radius:12px;background:#fff3cd;color:#5a4300;font-weight:700;font-size:17px}
 .editbar .small{flex:none;white-space:nowrap;width:auto}
 .qn small{font:600 13px Inter,"Noto Sans Arabic"}
@@ -261,6 +263,7 @@ li{font-size:19px;padding:9px 0}
 <button role="tab" data-v="tot"><span class="ico">🧮</span><span data-t="tTotShort">Totalt</span></button>
 <button role="tab" data-v="stock"><span class="ico">📊</span><span data-t="tStock">Lager</span></button>
 </nav>
+<div class="toast" id="toast" role="status" hidden></div>
 <div id="printArea" aria-hidden="true"></div>
 <div class="sheet" id="sheet" hidden><div class="sheetbox" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
 <div class="sheethead"><h2 id="sheetTitle"></h2><span class="sheetmsg" id="sheetMsg"></span><button id="sheetClose" data-t="done">Klar</button></div>
@@ -373,6 +376,11 @@ Object.assign(T.en,{"storeTitle": "Saving", "storeOk": "Everything is saved on t
 Object.assign(T.pl,{"storeTitle": "Zapisywanie", "storeOk": "Wszystko zapisuje się w telefonie od razu po zmianie, nawet jeśli aplikacja zostanie zamknięta.", "storeSafe": "Chroniona pamięć jest włączona – telefon sam nie usunie danych aplikacji."});
 Object.assign(T.da,{"storeTitle": "Gemning", "storeOk": "Alt gemmes på telefonen med det samme, når du ændrer noget, også hvis appen lukkes.", "storeSafe": "Beskyttet lagring er slået til – telefonen sletter ikke appens data af sig selv."});
 Object.assign(T.ar,{"storeTitle": "الحفظ", "storeOk": "كل شيء يُحفظ على الهاتف فوراً عند أي تغيير، حتى لو أُغلق التطبيق.", "storeSafe": "التخزين المحمي مفعّل – لن يمسح الهاتف بيانات التطبيق من تلقاء نفسه."});
+Object.assign(T.sv,{"delivDone": "✓ Levererad – borttaget från lagret:", "delivUndo": "↩ Tillbaka i lagret:"});
+Object.assign(T.en,{"delivDone": "✓ Delivered – removed from stock:", "delivUndo": "↩ Back in stock:"});
+Object.assign(T.pl,{"delivDone": "✓ Dostarczono – usunięto z magazynu:", "delivUndo": "↩ Z powrotem w magazynie:"});
+Object.assign(T.da,{"delivDone": "✓ Leveret – fjernet fra lageret:", "delivUndo": "↩ Tilbage på lager:"});
+Object.assign(T.ar,{"delivDone": "✓ تم التسليم – أُزيل من المخزون:", "delivUndo": "↩ أُعيد إلى المخزون:"});
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let lang=ls.get("ob_lang","sv");if(!["sv","en","pl","da","ar"].includes(lang))lang="sv";
 const LOC=()=>({sv:"sv-SE",en:"en-GB",pl:"pl-PL",da:"da-DK",ar:"ar"})[lang];
@@ -380,7 +388,7 @@ const t=k=>T[lang][k]??T.sv[k];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>(Math.round(n*100)/100).toLocaleString(LOC());
-const APP_VERSION="18 · sparas alltid";
+const APP_VERSION="19";
 const UNITS=["kg","kartong","st","låda","liter","paket"];
 
 const CATS=[["kyckling","🐔","catKyckling"],["kott","🐄","catKott"],["lamm","🐑","catLamm"],["ovrigt","🍟","catOvrigt"]];
@@ -914,6 +922,9 @@ function buildPrint(kind){
   return true;
 }
 function doPrint(kind){if(!buildPrint(kind)){$("#status").textContent=t("printNone");return}try{window.print()}catch(e){}}
+let toastTimer=null;
+function toast(msg){const e=$("#toast");e.textContent=msg;e.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{e.hidden=true},5000)}
+$("#toast").onclick=()=>{$("#toast").hidden=true};
 function renderTotals(v){
   const open=orders.filter(o=>!o.done),m=new Map();
   for(const o of open)for(const it of o.items){const k=it.product+"|"+it.unit;const c=m.get(k)||{product:it.product,product_ar:it.product_ar,unit:it.unit,qty:0,per:it.perCarton||null,cust:new Map()};
@@ -946,7 +957,10 @@ function render(){
     +(done.length?`<button class="donebtn" id="doneTog">${showDone?t("hideDone"):t("showDone")} (${done.length})</button>${showDone?`<div style="margin-top:14px">${slips(done)}</div>`:""}`:"");
   const dt=$("#doneTog");if(dt)dt.onclick=()=>{showDone=!showDone;render()};
   const pb=$("#printBtn");if(pb)pb.onclick=()=>doPrint("cust");
-  v.querySelectorAll("[data-done]").forEach(b=>b.onclick=()=>{const o=orders.find(x=>x.id===b.dataset.done);if(o)put({...o,done:!o.done})});
+  // delivered: the order leaves the stock (stock = in − delivered); undo puts it back
+  v.querySelectorAll("[data-done]").forEach(b=>b.onclick=()=>{const o=orders.find(x=>x.id===b.dataset.done);if(!o)return;
+    const nowDone=!o.done;put({...o,done:nowDone,doneAt:nowDone?Date.now():null});
+    toast((nowDone?t("delivDone"):t("delivUndo"))+" "+o.items.map(i=>`${fmt(i.qty)} ${unitTxt(i.unit)} ${pn(i.product)}`).join(", "))});
   v.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>{const o=orders.find(x=>x.id===b.dataset.edit);if(o)editSaved(o,false)});
   v.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const id=b.dataset.del;if(armed===id){armed=null;drop(id)}else{armed=id;render();setTimeout(()=>{if(armed===id){armed=null;render()}},4000)}});
   v.querySelectorAll("[data-ren]").forEach(b=>b.onclick=()=>{const old=b.dataset.ren;const nn=(prompt(t("renameQ"),old)||"").trim();if(!nn||nn===old)return;
