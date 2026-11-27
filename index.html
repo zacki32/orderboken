@@ -368,6 +368,11 @@ Object.assign(T.en,{"searchProd": "🔍 Search product…", "otherGroups": "In o
 Object.assign(T.pl,{"searchProd": "🔍 Szukaj produktu…", "otherGroups": "W innych grupach", "noMatch": "Nie znaleziono produktu."});
 Object.assign(T.da,{"searchProd": "🔍 Søg vare…", "otherGroups": "I andre grupper", "noMatch": "Ingen vare fundet."});
 Object.assign(T.ar,{"searchProd": "🔍 ابحث عن منتج…", "otherGroups": "في مجموعات أخرى", "noMatch": "لم يتم العثور على منتج."});
+Object.assign(T.sv,{"storeTitle": "Sparande", "storeOk": "Allt sparas på telefonen direkt när du ändrar något, även om appen stängs.", "storeSafe": "Skyddad lagring är på – telefonen rensar inte appens data av sig själv."});
+Object.assign(T.en,{"storeTitle": "Saving", "storeOk": "Everything is saved on the phone as soon as you change something, even if the app is closed.", "storeSafe": "Protected storage is on – the phone will not clear the app's data by itself."});
+Object.assign(T.pl,{"storeTitle": "Zapisywanie", "storeOk": "Wszystko zapisuje się w telefonie od razu po zmianie, nawet jeśli aplikacja zostanie zamknięta.", "storeSafe": "Chroniona pamięć jest włączona – telefon sam nie usunie danych aplikacji."});
+Object.assign(T.da,{"storeTitle": "Gemning", "storeOk": "Alt gemmes på telefonen med det samme, når du ændrer noget, også hvis appen lukkes.", "storeSafe": "Beskyttet lagring er slået til – telefonen sletter ikke appens data af sig selv."});
+Object.assign(T.ar,{"storeTitle": "الحفظ", "storeOk": "كل شيء يُحفظ على الهاتف فوراً عند أي تغيير، حتى لو أُغلق التطبيق.", "storeSafe": "التخزين المحمي مفعّل – لن يمسح الهاتف بيانات التطبيق من تلقاء نفسه."});
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let lang=ls.get("ob_lang","sv");if(!["sv","en","pl","da","ar"].includes(lang))lang="sv";
 const LOC=()=>({sv:"sv-SE",en:"en-GB",pl:"pl-PL",da:"da-DK",ar:"ar"})[lang];
@@ -375,7 +380,7 @@ const t=k=>T[lang][k]??T.sv[k];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>(Math.round(n*100)/100).toLocaleString(LOC());
-const APP_VERSION="17 · lamm i kg";
+const APP_VERSION="18 · sparas alltid";
 const UNITS=["kg","kartong","st","låda","liter","paket"];
 
 const CATS=[["kyckling","🐔","catKyckling"],["kott","🐄","catKott"],["lamm","🐑","catLamm"],["ovrigt","🍟","catOvrigt"]];
@@ -817,7 +822,9 @@ $("#addBtn").onclick=async()=>{
     showDraft(parsed,text);
   }finally{$("#addBtn").disabled=false}
 };
+function saveDraft(){if(draft){const{img,...d}=draft;ls.set("ob_draft",JSON.stringify(d))}else ls.del("ob_draft")}
 function renderDraft(){
+  saveDraft();
   const el=$("#draft");if(!draft){el.innerHTML="";return}
   const opt=u=>UNITS.map(x=>`<option value="${x}"${x===u?" selected":""}>${esc(unitTxt(x))}</option>`).join("");
   const isIn=draft.kind==="in";
@@ -851,7 +858,7 @@ function renderDraft(){
       if(isIn)putIn({id:"i"+now+"_"+i,supplier:String(o.customer).trim()||t("unknownSup"),items,note:o.note||"",raw:draft.raw,created:now});
       else put({id:"o"+now+"_"+i,customer:String(o.customer).trim()||"Okänd",items,note:o.note||"",raw:draft.raw,created:now,done:false})});
     const msg=isIn?t("savedIn"):t("saved");
-    draft=null;$("#inp").value="";renderDraft();const st=$("#status");st.textContent=msg;setTimeout(()=>{if(st.textContent===msg)st.textContent=""},2500);
+    draft=null;$("#inp").value="";ls.del("ob_inp");renderDraft();const st=$("#status");st.textContent=msg;setTimeout(()=>{if(st.textContent===msg)st.textContent=""},2500);
   };
 }
 
@@ -1023,6 +1030,7 @@ function renderSettings(){
     <h3>${t("sKey")}</h3><p class="hint">${t("sKeyInfo")}</p><p class="hint">${t("keyHow")}</p>
     <div class="row"><input class="fld" type="password" id="keyIn" placeholder="sk-ant-…" autocomplete="off" style="flex:1 1 220px"><button id="keySave">${t("sKeySave")}</button>${has?`<button class="del" id="keyDel">${t("sKeyDel")}</button>`:""}</div>
     <p class="hint ${has?"ok":""}">${has?t("sKeyOn"):t("sKeyOff")}</p>
+    <h3>${t("storeTitle")}</h3><p class="hint ok">✓ ${t("storeOk")}</p><p class="hint ok" id="storeSafe" hidden>✓ ${t("storeSafe")}</p>
     <h3>${t("products")} (${catalog.length})</h3><p class="hint">${t("prodInfo")}</p>
     <details><summary class="hint" style="cursor:pointer;min-height:36px;display:flex;align-items:center">${t("products")} ▾</summary>
     ${CATS.map(([k,e,l])=>`<div class="ghead"><span>${e} ${t(l)}</span></div><div class="plist">${catalog.map((p,i)=>[p,i]).filter(([p])=>p.cat===k).map(([p,i])=>`<div class="pline"><span dir="auto">${esc(p.name)}</span>
@@ -1032,6 +1040,7 @@ function renderSettings(){
     <h3>${t("sBackup")}</h3><p class="hint">${t("sBackupInfo")} <strong>${orders.length}</strong> ${t("sCount")}, <strong>${received.length}</strong> ${t("sCountIn")}.</p>
     <div class="row"><button id="expBtn">${t("sExport")}</button><button id="impBtn">${t("sImport")}</button><input type="file" id="impFile" accept=".json,application/json" hidden><span class="hint ok" id="impMsg"></span></div>
     <div class="row"><button id="closeSet">${t("sClose")}</button><span class="meta">Version ${APP_VERSION}</span></div>`;
+  if(navigator.storage&&navigator.storage.persisted)navigator.storage.persisted().then(v=>{const e=$("#storeSafe");if(e)e.hidden=!v}).catch(()=>{});
   $("#langSel").onchange=e=>{lang=e.target.value;ls.set("ob_lang",lang);applyLang()};
   s.querySelectorAll("[data-mv]").forEach(x=>x.onchange=()=>{catalog[+x.dataset.mv].cat=x.value;saveCatalog();renderSettings();renderPick();render()});
   s.querySelectorAll("[data-pren]").forEach(b=>b.onclick=()=>{const p=catalog[+b.dataset.pren],nn=(prompt(t("renameProdQ"),p.name)||"").trim();if(!nn||nn===p.name)return;
@@ -1105,6 +1114,17 @@ load();
 (()=>{if(ls.get("ob_mig_kg2",""))return;
   const fix=list=>list.forEach(o=>(o.items||[]).forEach(it=>{if(catProd(it.product)&&unitOf(it.product)==="kg"&&it.unit==="kartong"){it.unit="kg";delete it.cartons;delete it.perCarton}}));
   fix(orders);fix(received);fix([carts.order,carts.in]);persist();persistIn();saveCarts();ls.set("ob_mig_kg1","1");ls.set("ob_mig_kg2","1")})();
+// what was being typed or checked when the app was closed comes back
+try{const d=JSON.parse(ls.get("ob_draft",""));if(d&&Array.isArray(d.orders)){draft=d;view=d.kind==="in"?"in":"cust";mode=d.kind}}catch(e){}
+$("#inp").value=ls.get("ob_inp","");if($("#inp").value)$("#textBox").hidden=false;
+$("#inp").addEventListener("input",()=>ls.set("ob_inp",$("#inp").value));
+let draftTimer=null;document.addEventListener("input",e=>{if(draft&&e.target.closest&&e.target.closest("#draft")){clearTimeout(draftTimer);draftTimer=setTimeout(saveDraft,300)}});
+// app goes to the background or is closed: keep an amount that was typed but not confirmed, and the draft
+const saveOnLeave=()=>{if(qtyCommit)qtyCommit();if(draft)saveDraft();ls.set("ob_inp",$("#inp").value)};
+document.addEventListener("visibilitychange",()=>{if(document.hidden)saveOnLeave()});
+window.addEventListener("pagehide",saveOnLeave);
+// ask the phone not to clear this app's data when space runs low
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persisted().then(v=>v||navigator.storage.persist()).catch(()=>{});
 setupMic();applyLang();
 if("serviceWorker" in navigator&&location.protocol==="https:"){
   const hadSW=!!navigator.serviceWorker.controller;let reloaded=false;
