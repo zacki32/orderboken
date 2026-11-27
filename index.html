@@ -375,7 +375,7 @@ const t=k=>T[lang][k]??T.sv[k];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>(Math.round(n*100)/100).toLocaleString(LOC());
-const APP_VERSION="16 · sök";
+const APP_VERSION="17 · lamm i kg";
 const UNITS=["kg","kartong","st","låda","liter","paket"];
 
 const CATS=[["kyckling","🐔","catKyckling"],["kott","🐄","catKott"],["lamm","🐑","catLamm"],["ovrigt","🍟","catOvrigt"]];
@@ -388,7 +388,8 @@ function catOf(name){const c=catProd(name);if(c)return c.cat;const n=String(name
   if(/kyckling|chicken|kurcz|kylling|دجاج|فراخ/.test(n))return"kyckling";
   if(/lamm|lamb|lam\b|jagni|baran|غنم|خروف/.test(n))return"lamm";
   if(/kött|kött|kalv|nöt|färs|oxe|biff|beef|wołow|mięso|kød|لحم|بقر|عجل/.test(n))return"kott";return"ovrigt"}
-const unitOf=name=>catOf(name)==="kott"?"kg":"kartong";
+const KG_CATS=["kott","lamm"];
+const unitOf=name=>KG_CATS.includes(catOf(name))?"kg":"kartong";
 const catIdx=c=>CATS.findIndex(x=>x[0]===c);
 const prodOrder=name=>{const i=catalog.findIndex(x=>x.name===name);return catIdx(catOf(name))*10000+(i<0?9000:i)};
 const byProd=(a,b)=>prodOrder(a.product)-prodOrder(b.product)||a.product.localeCompare(b.product,"sv");
@@ -579,7 +580,7 @@ Extract every customer order. Return ONLY JSON, no other text:
 Cartons: "70 kartonger 7,2" / "70 kartonger kyckling à 7,2 kg" / "٧٠ كرتونة ٧٫٢" means 70 cartons of 7.2 kg each -> unit "kg", qty 504, plus "cartons":70,"perCarton":7.2. Cartons without a weight -> unit "kartong", qty = number of cartons, "cartons" = same number. A decimal comma (7,2) is a decimal point.
 Rules: convert grams to kg (500 g -> 0.5 kg). "kilo"/"كيلو"/"kg" -> kg. "نص كيلو" = 0.5 kg. If no number is given, qty 1. Write product in Swedish so totals add up across languages (لحم/meat/mięso/kød=kött, دجاج/chicken/kurczak/kylling=kyckling, لحم غنم/lamb=lammkött, لحم مفروم/minced meat=köttfärs).
 Product list (when an item is one of these, use EXACTLY this name and give "cartons" = number of cartons; "Hel kyckling 7,2" etc. are whole chickens named by kg per carton): ${JSON.stringify(catalog.map(c=>c.name))}.
-Meat products (the "Köttfärs…", "…kött", beef and veal cuts in the list) are counted in kg: give qty in kg and unit "kg" for those.
+Meat and lamb products (the "Köttfärs…", "…kött", beef, veal/"Kalv…" and "Lamm…" items in the list) are counted in kg: give qty in kg and unit "kg" for those.
 Known customers already in the book: ${JSON.stringify(knownCustomers())}. If a name refers to one of them (also across scripts, e.g. أحمد = Ahmed), use the existing spelling exactly. Otherwise keep the name as written. If no customer name is given, use "Okänd".
 ${img?PHOTO_INSTR:`Note text:\n"""${text}"""`}`,6000,img);
   const a=out.indexOf("{"),b=out.lastIndexOf("}");
@@ -700,7 +701,7 @@ function renderPick(){
   const names=[...new Set((isIn?received.filter(r=>!r.adjust).map(r=>r.supplier):orders.map(o=>o.customer)))].sort((a,b)=>a.localeCompare(b,"sv"));
   $("#whoList").innerHTML=names.map(n=>`<option value="${esc(n)}"></option>`).join("");
   $("#cats").innerHTML=CATS.map(([k,e,l])=>{const n=c.items.filter(i=>catOf(i.product)===k).reduce((a,i)=>a+i.qty,0);
-    return `<button class="cat" data-cat="${k}"><span class="ce">${e}</span>${t(l)}<span class="cn">${n?fmt(n)+" "+(k==="kott"?"kg":t("krt")):""}</span></button>`}).join("");
+    return `<button class="cat" data-cat="${k}"><span class="ce">${e}</span>${t(l)}<span class="cn">${n?fmt(n)+" "+(KG_CATS.includes(k)?"kg":t("krt")):""}</span></button>`}).join("");
   $("#cats").querySelectorAll("[data-cat]").forEach(b=>b.onclick=()=>openSheet(b.dataset.cat));
   const items=[...c.items].sort(byProd);
   $("#cart").innerHTML=(c.editId?`<div class="editbar"><span>${esc((isIn?t("editingIn"):t("editing")).replace("{who}",c.who||"…"))}</span><button class="small" id="editCancel">${t("cancel")}</button></div>`:"")+(items.length?`<div class="cart"><p class="carth">${isIn?t("cartIn"):t("cartOrder")}</p>${items.map(i=>`<div class="cline"><span class="cp" dir="auto">${esc(i.product)}${i.perCarton?`<br><span class="meta">≈ ${fmt(i.qty*i.perCarton)} kg</span>`:""}</span>
@@ -1101,9 +1102,9 @@ load();
   const fix=list=>list.forEach(o=>(o.items||[]).forEach(it=>{if(ren[it.product])it.product=ren[it.product]}));
   fix(orders);fix(received);fix([carts.order,carts.in]);
   if(ls.get("ob_catalog",""))saveCatalog();persist();persistIn();saveCarts();ls.set("ob_mig_names1","1")})();
-(()=>{if(ls.get("ob_mig_kg1",""))return;
+(()=>{if(ls.get("ob_mig_kg2",""))return;
   const fix=list=>list.forEach(o=>(o.items||[]).forEach(it=>{if(catProd(it.product)&&unitOf(it.product)==="kg"&&it.unit==="kartong"){it.unit="kg";delete it.cartons;delete it.perCarton}}));
-  fix(orders);fix(received);fix([carts.order,carts.in]);persist();persistIn();saveCarts();ls.set("ob_mig_kg1","1")})();
+  fix(orders);fix(received);fix([carts.order,carts.in]);persist();persistIn();saveCarts();ls.set("ob_mig_kg1","1");ls.set("ob_mig_kg2","1")})();
 setupMic();applyLang();
 if("serviceWorker" in navigator&&location.protocol==="https:"){
   const hadSW=!!navigator.serviceWorker.controller;let reloaded=false;
