@@ -149,6 +149,9 @@ li:last-child{border-bottom:0}
 .prow .badge{background:var(--redbg);color:var(--red);border-radius:999px;padding:2px 10px;font-size:14px;white-space:nowrap}
 .erow{cursor:default}
 .eact{display:flex;gap:6px;flex:none}
+.pswrap{position:sticky;top:0;z-index:1;background:var(--paper);padding:10px 0 6px}
+.psearch{width:100%;min-height:52px;font-size:19px}
+.pother{font:700 15px Archivo,"Noto Sans Arabic";color:var(--mute);margin:16px 4px 2px}
 .prow.newp{color:var(--mute);font-weight:600;border-bottom:0}
 .qtybox{text-align:center;padding:8px 0 4px}
 .qtybox .pname{font:800 24px/1.2 Archivo,"Noto Sans Arabic",sans-serif;margin:8px 0 4px}
@@ -360,6 +363,11 @@ Object.assign(T.en,{"howManyKg": "How many kilos?", "inTotal": "in total"});
 Object.assign(T.pl,{"howManyKg": "Ile kilogramów?", "inTotal": "razem"});
 Object.assign(T.da,{"howManyKg": "Hvor mange kilo?", "inTotal": "i alt"});
 Object.assign(T.ar,{"howManyKg": "كم كيلو؟", "inTotal": "بالمجموع"});
+Object.assign(T.sv,{"searchProd": "🔍 Sök produkt…", "otherGroups": "I andra grupper", "noMatch": "Ingen produkt hittades."});
+Object.assign(T.en,{"searchProd": "🔍 Search product…", "otherGroups": "In other groups", "noMatch": "No product found."});
+Object.assign(T.pl,{"searchProd": "🔍 Szukaj produktu…", "otherGroups": "W innych grupach", "noMatch": "Nie znaleziono produktu."});
+Object.assign(T.da,{"searchProd": "🔍 Søg vare…", "otherGroups": "I andre grupper", "noMatch": "Ingen vare fundet."});
+Object.assign(T.ar,{"searchProd": "🔍 ابحث عن منتج…", "otherGroups": "في مجموعات أخرى", "noMatch": "لم يتم العثور على منتج."});
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let lang=ls.get("ob_lang","sv");if(!["sv","en","pl","da","ar"].includes(lang))lang="sv";
 const LOC=()=>({sv:"sv-SE",en:"en-GB",pl:"pl-PL",da:"da-DK",ar:"ar"})[lang];
@@ -367,7 +375,7 @@ const t=k=>T[lang][k]??T.sv[k];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>(Math.round(n*100)/100).toLocaleString(LOC());
-const APP_VERSION="15 · kött i kg";
+const APP_VERSION="16 · sök";
 const UNITS=["kg","kartong","st","låda","liter","paket"];
 
 const CATS=[["kyckling","🐔","catKyckling"],["kott","🐄","catKott"],["lamm","🐑","catLamm"],["ovrigt","🍟","catOvrigt"]];
@@ -717,31 +725,43 @@ function editSaved(rec,isIn){
     items:rec.items.map(it=>({product:it.product,product_ar:it.product_ar||"",qty:Number(it.qty)||0,unit:it.unit||"kartong",...(it.perCarton?{perCarton:it.perCarton}:{})}))};
   saveCarts();renderPick();$("#status").textContent="";window.scrollTo({top:0,behavior:"smooth"});
 }
-let sheetCat=null,sheetEdit=false,qtyCommit=null;
-function openSheet(cat){sheetCat=cat;sheetEdit=false;$("#sheet").hidden=false;$("#sheetMsg").textContent="";showList();document.body.style.overflow="hidden"}
+let sheetCat=null,sheetEdit=false,qtyCommit=null,sheetQ="";
+function openSheet(cat){sheetCat=cat;sheetEdit=false;sheetQ="";$("#sheet").hidden=false;$("#sheetMsg").textContent="";showList();document.body.style.overflow="hidden"}
 function closeSheet(){if(qtyCommit){const f=qtyCommit;qtyCommit=null;f()}$("#sheet").hidden=true;document.body.style.overflow="";renderPick()}
 $("#sheetClose").onclick=closeSheet;
 $("#sheet").onclick=e=>{if(e.target.id==="sheet")closeSheet()};
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#sheet").hidden)closeSheet()});
+// every word typed must be found in the name (ignores case, accents, spaces)
+const prodMatch=(name,q)=>{const n=nrm(name);return String(q).trim().split(/\s+/).filter(Boolean).every(w=>n.includes(nrm(w)))};
 function showList(){
   qtyCommit=null;
-  const [k,e,l]=CATS.find(x=>x[0]===sheetCat),c=cart();
+  const [k,e,l]=CATS.find(x=>x[0]===sheetCat);
   $("#sheetTitle").textContent=e+" "+t(l);
-  const prods=catalog.filter(p=>p.cat===k);
-  $("#sheetBody").innerHTML=(sheetEdit
-    ?prods.map(p=>`<div class="prow erow" dir="auto"><span>${esc(p.name)}</span><span class="eact"><button class="small" data-ren="${esc(p.name)}">${t("renameBtn")}</button><button class="small del" data-del="${esc(p.name)}">${t("delBtn")}</button></span></div>`).join("")
-    :prods.map(p=>{const it=c.items.find(i=>i.product===p.name);
-      return `<button class="prow" data-p="${esc(p.name)}" dir="auto"><span>${esc(p.name)}</span>${it?`<span class="badge">${fmt(it.qty)} ${esc(unitTxt(it.unit||"kartong"))}</span>`:""}</button>`}).join(""))
+  $("#sheetBody").innerHTML=`<div class="pswrap"><input class="fld psearch" id="pSearch" type="search" dir="auto" autocomplete="off" enterkeyhint="search" placeholder="${t("searchProd")}" value="${esc(sheetQ)}"></div><div id="pList"></div>`;
+  $("#pSearch").oninput=ev=>{sheetQ=ev.target.value;renderPList()};
+  renderPList();
+  $("#sheetBody").scrollTop=0;
+}
+function renderPList(){
+  const k=sheetCat,c=cart(),q=sheetQ.trim();
+  const here=catalog.filter(p=>p.cat===k&&(!q||prodMatch(p.name,q)));
+  const other=q&&!sheetEdit?catalog.filter(p=>p.cat!==k&&prodMatch(p.name,q)):[];
+  const row=p=>{if(sheetEdit)return `<div class="prow erow" dir="auto"><span>${esc(p.name)}</span><span class="eact"><button class="small" data-ren="${esc(p.name)}">${t("renameBtn")}</button><button class="small del" data-del="${esc(p.name)}">${t("delBtn")}</button></span></div>`;
+    const it=c.items.find(i=>i.product===p.name);
+    return `<button class="prow" data-p="${esc(p.name)}" dir="auto"><span>${esc(p.name)}</span>${it?`<span class="badge">${fmt(it.qty)} ${esc(unitTxt(it.unit||"kartong"))}</span>`:""}</button>`};
+  const box=$("#pList");
+  box.innerHTML=here.map(row).join("")
+    +(other.length?`<div class="pother">${t("otherGroups")}</div>`+other.map(p=>{const x=CATS.find(y=>y[0]===p.cat);return row(p).replace("<span>",`<span>${x[1]} `)}).join(""):"")
+    +(q&&!here.length&&!other.length?`<p class="hint" style="text-align:center;margin:14px 0">${t("noMatch")}</p>`:"")
     +(sheetEdit?"":`<button class="prow newp" id="newP">${t("newProd")}</button>`)
     +`<button class="prow newp" id="editP">${sheetEdit?t("editDone"):t("editProds")}</button>`;
-  $("#editP").onclick=()=>{sheetEdit=!sheetEdit;$("#sheetMsg").textContent="";showList()};
-  $("#sheetBody").querySelectorAll("[data-ren]").forEach(b=>b.onclick=()=>{const old=b.dataset.ren,nn=(prompt(t("renameProdQ"),old)||"").trim();
-    if(renameProduct(old,nn)){showList();renderPick();render()}});
-  $("#sheetBody").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const n=b.dataset.del;
-    if(!confirm(t("delProdQ").replace("{p}",n)))return;catalog=catalog.filter(p=>p.name!==n);saveCatalog();showList();renderPick()});
-  $("#sheetBody").scrollTop=0;
-  $("#sheetBody").querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>showQty(b.dataset.p));
-  if(!sheetEdit)$("#newP").onclick=()=>{const n=(prompt(t("newProdQ"))||"").trim();if(!n)return;
+  $("#editP").onclick=()=>{sheetEdit=!sheetEdit;$("#sheetMsg").textContent="";renderPList()};
+  box.querySelectorAll("[data-ren]").forEach(b=>b.onclick=()=>{const old=b.dataset.ren,nn=(prompt(t("renameProdQ"),old)||"").trim();
+    if(renameProduct(old,nn)){renderPList();renderPick();render()}});
+  box.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const n=b.dataset.del;
+    if(!confirm(t("delProdQ").replace("{p}",n)))return;catalog=catalog.filter(p=>p.name!==n);saveCatalog();renderPList();renderPick()});
+  box.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>showQty(b.dataset.p));
+  if(!sheetEdit)$("#newP").onclick=()=>{const n=(prompt(t("newProdQ"),q)||"").trim();if(!n)return;
     if(!catProd(n)){catalog.push({cat:k,name:n});saveCatalog()}showQty(n)};
 }
 function showQty(name){
